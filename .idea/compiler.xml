@@ -7,11 +7,13 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="EurekaServer" />
-        <module name="OrderService" />
         <module name="BankAccountService" />
-        <module name="ApiGateway" />
         <module name="ProductService" />
         <module name="AuthService" />
+        <module name="OrderService" />
+        <module name="ApiGateway" />
+        <module name="PaymentService" />
+        <module name="JwtSecurityLib" />
       </profile>
     </annotationProcessing>
   </component>

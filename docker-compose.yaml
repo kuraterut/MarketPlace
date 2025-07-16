@@ -13,8 +13,8 @@ services:
       - marketplace-net
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
-      interval: 30s
-      timeout: 10s
+      interval: 15s
+      timeout: 5s
       retries: 3
 
   api-gateway:
@@ -32,6 +32,69 @@ services:
       - marketplace-net
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+
+  auth-service:
+    build:
+      context: ./AuthService
+      dockerfile: Dockerfile
+    container_name: auth-service
+    hostname: auth-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - eureka-server
+      - postgres-auth
+    networks:
+      - marketplace-net
+    environment:
+      - JWT_SECRET=7A25432A462D4A614E645267556B58703273357638792F423F4528482B4D6251
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-auth:5432/auth_db
+
+  postgres-auth:
+    image: postgres:latest
+    container_name: postgres-auth
+    environment:
+      - POSTGRES_DB=auth_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres_auth_data:/var/lib/postgresql/data
+    networks:
+      - marketplace-net
+
+  product-service:
+    build:
+      context: ./ProductService
+      dockerfile: Dockerfile
+    container_name: product-service
+    hostname: product-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - eureka-server
+      - postgres-product
+      - auth-service
+    networks:
+      - marketplace-net
+    environment:
+      - JWT_SECRET=7A25432A462D4A614E645267556B58703273357638792F423F4528482B4D6251
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-product:5432/product_db
+
+  postgres-product:
+    image: postgres:latest
+    container_name: postgres-product
+    environment:
+        - POSTGRES_DB=product_db
+        - POSTGRES_USER=postgres
+        - POSTGRES_PASSWORD=postgres
+    volumes:
+        - postgres_product_data:/var/lib/postgresql/data
+    networks:
+        - marketplace-net
+
+volumes:
+  postgres_auth_data:
+  postgres_product_data:
 
 networks:
   marketplace-net:
