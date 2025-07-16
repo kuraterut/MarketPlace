@@ -31,7 +31,7 @@ services:
     networks:
       - marketplace-net
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
+      - JWT_SECRET=7A25432A462D4A614E645267556B58703273357638792F423F4528482B4D6251
 
   auth-service:
     build:
