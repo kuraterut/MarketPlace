@@ -1,4 +1,4 @@
-package org.kuraterut;
+package org.kuraterut.eurekaserver;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
