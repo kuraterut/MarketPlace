@@ -2,6 +2,8 @@ server:
   port: 8080
 
 spring:
+  main:
+    web-application-type: reactive
   application:
     name: api-gateway
   cloud:
@@ -89,7 +91,15 @@ management:
     health:
       show-details: always
 
-logging:
-  level:
-    org.springframework.cloud.gateway: DEBUG
-    io.github.resilience4j: DEBUG
+security:
+  open-endpoints:
+    - /api/auth/login
+    - /api/auth/register
+    - /actuator/health
+
+
+
+#logging:
+#  level:
+#    org.springframework.cloud.gateway: DEBUG
+#    io.github.resilience4j: DEBUG

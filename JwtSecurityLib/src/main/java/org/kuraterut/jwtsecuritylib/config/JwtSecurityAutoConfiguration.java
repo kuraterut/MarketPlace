@@ -52,4 +52,9 @@ public class JwtSecurityAutoConfiguration {
                 "HmacSHA256"
         )).build();
     }
+
+//    @Bean
+//    public JwtService jwtService(JwtProperties properties) {
+//        return new JwtService(properties);
+//    }
 }
