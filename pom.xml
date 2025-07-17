@@ -16,7 +16,6 @@
         <module>BankAccountService</module>
         <module>EurekaServer</module>
         <module>JwtSecurityLib</module>
-        <module>PaymentService</module>
     </modules>
 
     <properties>

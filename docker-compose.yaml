@@ -1,6 +1,8 @@
 version: '3.8'
 
 services:
+
+#SERVICES
   eureka-server:
     build:
       context: ./EurekaServer
@@ -44,23 +46,12 @@ services:
     depends_on:
       - eureka-server
       - postgres-auth
+      - kafka
     networks:
       - marketplace-net
     environment:
       - JWT_SECRET=7A25432A462D4A614E645267556B58703273357638792F423F4528482B4D6251
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-auth:5432/auth_db
-
-  postgres-auth:
-    image: postgres:latest
-    container_name: postgres-auth
-    environment:
-      - POSTGRES_DB=auth_db
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    volumes:
-      - postgres_auth_data:/var/lib/postgresql/data
-    networks:
-      - marketplace-net
 
   product-service:
     build:
@@ -74,11 +65,46 @@ services:
       - eureka-server
       - postgres-product
       - auth-service
+      - kafka
     networks:
       - marketplace-net
     environment:
       - JWT_SECRET=7A25432A462D4A614E645267556B58703273357638792F423F4528482B4D6251
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-product:5432/product_db
+
+  bank-account-service:
+    build:
+      context: ./BankAccountService
+      dockerfile: Dockerfile
+    container_name: bank-account-service
+    hostname: bank-account-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - eureka-server
+      - postgres-bank-account
+      - auth-service
+      - kafka
+    networks:
+      - marketplace-net
+    environment:
+      - JWT_SECRET=7A25432A462D4A614E645267556B58703273357638792F423F4528482B4D6251
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-bank-account:5432/bank_account_db
+
+
+  #POSTGRES
+  postgres-auth:
+    image: postgres:latest
+    container_name: postgres-auth
+    environment:
+      - POSTGRES_DB=auth_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres_auth_data:/var/lib/postgresql/data
+    networks:
+      - marketplace-net
+
 
   postgres-product:
     image: postgres:latest
@@ -92,9 +118,92 @@ services:
     networks:
         - marketplace-net
 
+  postgres-payment:
+    image: postgres:latest
+    container_name: postgres-payment
+    environment:
+      - POSTGRES_DB=payment_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres_payment_data:/var/lib/postgresql/data
+    networks:
+      - marketplace-net
+
+  postgres-order:
+    image: postgres:latest
+    container_name: postgres-order
+    environment:
+      - POSTGRES_DB=order_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres_order_data:/var/lib/postgresql/data
+    networks:
+      - marketplace-net
+
+  postgres-bank-account:
+    image: postgres:latest
+    container_name: postgres-bank-account
+    environment:
+      - POSTGRES_DB=bank_account_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres_bank_account_data:/var/lib/postgresql/data
+    networks:
+      - marketplace-net
+
+
+#KAFKA
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.3.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_EXT://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_EXT:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_EXT://0.0.0.0:29092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "7071:8080"
+    depends_on:
+      - kafka
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+      - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
+
+
 volumes:
   postgres_auth_data:
   postgres_product_data:
+  postgres_payment_data:
+  postgres_order_data:
+  postgres_bank_account_data:
 
 networks:
   marketplace-net:

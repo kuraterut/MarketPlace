@@ -30,6 +30,8 @@ public class CategoryController {
     private final UpdateCategoryUseCase updateCategoryUseCase;
     private final GetCategoryUseCase getCategoryUseCase;
 
+    //TODO Прописать Postman
+
     @PostMapping
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<CategoryResponse> createCategory(@RequestBody @Valid CreateCategoryRequest request) {
