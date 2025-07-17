@@ -33,6 +33,9 @@ public class ProductController {
     private final DeleteProductUseCase deleteProductUseCase;
     private final UpdateProductUseCase updateProductUseCase;
     private final GetProductUseCase getProductUseCase;
+
+    //TODO Прописать Postman
+
     @PostMapping
     @PreAuthorize("hasAuthority('SELLER')")
     public ResponseEntity<ProductResponse> createProduct(@RequestBody @Valid CreateProductRequest createProductRequest,
