@@ -6,4 +6,5 @@ import org.kuraterut.bankaccount.model.Transaction;
 
 public interface CreateTransactionUseCase {
     TransactionResponse createTransaction(CreateTransactionRequest request);
+
 }

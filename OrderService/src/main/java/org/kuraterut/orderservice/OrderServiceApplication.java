@@ -1,16 +1,17 @@
-package org.kuraterut.productservice;
+package org.kuraterut.orderservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication(scanBasePackages = {
-        "org.kuraterut.productservice",
+        "org.kuraterut.orderservice",
         "org.kuraterut.jwtsecuritylib"
 })
 @EnableScheduling
-public class ProductServiceApplication {
+public class OrderServiceApplication {
     public static void main(String[] args) {
-        SpringApplication.run(ProductServiceApplication.class, args);
+
+        SpringApplication.run(OrderServiceApplication.class, args);
     }
 }
