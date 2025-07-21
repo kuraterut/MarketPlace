@@ -44,3 +44,6 @@ eureka:
 
 kafka-topics:
   order-created: order-created
+  product-hold-failed: product-hold-failed
+  product-hold-success: product-hold-success
+  payment-request: payment-request

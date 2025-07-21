@@ -1,11 +1,11 @@
-package org.kuraterut.orderservice.config;
+package org.kuraterut.productservice.config;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.kuraterut.orderservice.model.event.OrderCreatedEvent;
-import org.kuraterut.orderservice.model.event.PaymentEvent;
+import org.kuraterut.productservice.model.event.ProductHoldFailedEvent;
+import org.kuraterut.productservice.model.event.ProductHoldSuccessEvent;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,7 +21,6 @@ import java.util.Map;
 public class KafkaConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
-
 
     @Value("${spring.kafka.consumer.group-id}")
     private String groupId;
@@ -49,7 +48,7 @@ public class KafkaConfig {
     }
 
     @Bean
-    public ProducerFactory<String, OrderCreatedEvent> orderCreatedProducerFactory() {
+    public ProducerFactory<String, ProductHoldFailedEvent> productHoldFailedEventProducerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -63,12 +62,12 @@ public class KafkaConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, OrderCreatedEvent> orderCreatedKafkaTemplate() {
-        return new KafkaTemplate<>(orderCreatedProducerFactory());
+    public KafkaTemplate<String, ProductHoldFailedEvent> productHoldFailedEventKafkaTemplate() {
+        return new KafkaTemplate<>(productHoldFailedEventProducerFactory());
     }
 
     @Bean
-    public ProducerFactory<String, PaymentEvent> paymentEventProducerFactory() {
+    public ProducerFactory<String, ProductHoldSuccessEvent> productHoldSuccessEventProducerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -82,7 +81,7 @@ public class KafkaConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, PaymentEvent> paymentEventKafkaTemplate() {
-        return new KafkaTemplate<>(paymentEventProducerFactory());
+    public KafkaTemplate<String, ProductHoldSuccessEvent> productHoldSuccessEventKafkaTemplate() {
+        return new KafkaTemplate<>(productHoldSuccessEventProducerFactory());
     }
 }

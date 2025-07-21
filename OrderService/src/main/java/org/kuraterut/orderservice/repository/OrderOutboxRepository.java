@@ -11,7 +11,7 @@ import java.util.List;
 
 @Repository
 public interface OrderOutboxRepository extends JpaRepository<OrderOutbox, Long> {
-    List<OrderOutbox> findAllByProcessedIsFalse();
+    List<OrderOutbox> findTop100ByProcessedIsFalse();
 
     @Modifying
     @Query("UPDATE OrderOutbox o SET o.processed = true WHERE o.id = :id")

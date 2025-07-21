@@ -36,4 +36,9 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items;
+
+    @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
+    @CollectionTable(name = "json_order_details", joinColumns = @JoinColumn(name = "order_id"))
+    @Column(name = "json_order_details")
+    private List<String> details;
 }

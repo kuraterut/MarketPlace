@@ -1,5 +1,6 @@
 package org.kuraterut.orderservice.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kuraterut.orderservice.dto.CreateOrderRequest;
@@ -38,7 +39,7 @@ public class OrderService {
     private String orderCreatedTopic;
 
     @Transactional
-    public OrderResponse createOrder(CreateOrderRequest request, Long userId) {
+    public OrderResponse createOrder(CreateOrderRequest request, Long userId) throws JsonProcessingException {
         Order order = orderMapper.toEntity(request, userId);
 
         order.setStatus(OrderStatus.CREATED);
@@ -50,13 +51,19 @@ public class OrderService {
         return orderMapper.toResponse(order);
     }
 
+    public OrderResponse getOrder(Long orderId) throws JsonProcessingException {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+        return orderMapper.toResponse(order);
+    }
+
     //TODO Настроить тайминги
     @Transactional
     @Scheduled(fixedDelay = 5000)
     public void processCreateOrderEvent() {
         //TODO N+1
         //TODO Пагинация или лимиты
-        List<OrderOutbox> orderOutboxList = orderOutboxRepository.findAllByProcessedIsFalse();
+        List<OrderOutbox> orderOutboxList = orderOutboxRepository.findTop100ByProcessedIsFalse();
         for (OrderOutbox orderOutbox : orderOutboxList){
             try{
                 OrderCreatedEvent event = new OrderCreatedEvent();
@@ -71,7 +78,6 @@ public class OrderService {
                 log.error("Failed to process outbox with id: {}", orderOutbox.getId(), e);
             }
         }
-
     }
 
 }

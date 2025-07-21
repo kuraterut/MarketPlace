@@ -16,12 +16,37 @@ spring:
   liquibase:
     change-log: classpath:db/migration/changelog-master.xml
     enabled: true
+  kafka:
+    bootstrap-servers: kafka:9092
+    consumer:
+      group-id: product-consuming-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+      isolation-level: read_committed
+
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 2147483647
+      properties:
+        spring.json.add.type.headers=false:
 
 
 eureka:
   client:
     service-url:
       defaultZone: http://eureka-server:8761/eureka
+
+
+kafka-topics:
+  order-created: order-created
+  product-hold-failed: product-hold-failed
+  product-hold-success: product-hold-success
 
 #logging:
 #  level:

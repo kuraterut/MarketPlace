@@ -30,4 +30,17 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Modifying
     @Query("UPDATE Product p SET p.category = null WHERE p.category.name = :categoryName")
     void clearCategoryForProductsByCategoryName(@Param("categoryName") String categoryName);
+
+
+    @Modifying
+    @Query("UPDATE Product p SET p.stock = p.stock - :quantity " +
+            "WHERE p.id = :productId AND p.stock >= :quantity")
+    int reduceStockIfAvailable(@Param("productId") Long productId,
+                               @Param("quantity") Long quantity);
+
+    @Modifying
+    @Query("UPDATE Product p SET p.stock = p.stock + :quantity " +
+            "WHERE p.id = :productId")
+    int raiseStock(@Param("productId") Long productId,
+                   @Param("quantity") Long quantity);
 }

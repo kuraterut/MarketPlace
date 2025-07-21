@@ -1,17 +1,23 @@
 package org.kuraterut.orderservice.mapper;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.kuraterut.orderservice.dto.CreateOrderRequest;
 import org.kuraterut.orderservice.dto.OrderItemDto;
 import org.kuraterut.orderservice.dto.OrderResponse;
 import org.kuraterut.orderservice.model.Order;
 import org.kuraterut.orderservice.model.OrderItem;
 import org.kuraterut.orderservice.model.OrderOutbox;
+import org.kuraterut.orderservice.model.event.ProductHoldItemFailed;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class OrderMapper {
+
+
     public Order toEntity(CreateOrderRequest request, Long userId){
         Order order = new Order();
         order.setUserId(userId);
@@ -40,7 +46,16 @@ public class OrderMapper {
         return items.stream().map(this::toResponse).toList();
     }
 
-    public OrderResponse toResponse(Order order){
+    public OrderResponse toResponse(Order order) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        List<ProductHoldItemFailed> details = new ArrayList<>();
+        if(order.getDetails() != null){
+            for(String detail : order.getDetails()){
+                ProductHoldItemFailed productHoldItemFailed = mapper.readValue(detail, ProductHoldItemFailed.class);
+                details.add(productHoldItemFailed);
+            }
+        }
+
         OrderResponse orderResponse = new OrderResponse();
         orderResponse.setCreatedAt(order.getCreatedAt());
         orderResponse.setUpdatedAt(order.getUpdatedAt());
@@ -48,8 +63,10 @@ public class OrderMapper {
         orderResponse.setStatus(order.getStatus());
         orderResponse.setUserId(order.getUserId());
         orderResponse.setItems(toResponses(order.getItems()));
+        orderResponse.setDetails(details);
         return orderResponse;
     }
+
 
     public OrderOutbox toOutbox(Order order){
         OrderOutbox orderOutbox = new OrderOutbox();
