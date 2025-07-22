@@ -47,6 +47,7 @@ kafka-topics:
   order-created: order-created
   product-hold-failed: product-hold-failed
   product-hold-success: product-hold-success
+  product-hold-remove: product-hold-remove
 
 #logging:
 #  level:

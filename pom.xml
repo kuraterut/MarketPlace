@@ -13,7 +13,7 @@
         <module>AuthService</module>
         <module>ProductService</module>
         <module>OrderService</module>
-        <module>BankAccountService</module>
+        <module>PaymentService</module>
         <module>EurekaServer</module>
         <module>JwtSecurityLib</module>
     </modules>

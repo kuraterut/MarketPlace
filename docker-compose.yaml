@@ -72,24 +72,24 @@ services:
       - JWT_SECRET=7A25432A462D4A614E645267556B58703273357638792F423F4528482B4D6251
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-product:5432/product_db
 
-  bank-account-service:
+  payment-service:
     build:
-      context: ./BankAccountService
+      context: ./PaymentService
       dockerfile: Dockerfile
-    container_name: bank-account-service
-    hostname: bank-account-service
+    container_name: payment-service
+    hostname: payment-service
     ports:
       - "8083:8083"
     depends_on:
       - eureka-server
-      - postgres-bank-account
+      - postgres-payment
       - auth-service
       - kafka
     networks:
       - marketplace-net
     environment:
       - JWT_SECRET=7A25432A462D4A614E645267556B58703273357638792F423F4528482B4D6251
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-bank-account:5432/bank_account_db
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-payment:5432/payment_db
 
   order-service:
     build:
@@ -158,18 +158,6 @@ services:
       - POSTGRES_PASSWORD=postgres
     volumes:
       - postgres_order_data:/var/lib/postgresql/data
-    networks:
-      - marketplace-net
-
-  postgres-bank-account:
-    image: postgres:latest
-    container_name: postgres-bank-account
-    environment:
-      - POSTGRES_DB=bank_account_db
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    volumes:
-      - postgres_bank_account_data:/var/lib/postgresql/data
     networks:
       - marketplace-net
 

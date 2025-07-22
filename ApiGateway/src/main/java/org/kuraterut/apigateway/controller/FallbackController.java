@@ -32,9 +32,9 @@ public class FallbackController {
         return build503(exchange, "Order Service is unavailable. Please try again later.");
     }
 
-    @GetMapping("/account")
-    public Mono<Void> bankAccountFallback(ServerWebExchange exchange) {
-        return build503(exchange, "Bank Account Service is unavailable. Please try again later.");
+    @GetMapping("/payment")
+    public Mono<Void> paymentFallback(ServerWebExchange exchange) {
+        return build503(exchange, "Payment Service is unavailable. Please try again later.");
     }
 
     private Mono<Void> build503(ServerWebExchange exchange, String message) {

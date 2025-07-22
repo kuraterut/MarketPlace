@@ -65,10 +65,10 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<ProductResponse>> getAllProducts(@RequestParam(defaultValue = "0") int page,
-                                                                @RequestParam(defaultValue = "10") int size,
-                                                                @RequestParam(defaultValue = "id") String sortBy,
-                                                                @RequestParam(defaultValue = "asc") String direction) {
+    public ResponseEntity<Page<ProductResponse>> getAllProducts(@RequestParam(name = "page", defaultValue = "0") int page,
+                                                                @RequestParam(name = "size", defaultValue = "10") int size,
+                                                                @RequestParam(name = "sortBy", defaultValue = "id") String sortBy,
+                                                                @RequestParam(name = "direction", defaultValue = "asc") String direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sortBy));
         return ResponseEntity.ok(getProductUseCase.getAllProducts(pageable));
     }

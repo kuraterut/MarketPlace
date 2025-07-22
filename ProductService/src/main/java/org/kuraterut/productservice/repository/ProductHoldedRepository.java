@@ -13,8 +13,10 @@ import java.util.List;
 @Repository
 public interface ProductHoldedRepository extends JpaRepository<ProductHolded, Long> {
     List<ProductHolded> findAllByOrderId(Long orderId);
+    List<ProductHolded> findTop100ByStatus(ProductHoldedStatus status);
+    void deleteAllByStatus(ProductHoldedStatus status);
 
     @Modifying
     @Query("UPDATE ProductHolded ph SET ph.status = :status WHERE ph.orderId = :orderId")
-    int updateStatusByOrderId(@Param("orderId") Long orderId, @Param("status") ProductHoldedStatus status);
+    void updateStatusByOrderId(@Param("orderId") Long orderId, @Param("status") ProductHoldedStatus status);
 }

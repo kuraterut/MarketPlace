@@ -1,11 +1,11 @@
 server:
-  port: 8084
+  port: 8083
 
 spring:
   application:
-    name: order-service
+    name: payment-service
   datasource:
-    url: jdbc:postgresql://postgres-order:5432/order_db
+    url: jdbc:postgresql://postgres-payment:5432/payment_db
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
@@ -15,12 +15,12 @@ spring:
     show-sql: true
   liquibase:
     change-log: classpath:db/migration/changelog-master.xml
-    #TODO Enable Luquibase
+    #TODO Включить ликвибэйз
     enabled: false
   kafka:
     bootstrap-servers: kafka:9092
     consumer:
-      group-id: order-consuming-group
+      group-id: payment-consuming-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
@@ -37,15 +37,16 @@ spring:
       properties:
         spring.json.add.type.headers=false:
 
+
 eureka:
   client:
     service-url:
       defaultZone: http://eureka-server:8761/eureka
 
 kafka-topics:
-  order-created: order-created
-  product-hold-failed: product-hold-failed
-  product-hold-success: product-hold-success
   payment-request: payment-request
   payment-result: payment-result
-  product-hold-remove: product-hold-remove
+
+#logging:
+#  level:
+#    org.springframework: DEBUG
