@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-
+#TODO Переменные окружения
 #SERVICES
   eureka-server:
     build:
@@ -17,7 +17,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
       interval: 15s
       timeout: 5s
-      retries: 3
+      retries: 5
 
   api-gateway:
     build:
@@ -72,24 +72,43 @@ services:
       - JWT_SECRET=7A25432A462D4A614E645267556B58703273357638792F423F4528482B4D6251
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-product:5432/product_db
 
-  bank-account-service:
+  payment-service:
     build:
-      context: ./BankAccountService
+      context: ./PaymentService
       dockerfile: Dockerfile
-    container_name: bank-account-service
-    hostname: bank-account-service
+    container_name: payment-service
+    hostname: payment-service
     ports:
       - "8083:8083"
     depends_on:
       - eureka-server
-      - postgres-bank-account
+      - postgres-payment
       - auth-service
       - kafka
     networks:
       - marketplace-net
     environment:
       - JWT_SECRET=7A25432A462D4A614E645267556B58703273357638792F423F4528482B4D6251
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-bank-account:5432/bank_account_db
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-payment:5432/payment_db
+
+  order-service:
+    build:
+      context: ./OrderService
+      dockerfile: Dockerfile
+    container_name: order-service
+    hostname: order-service
+    ports:
+      - "8084:8084"
+    depends_on:
+      - eureka-server
+      - postgres-order
+      - auth-service
+      - kafka
+    networks:
+      - marketplace-net
+    environment:
+      - JWT_SECRET=7A25432A462D4A614E645267556B58703273357638792F423F4528482B4D6251
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-order:5432/order_db
 
 
   #POSTGRES
@@ -142,22 +161,12 @@ services:
     networks:
       - marketplace-net
 
-  postgres-bank-account:
-    image: postgres:latest
-    container_name: postgres-bank-account
-    environment:
-      - POSTGRES_DB=bank_account_db
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    volumes:
-      - postgres_bank_account_data:/var/lib/postgresql/data
-    networks:
-      - marketplace-net
-
 
 #KAFKA
   zookeeper:
     image: confluentinc/cp-zookeeper:7.3.0
+    networks:
+      - marketplace-net
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
@@ -172,6 +181,8 @@ services:
     ports:
       - "9092:9092"
       - "29092:29092"
+    networks:
+      - marketplace-net
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -192,6 +203,8 @@ services:
       - "7071:8080"
     depends_on:
       - kafka
+    networks:
+      - marketplace-net
     environment:
       - KAFKA_CLUSTERS_0_NAME=local
       - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092

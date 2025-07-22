@@ -28,7 +28,7 @@ public class RegisterService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtGeneratorService jwtGeneratorService;
-
+    //TODO Добавить kafka сообщение о регистрации пользователя
     @Transactional
     @Retryable(value = OptimisticLockingFailureException.class, maxAttempts = 3, backoff = @Backoff(delay = 100))
     public RegisterResponse register(RegisterRequest registerRequest) {
