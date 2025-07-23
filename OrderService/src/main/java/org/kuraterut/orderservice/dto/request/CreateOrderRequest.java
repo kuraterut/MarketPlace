@@ -1,9 +1,10 @@
-package org.kuraterut.orderservice.dto;
+package org.kuraterut.orderservice.dto.request;
 
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.kuraterut.orderservice.dto.OrderItemDto;
 
 import java.util.List;
 

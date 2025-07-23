@@ -4,9 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kuraterut.authservice.exception.model.UserNotFoundException;
 import org.kuraterut.authservice.model.UserDetailsImpl;
-import org.kuraterut.authservice.model.dto.requests.LoginRequest;
-import org.kuraterut.authservice.model.dto.responses.LoginResponse;
+import org.kuraterut.authservice.dto.requests.LoginRequest;
+import org.kuraterut.authservice.dto.responses.LoginResponse;
 import org.kuraterut.authservice.repository.UserRepository;
+import org.kuraterut.authservice.usecases.LoginUseCase;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,13 +18,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class LoginService {
+public class LoginService implements LoginUseCase {
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final JwtGeneratorService jwtGeneratorService;
 
+    @Override
     @Transactional
     public LoginResponse login(LoginRequest request) {
         log.info("Login request: {}", request);

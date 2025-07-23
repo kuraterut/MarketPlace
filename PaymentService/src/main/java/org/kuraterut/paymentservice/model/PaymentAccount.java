@@ -29,10 +29,6 @@ public class PaymentAccount {
     private BigDecimal balance;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private Currency currency;
-
-    @Column(nullable = false)
     private boolean active;
 
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

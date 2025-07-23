@@ -1,6 +1,5 @@
 package org.kuraterut.paymentservice.mapper;
 
-import org.kuraterut.paymentservice.dto.request.CreatePaymentAccountRequest;
 import org.kuraterut.paymentservice.dto.response.PaymentAccountResponse;
 import org.kuraterut.paymentservice.model.PaymentAccount;
 import org.kuraterut.paymentservice.model.Transaction;
@@ -11,11 +10,10 @@ import java.util.List;
 
 @Component
 public class PaymentAccountMapper {
-    public PaymentAccount toEntity(CreatePaymentAccountRequest request, Long userId) {
+    public PaymentAccount toEntity(Long userId) {
         PaymentAccount paymentAccount = new PaymentAccount();
         paymentAccount.setUserId(userId);
         paymentAccount.setActive(true);
-        paymentAccount.setCurrency(request.getCurrency());
         paymentAccount.setBalance(BigDecimal.ZERO);
         return paymentAccount;
     }
@@ -25,7 +23,6 @@ public class PaymentAccountMapper {
         paymentAccountResponse.setId(paymentAccount.getId());
         paymentAccountResponse.setUserId(paymentAccount.getUserId());
         paymentAccountResponse.setBalance(paymentAccount.getBalance());
-        paymentAccountResponse.setCurrency(paymentAccount.getCurrency());
         paymentAccountResponse.setActive(paymentAccount.isActive());
         List<Long> transactionIds = paymentAccount.getTransactions().stream().map(Transaction::getId).toList();
         paymentAccountResponse.setTransactionIds(transactionIds);

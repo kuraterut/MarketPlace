@@ -1,4 +1,4 @@
-package org.kuraterut.authservice.model.dto.responses;
+package org.kuraterut.authservice.dto.responses;
 
 import lombok.*;
 

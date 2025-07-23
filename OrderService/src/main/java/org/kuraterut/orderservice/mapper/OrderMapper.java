@@ -2,9 +2,10 @@ package org.kuraterut.orderservice.mapper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.kuraterut.orderservice.dto.CreateOrderRequest;
+import lombok.SneakyThrows;
+import org.kuraterut.orderservice.dto.request.CreateOrderRequest;
 import org.kuraterut.orderservice.dto.OrderItemDto;
-import org.kuraterut.orderservice.dto.OrderResponse;
+import org.kuraterut.orderservice.dto.response.OrderResponse;
 import org.kuraterut.orderservice.model.Order;
 import org.kuraterut.orderservice.model.OrderItem;
 import org.kuraterut.orderservice.model.OrderOutbox;
@@ -65,6 +66,15 @@ public class OrderMapper {
         orderResponse.setItems(toResponses(order.getItems()));
         orderResponse.setDetails(details);
         return orderResponse;
+    }
+
+
+    public List<OrderResponse> toResponses(List<Order> orders) throws JsonProcessingException {
+        List<OrderResponse> orderResponses = new ArrayList<>();
+        for (Order order : orders) {
+            orderResponses.add(toResponse(order));
+        }
+        return orderResponses;
     }
 
 

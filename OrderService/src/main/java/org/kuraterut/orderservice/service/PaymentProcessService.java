@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.kuraterut.orderservice.model.PaymentEventOutbox;
 import org.kuraterut.orderservice.model.event.PaymentEvent;
 import org.kuraterut.orderservice.repository.PaymentEventOutboxRepository;
+import org.kuraterut.orderservice.usecases.PaymentProcessUseCase;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -17,13 +18,14 @@ import java.util.concurrent.ExecutionException;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class PaymentProcessService {
+public class PaymentProcessService implements PaymentProcessUseCase {
     private final PaymentEventOutboxRepository paymentEventOutboxRepository;
     private final KafkaTemplate<String, PaymentEvent> paymentEventKafkaTemplate;
 
     @Value("${kafka-topics.payment-request}")
     private String paymentRequestTopic;
 
+    @Override
     @Scheduled(fixedRate = 2000)
     @Transactional
     public void processPaymentEvents() throws ExecutionException, InterruptedException {

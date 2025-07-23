@@ -12,6 +12,7 @@ import org.kuraterut.productservice.model.event.*;
 import org.kuraterut.productservice.repository.OrderCreatedInboxRepository;
 import org.kuraterut.productservice.repository.ProductHoldedRepository;
 import org.kuraterut.productservice.repository.ProductRepository;
+import org.kuraterut.productservice.usecases.OrderCreatedEventUseCase;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -29,7 +30,7 @@ import java.util.concurrent.ExecutionException;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class OrderCreatedEventService {
+public class OrderCreatedEventService implements OrderCreatedEventUseCase {
     private final OrderCreatedInboxRepository orderCreatedInboxRepository;
     private final ProductRepository productRepository;
     private final ProductHoldedRepository productHoldedRepository;
@@ -44,6 +45,7 @@ public class OrderCreatedEventService {
     @Value("${kafka-topics.product-hold-success}")
     private String productHoldSuccessTopic;
 
+    @Override
     @KafkaListener(topics = "${kafka-topics.order-created}", groupId = "${spring.kafka.consumer.group-id}")
     @Transactional
     public void listenOrderCreated(String message, Acknowledgment ack) {
@@ -66,7 +68,7 @@ public class OrderCreatedEventService {
     }
 
     //TODO Тайминги
-    //TODO UseCases
+    @Override
     @Scheduled(fixedDelay = 5000)
     @Transactional
     public void executeOrderCreatedEvent() throws JsonProcessingException, ExecutionException, InterruptedException {

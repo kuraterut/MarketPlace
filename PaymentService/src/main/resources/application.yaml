@@ -46,6 +46,8 @@ eureka:
 kafka-topics:
   payment-request: payment-request
   payment-result: payment-result
+  user-registration: user-registration-topic
+  #TODO Пристегнуть к топику payment-result ProductHoldRemoving
 
 #logging:
 #  level:

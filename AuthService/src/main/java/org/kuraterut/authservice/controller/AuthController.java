@@ -3,10 +3,10 @@ package org.kuraterut.authservice.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.kuraterut.authservice.model.dto.requests.LoginRequest;
-import org.kuraterut.authservice.model.dto.requests.RegisterRequest;
-import org.kuraterut.authservice.model.dto.responses.LoginResponse;
-import org.kuraterut.authservice.model.dto.responses.RegisterResponse;
+import org.kuraterut.authservice.dto.requests.LoginRequest;
+import org.kuraterut.authservice.dto.requests.RegisterRequest;
+import org.kuraterut.authservice.dto.responses.LoginResponse;
+import org.kuraterut.authservice.dto.responses.RegisterResponse;
 import org.kuraterut.authservice.service.LoginService;
 import org.kuraterut.authservice.service.RegisterService;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.concurrent.ExecutionException;
 
 
 @RestController
@@ -26,7 +27,7 @@ public class AuthController {
     private final RegisterService registerService;
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterResponse> register(@RequestBody @Valid RegisterRequest registerRequest) {
+    public ResponseEntity<RegisterResponse> register(@RequestBody @Valid RegisterRequest registerRequest) throws ExecutionException, InterruptedException {
         return ResponseEntity.ok(registerService.register(registerRequest));
     }
 

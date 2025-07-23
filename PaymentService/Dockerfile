@@ -1,5 +1,4 @@
-FROM eclipse-temurin:17-jdk-jammy
-#TODO Переключить на JRE
+FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 #COPY target/classes/db/migration /app/classes/db/migration
 COPY target/*.jar app.jar

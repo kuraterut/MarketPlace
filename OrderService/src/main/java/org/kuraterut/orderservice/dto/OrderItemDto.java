@@ -10,10 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderItemDto {
-    //TODO Добавить Message везде.
-
-    @NotNull
+    @NotNull(message = "Product ID must be not null")
     private Long productId;
-    @Min(1)
+
+    @Min(value = 1, message = "Quantity must be at least 1")
     private Long quantity;
 }

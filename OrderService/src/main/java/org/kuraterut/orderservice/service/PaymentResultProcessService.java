@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.kuraterut.orderservice.exception.model.OrderNotFoundException;
 import org.kuraterut.orderservice.model.Order;
 import org.kuraterut.orderservice.model.OrderStatus;
 import org.kuraterut.orderservice.model.PaymentResultInbox;
@@ -14,6 +15,7 @@ import org.kuraterut.orderservice.model.event.ProductHoldRemoveEventDetails;
 import org.kuraterut.orderservice.repository.OrderRepository;
 import org.kuraterut.orderservice.repository.PaymentResultInboxRepository;
 import org.kuraterut.orderservice.repository.ProductHoldRemoveEventOutboxRepository;
+import org.kuraterut.orderservice.usecases.PaymentResultProcessUseCase;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -28,7 +30,7 @@ import java.util.concurrent.ExecutionException;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class PaymentResultProcessService {
+public class PaymentResultProcessService implements PaymentResultProcessUseCase {
     private final ObjectMapper objectMapper;
     private final PaymentResultInboxRepository paymentResultInboxRepository;
     private final ProductHoldRemoveEventOutboxRepository productHoldRemoveEventOutboxRepository;
@@ -39,6 +41,7 @@ public class PaymentResultProcessService {
     @Value("${kafka-topics.product-hold-remove}")
     private String productHoldRemoveTopic;
 
+    @Override
     @KafkaListener(topics = "${kafka-topics.payment-result}", groupId = "${spring.kafka.consumer.group-id}")
     @Transactional
     public void listenPaymentResult(String message, Acknowledgment ack) throws JsonProcessingException {
@@ -51,13 +54,14 @@ public class PaymentResultProcessService {
         ack.acknowledge();
     }
 
+    @Override
     @Scheduled(fixedDelay = 3000)
     @Transactional
     public void processPaymentResult() {
         List<PaymentResultInbox> inboxes = paymentResultInboxRepository.findTop100ByProcessedIsFalse();
         for (PaymentResultInbox inbox : inboxes) {
             Order order = orderRepository.findById(inbox.getOrderId())
-                    .orElseThrow(() -> new RuntimeException("Order not found"));
+                    .orElseThrow(() -> new OrderNotFoundException("Order not found by id: " + inbox.getOrderId()));
             ProductHoldRemoveEventOutbox outbox = new ProductHoldRemoveEventOutbox();
             switch (inbox.getResult()){
                 case SUCCESS:
@@ -89,6 +93,7 @@ public class PaymentResultProcessService {
         }
     }
 
+    @Override
     @Scheduled(fixedDelay = 3000)
     @Transactional
     public void processProductHoldRemoveEvent() throws ExecutionException, InterruptedException {

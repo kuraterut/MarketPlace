@@ -8,6 +8,7 @@ import org.kuraterut.paymentservice.model.event.*;
 import org.kuraterut.paymentservice.repository.PaymentAccountRepository;
 import org.kuraterut.paymentservice.repository.PaymentEventInboxRepository;
 import org.kuraterut.paymentservice.repository.PaymentResultOutboxRepository;
+import org.kuraterut.paymentservice.usecases.PaymentProcessUseCase;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -24,16 +25,17 @@ import java.util.concurrent.ExecutionException;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class PaymentProcessService {
+public class PaymentProcessService implements PaymentProcessUseCase {
     private final ObjectMapper objectMapper;
     private final PaymentAccountRepository paymentAccountRepository;
     private final PaymentEventInboxRepository paymentEventInboxRepository;
     private final PaymentResultOutboxRepository paymentResultOutboxRepository;
     private final KafkaTemplate<String, PaymentResultEvent> paymentResultEventKafkaTemplate;
-
+    //TODO Регистрировать транзакцию
     @Value("${kafka-topics.payment-result}")
     private String paymentResultTopic;
 
+    @Override
     @KafkaListener(topics = "${kafka-topics.payment-request}", groupId = "${spring.kafka.consumer.group-id}")
     @Transactional
     public void listenPaymentEvent(String message, Acknowledgment ack) throws JsonProcessingException {
@@ -47,6 +49,7 @@ public class PaymentProcessService {
         ack.acknowledge();
     }
 
+    @Override
     @Transactional
     @Scheduled(fixedDelay = 3000)
     public void processPaymentEvent() {
@@ -80,6 +83,7 @@ public class PaymentProcessService {
         }
     }
 
+    @Override
     @Transactional
     @Scheduled(fixedDelay = 3000)
     public void processPaymentResult() throws ExecutionException, InterruptedException {
