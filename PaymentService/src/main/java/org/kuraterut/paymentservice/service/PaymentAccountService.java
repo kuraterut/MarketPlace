@@ -6,7 +6,11 @@ import org.kuraterut.paymentservice.dto.response.PaymentAccountResponse;
 import org.kuraterut.paymentservice.exception.model.*;
 import org.kuraterut.paymentservice.mapper.PaymentAccountMapper;
 import org.kuraterut.paymentservice.model.PaymentAccount;
+import org.kuraterut.paymentservice.model.Transaction;
+import org.kuraterut.paymentservice.model.TransactionStatus;
+import org.kuraterut.paymentservice.model.TransactionType;
 import org.kuraterut.paymentservice.repository.PaymentAccountRepository;
+import org.kuraterut.paymentservice.repository.TransactionRepository;
 import org.kuraterut.paymentservice.usecases.paymentaccount.CreatePaymentAccountUseCase;
 import org.kuraterut.paymentservice.usecases.paymentaccount.DeletePaymentAccountUseCase;
 import org.kuraterut.paymentservice.usecases.paymentaccount.GetPaymentAccountUseCase;
@@ -17,16 +21,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 public class PaymentAccountService implements CreatePaymentAccountUseCase, UpdatePaymentAccountUseCase,
         DeletePaymentAccountUseCase, GetPaymentAccountUseCase {
 
-    //TODO Транзакции
     private final PaymentAccountRepository paymentAccountRepository;
     private final PaymentAccountMapper paymentAccountMapper;
+    private final TransactionRepository transactionRepository;
 
     @Override
     @Transactional
@@ -104,13 +107,21 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
     @Override
     @Transactional
     public PaymentAccountResponse depositPaymentAccountByUserId(Long userId, BigDecimal amount) {
-        if(!paymentAccountRepository.existsByUserId(userId)) {
-            throw new PaymentAccountNotFoundException("Bank account not found by user id: " + userId);
-        }
+        PaymentAccount account = paymentAccountRepository.findByUserId(userId)
+                .orElseThrow(() -> new PaymentAccountNotFoundException("Payment account not found by user id: " + userId));
+        Transaction transaction = new Transaction();
+        transaction.setAmount(amount);
+        transaction.setAccount(account);
+        transaction.setType(TransactionType.DEPOSIT);
+
         int rows = paymentAccountRepository.depositPaymentAccountByUserId(userId, amount);
         if (rows == 0){
+            transaction.setStatus(TransactionStatus.FAILED);
+            transactionRepository.save(transaction);
             throw new UpdatePaymentAccountException("Can't deposit account");
         }
+        transaction.setStatus(TransactionStatus.COMPLETED);
+        transactionRepository.save(transaction);
         return paymentAccountMapper.toResponse(paymentAccountRepository.findByUserId(userId)
                 .orElseThrow(() -> new PaymentAccountNotFoundException("Bank account not found by userId: " + userId)));
     }
@@ -118,13 +129,21 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
     @Override
     @Transactional
     public PaymentAccountResponse withdrawPaymentAccountByUserId(Long userId, BigDecimal amount) {
-        if(!paymentAccountRepository.existsByUserId(userId)) {
-            throw new PaymentAccountNotFoundException("Bank account not found by user id: " + userId);
-        }
+        PaymentAccount account = paymentAccountRepository.findByUserId(userId)
+                .orElseThrow(() -> new PaymentAccountNotFoundException("Payment account not found by user id: " + userId));
+        Transaction transaction = new Transaction();
+        transaction.setAmount(amount);
+        transaction.setAccount(account);
+        transaction.setType(TransactionType.WITHDRAW);
+
         int rows = paymentAccountRepository.withdrawPaymentAccountByUserId(userId, amount);
         if (rows == 0){
+            transaction.setStatus(TransactionStatus.FAILED);
+            transactionRepository.save(transaction);
             throw new UpdatePaymentAccountException("Can't withdraw account");
         }
+        transaction.setStatus(TransactionStatus.COMPLETED);
+        transactionRepository.save(transaction);
         return paymentAccountMapper.toResponse(paymentAccountRepository.findByUserId(userId)
                 .orElseThrow(() -> new PaymentAccountNotFoundException("Bank account not found by user id: " + userId)));
     }

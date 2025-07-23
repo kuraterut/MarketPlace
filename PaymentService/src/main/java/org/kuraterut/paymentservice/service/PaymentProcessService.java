@@ -4,10 +4,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.kuraterut.paymentservice.model.PaymentAccount;
+import org.kuraterut.paymentservice.model.Transaction;
+import org.kuraterut.paymentservice.model.TransactionStatus;
+import org.kuraterut.paymentservice.model.TransactionType;
 import org.kuraterut.paymentservice.model.event.*;
 import org.kuraterut.paymentservice.repository.PaymentAccountRepository;
 import org.kuraterut.paymentservice.repository.PaymentEventInboxRepository;
 import org.kuraterut.paymentservice.repository.PaymentResultOutboxRepository;
+import org.kuraterut.paymentservice.repository.TransactionRepository;
 import org.kuraterut.paymentservice.usecases.PaymentProcessUseCase;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -20,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -30,8 +36,9 @@ public class PaymentProcessService implements PaymentProcessUseCase {
     private final PaymentAccountRepository paymentAccountRepository;
     private final PaymentEventInboxRepository paymentEventInboxRepository;
     private final PaymentResultOutboxRepository paymentResultOutboxRepository;
+    private final TransactionRepository transactionRepository;
     private final KafkaTemplate<String, PaymentResultEvent> paymentResultEventKafkaTemplate;
-    //TODO Регистрировать транзакцию
+
     @Value("${kafka-topics.payment-result}")
     private String paymentResultTopic;
 
@@ -58,7 +65,9 @@ public class PaymentProcessService implements PaymentProcessUseCase {
             BigDecimal amount = inbox.getAmount();
             Long userId = inbox.getUserId();
 
-            if(!paymentAccountRepository.existsByUserId(userId)){
+            Optional<PaymentAccount> accountOpt = paymentAccountRepository.findByUserId(userId);
+
+            if(accountOpt.isEmpty()){
                 PaymentResultOutbox outbox = new PaymentResultOutbox();
                 outbox.setProcessed(false);
                 outbox.setOrderId(inbox.getOrderId());
@@ -68,15 +77,27 @@ public class PaymentProcessService implements PaymentProcessUseCase {
                 paymentEventInboxRepository.save(inbox);
                 continue;
             }
+            PaymentAccount account = accountOpt.get();
+
             int updatedRows = paymentAccountRepository.withdrawPaymentAccountIfAvailableByUserId(userId, amount);
             PaymentResultOutbox outbox = new PaymentResultOutbox();
             outbox.setProcessed(false);
             outbox.setOrderId(inbox.getOrderId());
+
+            Transaction transaction = new Transaction();
+            transaction.setAmount(amount);
+            transaction.setAccount(account);
+            transaction.setType(TransactionType.PAYMENT);
+            transaction.setOrderId(inbox.getOrderId());
+
             if(updatedRows == 0){
                 outbox.setResult(PaymentResult.NOT_ENOUGH_MONEY);
+                transaction.setStatus(TransactionStatus.FAILED);
             } else {
                 outbox.setResult(PaymentResult.SUCCESS);
+                transaction.setStatus(TransactionStatus.COMPLETED);
             }
+            transactionRepository.save(transaction);
             paymentResultOutboxRepository.save(outbox);
             inbox.setProcessed(true);
             paymentEventInboxRepository.save(inbox);
