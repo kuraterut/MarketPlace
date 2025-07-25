@@ -1,0 +1,35 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <!-- PaymentResultEventOutbox -->
+    <changeSet id="v1.0-create-payment_result_outbox" author="kuraterut">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="payment_result_outbox"/>
+            </not>
+        </preConditions>
+        <createTable tableName="payment_result_outbox">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="order_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="result" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="processed" type="BOOLEAN"/>
+        </createTable>
+        <createSequence
+                sequenceName="payment_result_event_outbox_seq"
+                startValue="1"
+                incrementBy="1"/>
+        <addDefaultValue
+                tableName="payment_result_outbox"
+                columnName="id"
+                defaultValueComputed="nextval('payment_result_event_outbox_seq')"/>
+    </changeSet>
+</databaseChangeLog>

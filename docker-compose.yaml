@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-#TODO Переменные окружения
 #SERVICES
   eureka-server:
     build:
@@ -33,7 +32,7 @@ services:
     networks:
       - marketplace-net
     environment:
-      - JWT_SECRET=7A25432A462D4A614E645267556B58703273357638792F423F4528482B4D6251
+      - JWT_SECRET=${JWT_SECRET}
 
   auth-service:
     build:
@@ -50,8 +49,8 @@ services:
     networks:
       - marketplace-net
     environment:
-      - JWT_SECRET=7A25432A462D4A614E645267556B58703273357638792F423F4528482B4D6251
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-auth:5432/auth_db
+      - JWT_SECRET=${JWT_SECRET}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${POSTGRES_NAME_AUTH}:5432/${POSTGRES_DB_AUTH}
 
   product-service:
     build:
@@ -69,8 +68,8 @@ services:
     networks:
       - marketplace-net
     environment:
-      - JWT_SECRET=7A25432A462D4A614E645267556B58703273357638792F423F4528482B4D6251
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-product:5432/product_db
+      - JWT_SECRET=${JWT_SECRET}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${POSTGRES_NAME_PRODUCT}:5432/${POSTGRES_DB_PRODUCT}
 
   payment-service:
     build:
@@ -88,8 +87,8 @@ services:
     networks:
       - marketplace-net
     environment:
-      - JWT_SECRET=7A25432A462D4A614E645267556B58703273357638792F423F4528482B4D6251
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-payment:5432/payment_db
+      - JWT_SECRET=${JWT_SECRET}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${POSTGRES_NAME_PAYMENT}:5432/${POSTGRES_DB_PAYMENT}
 
   order-service:
     build:
@@ -107,14 +106,14 @@ services:
     networks:
       - marketplace-net
     environment:
-      - JWT_SECRET=7A25432A462D4A614E645267556B58703273357638792F423F4528482B4D6251
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-order:5432/order_db
+      - JWT_SECRET=${JWT_SECRET}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${POSTGRES_NAME_ORDER}:5432/${POSTGRES_DB_ORDER}
 
 
   #POSTGRES
   postgres-auth:
     image: postgres:latest
-    container_name: postgres-auth
+    container_name: ${POSTGRES_NAME_AUTH}
     environment:
       - POSTGRES_DB=auth_db
       - POSTGRES_USER=postgres
@@ -127,7 +126,7 @@ services:
 
   postgres-product:
     image: postgres:latest
-    container_name: postgres-product
+    container_name: ${POSTGRES_NAME_PRODUCT}
     environment:
         - POSTGRES_DB=product_db
         - POSTGRES_USER=postgres
@@ -139,7 +138,7 @@ services:
 
   postgres-payment:
     image: postgres:latest
-    container_name: postgres-payment
+    container_name: ${POSTGRES_NAME_PAYMENT}
     environment:
       - POSTGRES_DB=payment_db
       - POSTGRES_USER=postgres
@@ -151,7 +150,7 @@ services:
 
   postgres-order:
     image: postgres:latest
-    container_name: postgres-order
+    container_name: ${POSTGRES_NAME_ORDER}
     environment:
       - POSTGRES_DB=order_db
       - POSTGRES_USER=postgres

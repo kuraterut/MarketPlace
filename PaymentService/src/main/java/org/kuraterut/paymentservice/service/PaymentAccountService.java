@@ -1,55 +1,58 @@
 package org.kuraterut.paymentservice.service;
 
+import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
-import org.kuraterut.paymentservice.dto.request.CreatePaymentAccountRequest;
 import org.kuraterut.paymentservice.dto.response.PaymentAccountResponse;
-import org.kuraterut.paymentservice.exception.model.AccessDeniedException;
-import org.kuraterut.paymentservice.exception.model.PaymentAccountIsNotEmptyException;
-import org.kuraterut.paymentservice.exception.model.PaymentAccountNotFoundException;
-import org.kuraterut.paymentservice.exception.model.UpdatePaymentAccountException;
+import org.kuraterut.paymentservice.exception.model.*;
 import org.kuraterut.paymentservice.mapper.PaymentAccountMapper;
-import org.kuraterut.paymentservice.model.PaymentAccount;
-import org.kuraterut.paymentservice.model.Currency;
+import org.kuraterut.paymentservice.model.entity.PaymentAccount;
+import org.kuraterut.paymentservice.model.entity.Transaction;
+import org.kuraterut.paymentservice.model.utils.TransactionStatus;
+import org.kuraterut.paymentservice.model.utils.TransactionType;
 import org.kuraterut.paymentservice.repository.PaymentAccountRepository;
-import org.kuraterut.paymentservice.usecases.bankaccount.CreatePaymentAccountUseCase;
-import org.kuraterut.paymentservice.usecases.bankaccount.DeletePaymentAccountUseCase;
-import org.kuraterut.paymentservice.usecases.bankaccount.GetPaymentAccountUseCase;
-import org.kuraterut.paymentservice.usecases.bankaccount.UpdatePaymentAccountUseCase;
+import org.kuraterut.paymentservice.repository.TransactionRepository;
+import org.kuraterut.paymentservice.usecases.paymentaccount.CreatePaymentAccountUseCase;
+import org.kuraterut.paymentservice.usecases.paymentaccount.DeletePaymentAccountUseCase;
+import org.kuraterut.paymentservice.usecases.paymentaccount.GetPaymentAccountUseCase;
+import org.kuraterut.paymentservice.usecases.paymentaccount.UpdatePaymentAccountUseCase;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 public class PaymentAccountService implements CreatePaymentAccountUseCase, UpdatePaymentAccountUseCase,
         DeletePaymentAccountUseCase, GetPaymentAccountUseCase {
 
-    //TODO Транзакции
     private final PaymentAccountRepository paymentAccountRepository;
     private final PaymentAccountMapper paymentAccountMapper;
+    private final TransactionRepository transactionRepository;
 
     @Override
     @Transactional
-    public PaymentAccountResponse createBankAccount(CreatePaymentAccountRequest request, Long userId) {
-        PaymentAccount paymentAccount = paymentAccountMapper.toEntity(request, userId);
-        paymentAccount = paymentAccountRepository.save(paymentAccount);
-        return paymentAccountMapper.toResponse(paymentAccount);
+    public PaymentAccountResponse createPaymentAccount(Long userId) {
+        try {
+            PaymentAccount paymentAccount = paymentAccountMapper.toEntity(userId);
+            paymentAccount = paymentAccountRepository.save(paymentAccount);
+            return paymentAccountMapper.toResponse(paymentAccount);
+        } catch (DataIntegrityViolationException | ConstraintViolationException e){
+            throw new PaymentAccountAlreadyExistsException("Payment Account is already exists with userId: " + userId);
+        }
     }
 
     @Override
     @Transactional
-    public void deleteBankAccountById(Long id, Long userId) {
+    public void deletePaymentAccountById(Long id) {
         PaymentAccount paymentAccount = paymentAccountRepository.findById(id)
-                .orElseThrow(() -> new PaymentAccountNotFoundException("Bank account not found by id: " + id));
-        if (!Objects.equals(paymentAccount.getUserId(), userId)){
-            throw new AccessDeniedException("You do not have permission to delete this bank account");
-        }
+                .orElseThrow(() -> new PaymentAccountNotFoundException("Payment account not found by id: " + id));
+
         BigDecimal balance = paymentAccount.getBalance();
         if (balance.compareTo(BigDecimal.ZERO) != 0) {
-            String message = String.format("Can't delete bank account with id: %d, because balance is not zero: %f%s", id, balance, paymentAccount.getCurrency().toString());
+            String message = String.format("Can't delete payment account with id: %d, because balance is not zero: %f", id, balance);
             throw new PaymentAccountIsNotEmptyException(message);
         }
         paymentAccountRepository.deleteById(id);
@@ -57,98 +60,100 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
 
     @Override
     @Transactional
-    public void deleteBankAccountsByUserId(Long userId) {
-        int countOfNotReadyBankAccounts = paymentAccountRepository.checkReadyForDeletingByUserId(userId);
-        if (countOfNotReadyBankAccounts != 0){
-            String message = String.format("There are %d bank accounts, with non zero balance", countOfNotReadyBankAccounts);
+    public void deletePaymentAccountByUserId(Long userId) {
+        PaymentAccount paymentAccount = paymentAccountRepository.findByUserId(userId)
+                .orElseThrow(() -> new PaymentAccountNotFoundException("Payment account not found by userId: " + userId));
+
+        BigDecimal balance = paymentAccount.getBalance();
+        if (balance.compareTo(BigDecimal.ZERO) != 0) {
+            String message = String.format("Can't delete payment account with userId: %d, because balance is not zero: %f", userId, balance);
             throw new PaymentAccountIsNotEmptyException(message);
         }
-        paymentAccountRepository.deleteAllByUserId(userId);
+        paymentAccountRepository.deleteById(paymentAccount.getId());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<PaymentAccountResponse> getAllBankAccounts() {
-        return paymentAccountMapper.toResponses(paymentAccountRepository.findAll());
+    public Page<PaymentAccountResponse> getAllPaymentAccounts(Pageable pageable) {
+        return paymentAccountMapper.toResponses(paymentAccountRepository.findAll(pageable));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public PaymentAccountResponse getBankAccountById(Long id, Long userId) {
-        PaymentAccount paymentAccount = paymentAccountRepository.findById(id)
-                .orElseThrow(() -> new PaymentAccountNotFoundException("Bank account not found by id: " + id));
-        if (!Objects.equals(paymentAccount.getUserId(), userId)){
-            throw new AccessDeniedException("You don't have permission to get this bank account");
-        }
-        return paymentAccountMapper.toResponse(paymentAccount);
+    public PaymentAccountResponse getPaymentAccountByUserId(Long userId) {
+        return paymentAccountMapper.toResponse(paymentAccountRepository.findByUserId(userId)
+                .orElseThrow(() -> new PaymentAccountNotFoundException("Payment account not found by user id: " + userId)));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<PaymentAccountResponse> getBankAccountsByUserId(Long userId) {
-        return paymentAccountMapper.toResponses(paymentAccountRepository.findPaymentAccountByUserId(userId));
+    public PaymentAccountResponse getPaymentAccountById(Long id){
+        return paymentAccountMapper.toResponse(paymentAccountRepository.findById(id)
+                .orElseThrow(() -> new PaymentAccountNotFoundException("Payment account not found by id: " + id)));
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PaymentAccountResponse> getPaymentAccountsByIsActive(boolean isActive, Pageable pageable) {
+        return paymentAccountMapper.toResponses(paymentAccountRepository.findAllPaymentAccountByActive(isActive, pageable));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<PaymentAccountResponse> getBankAccountsByCurrency(Currency currency, Long userId) {
-        return paymentAccountMapper.toResponses(paymentAccountRepository.findPaymentAccountByCurrencyAndUserId(currency, userId));
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<PaymentAccountResponse> getBankAccountsByIsActive(boolean isActive, Long userId) {
-        return paymentAccountMapper.toResponses(paymentAccountRepository.findPaymentAccountByActiveAndUserId(isActive, userId));
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<PaymentAccountResponse> getBankAccountsByBalanceBetween(BigDecimal min, BigDecimal max, Long userId) {
-        return paymentAccountMapper.toResponses(paymentAccountRepository.findPaymentAccountByBalanceBetweenAndUserId(min, max, userId));
+    public Page<PaymentAccountResponse> getPaymentAccountsByBalanceBetween(BigDecimal min, BigDecimal max, Pageable pageable) {
+        return paymentAccountMapper.toResponses(paymentAccountRepository.findAllPaymentAccountByBalanceBetween(min, max, pageable));
     }
 
     @Override
     @Transactional
-    public PaymentAccountResponse depositBankAccount(Long id, BigDecimal amount, Long userId) {
-        if(!paymentAccountRepository.existsById(id)) {
-            throw new PaymentAccountNotFoundException("Bank account not found by id: " + id);
-        }
-        if (!paymentAccountRepository.existsPaymentAccountByIdAndUserId(id, userId)) {
-            throw new AccessDeniedException("You don't have permission to deposit this account");
-        }
-        int rows = paymentAccountRepository.depositPaymentAccountById(id, amount);
+    public PaymentAccountResponse depositPaymentAccountByUserId(Long userId, BigDecimal amount) {
+        PaymentAccount account = paymentAccountRepository.findByUserId(userId)
+                .orElseThrow(() -> new PaymentAccountNotFoundException("Payment account not found by user id: " + userId));
+        Transaction transaction = new Transaction();
+        transaction.setAmount(amount);
+        transaction.setAccount(account);
+        transaction.setType(TransactionType.DEPOSIT);
+
+        int rows = paymentAccountRepository.depositPaymentAccountByUserId(userId, amount);
         if (rows == 0){
+            transaction.setStatus(TransactionStatus.FAILED);
+            transactionRepository.save(transaction);
             throw new UpdatePaymentAccountException("Can't deposit account");
         }
-        return paymentAccountMapper.toResponse(paymentAccountRepository.findById(id)
-                .orElseThrow(() -> new PaymentAccountNotFoundException("Bank account not found by id: " + id)));
+        transaction.setStatus(TransactionStatus.COMPLETED);
+        transactionRepository.save(transaction);
+        return paymentAccountMapper.toResponse(paymentAccountRepository.findByUserId(userId)
+                .orElseThrow(() -> new PaymentAccountNotFoundException("Bank account not found by userId: " + userId)));
     }
 
     @Override
     @Transactional
-    public PaymentAccountResponse withdrawBankAccount(Long id, BigDecimal amount, Long userId) {
-        if(!paymentAccountRepository.existsById(id)) {
-            throw new PaymentAccountNotFoundException("Bank account not found by id: " + id);
-        }
-        if (!paymentAccountRepository.existsPaymentAccountByIdAndUserId(id, userId)) {
-            throw new AccessDeniedException("You don't have permission to withdraw this account");
-        }
-        int rows = paymentAccountRepository.withdrawPaymentAccountById(id, amount);
+    public PaymentAccountResponse withdrawPaymentAccountByUserId(Long userId, BigDecimal amount) {
+        PaymentAccount account = paymentAccountRepository.findByUserId(userId)
+                .orElseThrow(() -> new PaymentAccountNotFoundException("Payment account not found by user id: " + userId));
+        Transaction transaction = new Transaction();
+        transaction.setAmount(amount);
+        transaction.setAccount(account);
+        transaction.setType(TransactionType.WITHDRAW);
+
+        int rows = paymentAccountRepository.withdrawPaymentAccountByUserId(userId, amount);
         if (rows == 0){
+            transaction.setStatus(TransactionStatus.FAILED);
+            transactionRepository.save(transaction);
             throw new UpdatePaymentAccountException("Can't withdraw account");
         }
-        return paymentAccountMapper.toResponse(paymentAccountRepository.findById(id)
-                .orElseThrow(() -> new PaymentAccountNotFoundException("Bank account not found by id: " + id)));
+        transaction.setStatus(TransactionStatus.COMPLETED);
+        transactionRepository.save(transaction);
+        return paymentAccountMapper.toResponse(paymentAccountRepository.findByUserId(userId)
+                .orElseThrow(() -> new PaymentAccountNotFoundException("Bank account not found by user id: " + userId)));
     }
 
     @Override
     @Transactional
-    public PaymentAccountResponse activateBankAccount(Long id, Long userId) {
+    public PaymentAccountResponse activatePaymentAccountById(Long id) {
         if(!paymentAccountRepository.existsById(id)) {
             throw new PaymentAccountNotFoundException("Bank account not found by id: " + id);
-        }
-        if (!paymentAccountRepository.existsPaymentAccountByIdAndUserId(id, userId)) {
-            throw new AccessDeniedException("You don't have permission to activate this account");
         }
         int rows = paymentAccountRepository.activatePaymentAccountById(id);
         if (rows == 0){
@@ -160,12 +165,23 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
 
     @Override
     @Transactional
-    public PaymentAccountResponse deactivateBankAccount(Long id, Long userId) {
+    public PaymentAccountResponse activatePaymentAccountByUserId(Long userId) {
+        if(!paymentAccountRepository.existsByUserId(userId)) {
+            throw new PaymentAccountNotFoundException("Bank account not found by user id: " + userId);
+        }
+        int rows = paymentAccountRepository.activatePaymentAccountByUserId(userId);
+        if (rows == 0){
+            throw new UpdatePaymentAccountException("Can't activate account");
+        }
+        return paymentAccountMapper.toResponse(paymentAccountRepository.findByUserId(userId)
+                .orElseThrow(() -> new PaymentAccountNotFoundException("Bank account not found by user id: " + userId)));
+    }
+
+    @Override
+    @Transactional
+    public PaymentAccountResponse deactivatePaymentAccountById(Long id) {
         if(!paymentAccountRepository.existsById(id)) {
             throw new PaymentAccountNotFoundException("Bank account not found by id: " + id);
-        }
-        if (!paymentAccountRepository.existsPaymentAccountByIdAndUserId(id, userId)) {
-            throw new AccessDeniedException("You don't have permission to deactivate this account");
         }
         int rows = paymentAccountRepository.deactivatePaymentAccountById(id);
         if (rows == 0){
@@ -173,5 +189,19 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
         }
         return paymentAccountMapper.toResponse(paymentAccountRepository.findById(id)
                 .orElseThrow(() -> new PaymentAccountNotFoundException("Bank account not found by id: " + id)));
+    }
+
+    @Override
+    @Transactional
+    public PaymentAccountResponse deactivatePaymentAccountByUserId(Long userId) {
+        if(!paymentAccountRepository.existsByUserId(userId)) {
+            throw new PaymentAccountNotFoundException("Bank account not found by user id: " + userId);
+        }
+        int rows = paymentAccountRepository.deactivatePaymentAccountByUserId(userId);
+        if (rows == 0){
+            throw new UpdatePaymentAccountException("Can't deactivate account");
+        }
+        return paymentAccountMapper.toResponse(paymentAccountRepository.findByUserId(userId)
+                .orElseThrow(() -> new PaymentAccountNotFoundException("Bank account not found by user id: " + userId)));
     }
 }

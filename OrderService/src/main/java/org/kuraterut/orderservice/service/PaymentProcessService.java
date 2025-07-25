@@ -2,9 +2,10 @@ package org.kuraterut.orderservice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.kuraterut.orderservice.model.PaymentEventOutbox;
+import org.kuraterut.orderservice.model.event.outbox.PaymentEventOutbox;
 import org.kuraterut.orderservice.model.event.PaymentEvent;
 import org.kuraterut.orderservice.repository.PaymentEventOutboxRepository;
+import org.kuraterut.orderservice.usecases.PaymentProcessUseCase;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -17,14 +18,15 @@ import java.util.concurrent.ExecutionException;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class PaymentProcessService {
+public class PaymentProcessService implements PaymentProcessUseCase {
     private final PaymentEventOutboxRepository paymentEventOutboxRepository;
     private final KafkaTemplate<String, PaymentEvent> paymentEventKafkaTemplate;
 
     @Value("${kafka-topics.payment-request}")
     private String paymentRequestTopic;
 
-    @Scheduled(fixedRate = 2000)
+    @Override
+    @Scheduled(fixedRateString = "${scheduling.process-payment-event-rate}")
     @Transactional
     public void processPaymentEvents() throws ExecutionException, InterruptedException {
         List<PaymentEventOutbox> outboxes = paymentEventOutboxRepository.findTop100ByProcessedIsFalse();

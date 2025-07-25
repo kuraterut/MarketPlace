@@ -7,10 +7,8 @@ import org.kuraterut.productservice.dto.requests.UpdateCategoryRequest;
 import org.kuraterut.productservice.dto.responses.CategoryResponse;
 import org.kuraterut.productservice.exception.model.CategoryAlreadyExists;
 import org.kuraterut.productservice.exception.model.CategoryNotFoundException;
-import org.kuraterut.productservice.exception.model.ProductNotFoundException;
 import org.kuraterut.productservice.mapper.CategoryMapper;
-import org.kuraterut.productservice.model.Category;
-import org.kuraterut.productservice.model.Product;
+import org.kuraterut.productservice.model.entity.Category;
 import org.kuraterut.productservice.repository.CategoryRepository;
 import org.kuraterut.productservice.repository.ProductRepository;
 import org.kuraterut.productservice.usecases.category.CreateCategoryUseCase;
@@ -22,8 +20,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

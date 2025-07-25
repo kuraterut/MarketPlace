@@ -5,5 +5,6 @@ import org.apache.kafka.common.protocol.types.Field;
 import java.util.List;
 
 public interface DeleteProductUseCase {
-    void deleteProduct(Long id, Long userId, List<String> roles);
+    void deleteProduct(Long id, Long userId);
+    void adminDeleteProduct(Long id);
 }

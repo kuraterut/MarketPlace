@@ -15,8 +15,7 @@ spring:
     show-sql: true
   liquibase:
     change-log: classpath:db/migration/changelog-master.xml
-    #TODO Включить ликвибэйз
-    enabled: false
+    enabled: true
   kafka:
     bootstrap-servers: kafka:9092
     consumer:
@@ -46,6 +45,11 @@ eureka:
 kafka-topics:
   payment-request: payment-request
   payment-result: payment-result
+  user-registration: user-registration-topic
+
+scheduling:
+  process-payment-event-rate: 3000
+  process-payment-result-rate: 3000
 
 #logging:
 #  level:

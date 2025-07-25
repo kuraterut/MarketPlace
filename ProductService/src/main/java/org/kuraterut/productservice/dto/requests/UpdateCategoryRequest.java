@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class UpdateCategoryRequest {
+    @NotBlank(message = "Category name must be not empty")
     private String name;
     private String description;
 }

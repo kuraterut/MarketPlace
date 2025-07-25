@@ -49,6 +49,11 @@ kafka-topics:
   product-hold-success: product-hold-success
   product-hold-remove: product-hold-remove
 
+
+scheduling:
+  process-order-created-rate: 3000
+  process-remove-product-hold-rate: 3000
+
 #logging:
 #  level:
 #    org.springframework: DEBUG

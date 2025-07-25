@@ -1,7 +1,7 @@
 package org.kuraterut.productservice.repository;
 
-import org.kuraterut.productservice.model.ProductHolded;
-import org.kuraterut.productservice.model.ProductHoldedStatus;
+import org.kuraterut.productservice.model.entity.ProductHolded;
+import org.kuraterut.productservice.model.utils.ProductHoldedStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

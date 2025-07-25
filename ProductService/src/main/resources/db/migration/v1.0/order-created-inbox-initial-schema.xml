@@ -1,0 +1,55 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <!-- OrderCreatedInbox -->
+    <changeSet id="v1.0-create-order_created_inbox" author="kuraterut">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="order_created_inbox"/>
+            </not>
+        </preConditions>
+        <createTable tableName="order_created_inbox">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="order_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="processed" type="BOOLEAN" defaultValueBoolean="false"/>
+        </createTable>
+        <createSequence
+                sequenceName="order_created_inbox_seq"
+                startValue="1"
+                incrementBy="1"/>
+        <addDefaultValue
+                tableName="order_created_inbox"
+                columnName="id"
+                defaultValueComputed="nextval('order_created_inbox_seq')"/>
+    </changeSet>
+
+    <changeSet id="v1.0-create-json_items" author="kuraterut">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="json_items"/>
+            </not>
+        </preConditions>
+        <createTable tableName="json_items">
+            <column name="order_created_inbox_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="json_items" type="TEXT"/>
+        </createTable>
+        <addForeignKeyConstraint
+                baseTableName="json_items"
+                baseColumnNames="order_created_inbox_id"
+                constraintName="fk_json_items_inbox"
+                referencedTableName="order_created_inbox"
+                referencedColumnNames="id"/>
+    </changeSet>
+</databaseChangeLog>

@@ -7,8 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.kuraterut.paymentservice.model.TransactionStatus;
-import org.kuraterut.paymentservice.model.TransactionType;
+import org.kuraterut.paymentservice.model.utils.TransactionStatus;
+import org.kuraterut.paymentservice.model.utils.TransactionType;
 
 import java.math.BigDecimal;
 
@@ -17,19 +17,21 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Builder
 public class CreateTransactionRequest {
-    @NotNull
+    @NotNull(message = "Account ID must be not null")
     private Long accountId;
 
-    @Positive @NotNull
+    @Positive(message = "Transaction amount must be positive")
+    @NotNull(message = "Transaction amount must be not null")
     private BigDecimal amount;
 
-    @NotNull
+    @NotNull(message = "Transaction type must be not null")
     private TransactionType transactionType;
 
     private String description;
 
-    @NotNull
+    @NotNull(message = "Transaction status must be not null")
     private TransactionStatus status;
 
+    @NotNull(message = "Order ID must be not null")
     private Long orderId;
 }

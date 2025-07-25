@@ -8,8 +8,8 @@ import org.kuraterut.productservice.exception.model.CategoryNotFoundException;
 import org.kuraterut.productservice.exception.model.PermissionDeniedException;
 import org.kuraterut.productservice.exception.model.ProductNotFoundException;
 import org.kuraterut.productservice.mapper.ProductMapper;
-import org.kuraterut.productservice.model.Category;
-import org.kuraterut.productservice.model.Product;
+import org.kuraterut.productservice.model.entity.Category;
+import org.kuraterut.productservice.model.entity.Product;
 import org.kuraterut.productservice.repository.CategoryRepository;
 import org.kuraterut.productservice.repository.ProductRepository;
 import org.kuraterut.productservice.usecases.product.CreateProductUseCase;
@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -46,10 +45,10 @@ public class ProductService implements CreateProductUseCase, DeleteProductUseCas
 
     @Override
     @Transactional
-    public void deleteProduct(Long id, Long userId, List<String> roles) {
+    public void deleteProduct(Long id, Long userId) {
         boolean isOwner = productRepository.existsByIdAndSellerId(id, userId);
 
-        if (!isOwner && !roles.contains("ADMIN")) {
+        if (!isOwner) {
             throw new PermissionDeniedException("Permission Denied. You are not allowed to delete this product");
         }
 
@@ -59,6 +58,17 @@ public class ProductService implements CreateProductUseCase, DeleteProductUseCas
 
         productRepository.deleteById(id);
     }
+
+    @Override
+    @Transactional
+    public void adminDeleteProduct(Long id) {
+        if (!productRepository.existsById(id)) {
+            throw new ProductNotFoundException("Product not found by id: " + id);
+        }
+        productRepository.deleteById(id);
+    }
+
+
 
     @Override
     @Transactional(readOnly = true)
