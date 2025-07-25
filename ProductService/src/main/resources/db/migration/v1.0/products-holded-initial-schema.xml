@@ -1,0 +1,46 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <!-- ProductHolded -->
+    <changeSet id="v1.0-create-product_holded" author="kuraterut">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="product_holded"/>
+            </not>
+        </preConditions>
+        <createTable tableName="product_holded">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="order_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="product_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="quantity" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="unit_price" type="DECIMAL(19,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_price" type="DECIMAL(19,2)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createSequence
+                sequenceName="product_holded_seq"
+                startValue="1"
+                incrementBy="1"/>
+        <addDefaultValue
+                tableName="product_holded"
+                columnName="id"
+                defaultValueComputed="nextval('product_holded_seq')"/>
+    </changeSet>
+</databaseChangeLog>

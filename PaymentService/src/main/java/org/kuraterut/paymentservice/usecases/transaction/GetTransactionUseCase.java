@@ -1,8 +1,8 @@
 package org.kuraterut.paymentservice.usecases.transaction;
 
 import org.kuraterut.paymentservice.dto.response.TransactionResponse;
-import org.kuraterut.paymentservice.model.TransactionStatus;
-import org.kuraterut.paymentservice.model.TransactionType;
+import org.kuraterut.paymentservice.model.utils.TransactionStatus;
+import org.kuraterut.paymentservice.model.utils.TransactionType;
 
 import java.math.BigDecimal;
 import java.util.List;

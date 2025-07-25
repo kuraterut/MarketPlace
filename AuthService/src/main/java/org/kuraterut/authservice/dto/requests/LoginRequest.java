@@ -3,7 +3,6 @@ package org.kuraterut.authservice.dto.requests;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
-import org.kuraterut.authservice.model.Role;
 
 @NoArgsConstructor
 @AllArgsConstructor

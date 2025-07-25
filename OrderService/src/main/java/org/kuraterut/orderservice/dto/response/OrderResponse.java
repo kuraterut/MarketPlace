@@ -3,9 +3,9 @@ package org.kuraterut.orderservice.dto.response;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.kuraterut.orderservice.dto.OrderItemDto;
-import org.kuraterut.orderservice.model.OrderStatus;
-import org.kuraterut.orderservice.model.event.ProductHoldItemFailed;
+import org.kuraterut.orderservice.model.event.dto.OrderItemDto;
+import org.kuraterut.orderservice.model.utils.OrderStatus;
+import org.kuraterut.orderservice.model.event.dto.ProductHoldItemFailed;
 
 import java.time.OffsetDateTime;
 import java.util.List;

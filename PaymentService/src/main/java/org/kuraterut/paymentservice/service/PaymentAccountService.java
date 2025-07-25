@@ -5,10 +5,10 @@ import lombok.RequiredArgsConstructor;
 import org.kuraterut.paymentservice.dto.response.PaymentAccountResponse;
 import org.kuraterut.paymentservice.exception.model.*;
 import org.kuraterut.paymentservice.mapper.PaymentAccountMapper;
-import org.kuraterut.paymentservice.model.PaymentAccount;
-import org.kuraterut.paymentservice.model.Transaction;
-import org.kuraterut.paymentservice.model.TransactionStatus;
-import org.kuraterut.paymentservice.model.TransactionType;
+import org.kuraterut.paymentservice.model.entity.PaymentAccount;
+import org.kuraterut.paymentservice.model.entity.Transaction;
+import org.kuraterut.paymentservice.model.utils.TransactionStatus;
+import org.kuraterut.paymentservice.model.utils.TransactionType;
 import org.kuraterut.paymentservice.repository.PaymentAccountRepository;
 import org.kuraterut.paymentservice.repository.TransactionRepository;
 import org.kuraterut.paymentservice.usecases.paymentaccount.CreatePaymentAccountUseCase;
@@ -16,11 +16,12 @@ import org.kuraterut.paymentservice.usecases.paymentaccount.DeletePaymentAccount
 import org.kuraterut.paymentservice.usecases.paymentaccount.GetPaymentAccountUseCase;
 import org.kuraterut.paymentservice.usecases.paymentaccount.UpdatePaymentAccountUseCase;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -73,8 +74,8 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
 
     @Override
     @Transactional(readOnly = true)
-    public List<PaymentAccountResponse> getAllPaymentAccounts() {
-        return paymentAccountMapper.toResponses(paymentAccountRepository.findAll());
+    public Page<PaymentAccountResponse> getAllPaymentAccounts(Pageable pageable) {
+        return paymentAccountMapper.toResponses(paymentAccountRepository.findAll(pageable));
     }
 
     @Override
@@ -94,14 +95,14 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
 
     @Override
     @Transactional(readOnly = true)
-    public List<PaymentAccountResponse> getPaymentAccountsByIsActive(boolean isActive) {
-        return paymentAccountMapper.toResponses(paymentAccountRepository.findAllPaymentAccountByActive(isActive));
+    public Page<PaymentAccountResponse> getPaymentAccountsByIsActive(boolean isActive, Pageable pageable) {
+        return paymentAccountMapper.toResponses(paymentAccountRepository.findAllPaymentAccountByActive(isActive, pageable));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<PaymentAccountResponse> getPaymentAccountsByBalanceBetween(BigDecimal min, BigDecimal max) {
-        return paymentAccountMapper.toResponses(paymentAccountRepository.findAllPaymentAccountByBalanceBetween(min, max));
+    public Page<PaymentAccountResponse> getPaymentAccountsByBalanceBetween(BigDecimal min, BigDecimal max, Pageable pageable) {
+        return paymentAccountMapper.toResponses(paymentAccountRepository.findAllPaymentAccountByBalanceBetween(min, max, pageable));
     }
 
     @Override

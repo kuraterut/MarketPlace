@@ -1,8 +1,8 @@
 package org.kuraterut.authservice.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.kuraterut.authservice.model.User;
-import org.kuraterut.authservice.model.UserDetailsImpl;
+import org.kuraterut.authservice.model.entity.User;
+import org.kuraterut.authservice.model.utils.UserDetailsImpl;
 import org.kuraterut.authservice.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

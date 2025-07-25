@@ -1,12 +1,10 @@
 package org.kuraterut.productservice.usecases.product;
 
 import org.kuraterut.productservice.dto.responses.ProductResponse;
-import org.kuraterut.productservice.model.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 public interface GetProductUseCase {
     Page<ProductResponse> getAllProducts(Pageable pageable);

@@ -2,19 +2,21 @@ package org.kuraterut.orderservice.mapper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.kuraterut.orderservice.dto.request.CreateOrderRequest;
-import org.kuraterut.orderservice.dto.OrderItemDto;
+import org.kuraterut.orderservice.model.event.dto.OrderItemDto;
 import org.kuraterut.orderservice.dto.response.OrderResponse;
-import org.kuraterut.orderservice.model.Order;
-import org.kuraterut.orderservice.model.OrderItem;
-import org.kuraterut.orderservice.model.OrderOutbox;
-import org.kuraterut.orderservice.model.event.ProductHoldItemFailed;
+import org.kuraterut.orderservice.model.entity.Order;
+import org.kuraterut.orderservice.model.entity.OrderItem;
+import org.kuraterut.orderservice.model.event.outbox.CreateOrderEventOutbox;
+import org.kuraterut.orderservice.model.event.dto.ProductHoldItemFailed;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Component
 public class OrderMapper {
 
@@ -47,13 +49,17 @@ public class OrderMapper {
         return items.stream().map(this::toResponse).toList();
     }
 
-    public OrderResponse toResponse(Order order) throws JsonProcessingException {
+    public OrderResponse toResponse(Order order) {
         ObjectMapper mapper = new ObjectMapper();
         List<ProductHoldItemFailed> details = new ArrayList<>();
         if(order.getDetails() != null){
             for(String detail : order.getDetails()){
-                ProductHoldItemFailed productHoldItemFailed = mapper.readValue(detail, ProductHoldItemFailed.class);
-                details.add(productHoldItemFailed);
+                try{
+                    ProductHoldItemFailed productHoldItemFailed = mapper.readValue(detail, ProductHoldItemFailed.class);
+                    details.add(productHoldItemFailed);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException("Json Processing Exception", e);
+                }
             }
         }
 
@@ -69,20 +75,20 @@ public class OrderMapper {
     }
 
 
-    public List<OrderResponse> toResponses(List<Order> orders) throws JsonProcessingException {
-        List<OrderResponse> orderResponses = new ArrayList<>();
-        for (Order order : orders) {
-            orderResponses.add(toResponse(order));
-        }
-        return orderResponses;
+//    public List<OrderResponse> toResponses(List<Order> orders) {
+//        return orders.stream().map(this::toResponse).toList();
+//    }
+
+    public Page<OrderResponse> toResponses(Page<Order> orders)  {
+        return orders.map(this::toResponse);
     }
 
 
-    public OrderOutbox toOutbox(Order order){
-        OrderOutbox orderOutbox = new OrderOutbox();
-        orderOutbox.setOrder(order);
-        orderOutbox.setProcessed(false);
-        return orderOutbox;
+    public CreateOrderEventOutbox toOutbox(Order order){
+        CreateOrderEventOutbox createOrderEventOutbox = new CreateOrderEventOutbox();
+        createOrderEventOutbox.setOrder(order);
+        createOrderEventOutbox.setProcessed(false);
+        return createOrderEventOutbox;
     }
 
 }

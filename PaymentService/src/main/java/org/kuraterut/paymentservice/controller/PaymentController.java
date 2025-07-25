@@ -7,6 +7,10 @@ import org.kuraterut.paymentservice.usecases.paymentaccount.DeletePaymentAccount
 import org.kuraterut.paymentservice.usecases.paymentaccount.GetPaymentAccountUseCase;
 import org.kuraterut.paymentservice.usecases.paymentaccount.UpdatePaymentAccountUseCase;
 import org.kuraterut.jwtsecuritylib.model.AuthPrincipal;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +22,6 @@ import java.util.List;
 @RequestMapping("/api/payments")
 @RequiredArgsConstructor
 public class PaymentController {
-    //TODO Пагинация
     //TODO Прописать Postman
     //TODO Добавить тестовые данные в Ликви
 
@@ -35,8 +38,12 @@ public class PaymentController {
     }
     @GetMapping("/admin/all")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public List<PaymentAccountResponse> adminGetAllPaymentAccounts() {
-        return getPaymentAccountUseCase.getAllPaymentAccounts();
+    public Page<PaymentAccountResponse> adminGetAllPaymentAccounts(@RequestParam(defaultValue = "0") int page,
+                                                                   @RequestParam(defaultValue = "10") int size,
+                                                                   @RequestParam(defaultValue = "id") String sortBy,
+                                                                   @RequestParam(defaultValue = "asc") String direction) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sortBy));
+        return getPaymentAccountUseCase.getAllPaymentAccounts(pageable);
     }
 
     @GetMapping("/admin/{id}")
@@ -60,15 +67,25 @@ public class PaymentController {
 
     @GetMapping("/filter/active")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public List<PaymentAccountResponse> getPaymentAccountsFilterByActive(@RequestParam("isActive") Boolean isActive) {
-        return getPaymentAccountUseCase.getPaymentAccountsByIsActive(isActive);
+    public Page<PaymentAccountResponse> getPaymentAccountsFilterByActive(@RequestParam("isActive") Boolean isActive,
+                                                                         @RequestParam(defaultValue = "0") int page,
+                                                                         @RequestParam(defaultValue = "10") int size,
+                                                                         @RequestParam(defaultValue = "id") String sortBy,
+                                                                         @RequestParam(defaultValue = "asc") String direction) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sortBy));
+        return getPaymentAccountUseCase.getPaymentAccountsByIsActive(isActive, pageable);
     }
 
     @GetMapping("/filter/balance")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public List<PaymentAccountResponse> getPaymentAccountsFilterByBalanceBetween(@RequestParam("min") BigDecimal min,
-                                                                        @RequestParam("max") BigDecimal max) {
-        return getPaymentAccountUseCase.getPaymentAccountsByBalanceBetween(min, max);
+    public Page<PaymentAccountResponse> getPaymentAccountsFilterByBalanceBetween(@RequestParam("min") BigDecimal min,
+                                                                                 @RequestParam("max") BigDecimal max,
+                                                                                 @RequestParam(defaultValue = "0") int page,
+                                                                                 @RequestParam(defaultValue = "10") int size,
+                                                                                 @RequestParam(defaultValue = "id") String sortBy,
+                                                                                 @RequestParam(defaultValue = "asc") String direction) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sortBy));
+        return getPaymentAccountUseCase.getPaymentAccountsByBalanceBetween(min, max, pageable);
     }
 
     @DeleteMapping

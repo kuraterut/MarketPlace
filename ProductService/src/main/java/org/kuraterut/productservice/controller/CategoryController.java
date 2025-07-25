@@ -5,8 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.kuraterut.productservice.dto.requests.CreateCategoryRequest;
 import org.kuraterut.productservice.dto.requests.UpdateCategoryRequest;
 import org.kuraterut.productservice.dto.responses.CategoryResponse;
-import org.kuraterut.productservice.mapper.CategoryMapper;
-import org.kuraterut.productservice.model.Category;
 import org.kuraterut.productservice.usecases.category.CreateCategoryUseCase;
 import org.kuraterut.productservice.usecases.category.DeleteCategoryUseCase;
 import org.kuraterut.productservice.usecases.category.GetCategoryUseCase;
@@ -15,11 +13,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/products/category")
@@ -34,58 +29,51 @@ public class CategoryController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<CategoryResponse> createCategory(@RequestBody @Valid CreateCategoryRequest request) {
-        CategoryResponse category = createCategoryUseCase.createCategory(request);
-        return ResponseEntity.ok(category);
+    public CategoryResponse createCategory(@RequestBody @Valid CreateCategoryRequest request) {
+        return createCategoryUseCase.createCategory(request);
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<Void> deleteCategoryById(@PathVariable("id") Long id) {
+    public void deleteCategoryById(@PathVariable("id") Long id) {
         deleteCategoryUseCase.deleteCategory(id);
-        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<Void> deleteCategoryByName(@RequestParam("name") String name) {
+    public void deleteCategoryByName(@RequestParam("name") String name) {
         deleteCategoryUseCase.deleteCategory(name);
-        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<CategoryResponse> updateCategoryById(@PathVariable Long id,
+    public CategoryResponse updateCategoryById(@PathVariable Long id,
                                                                @RequestBody @Valid UpdateCategoryRequest request) {
-        CategoryResponse categoryResponse = updateCategoryUseCase.updateCategoryById(id, request);
-        return ResponseEntity.ok(categoryResponse);
+        return updateCategoryUseCase.updateCategoryById(id, request);
     }
 
     @PutMapping()
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<CategoryResponse> updateCategoryByName(@RequestParam("name") String name,
+    public CategoryResponse updateCategoryByName(@RequestParam("name") String name,
                                                                  @RequestBody @Valid UpdateCategoryRequest request) {
-        CategoryResponse categoryResponse = updateCategoryUseCase.updateCategoryByName(name, request);
-        return ResponseEntity.ok(categoryResponse);
+        return updateCategoryUseCase.updateCategoryByName(name, request);
     }
-
     @GetMapping
-    public ResponseEntity<Page<CategoryResponse>> getAllCategories(@RequestParam(defaultValue = "0") int page,
+    public Page<CategoryResponse> getAllCategories(@RequestParam(defaultValue = "0") int page,
                                                                    @RequestParam(defaultValue = "10") int size,
                                                                    @RequestParam(defaultValue = "id") String sortBy,
                                                                    @RequestParam(defaultValue = "asc") String direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sortBy));
-        Page<CategoryResponse> categories = getCategoryUseCase.getAllCategories(pageable);
-        return ResponseEntity.ok(categories);
+        return getCategoryUseCase.getAllCategories(pageable);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CategoryResponse> getCategoryById(@PathVariable Long id) {
-        return ResponseEntity.ok(getCategoryUseCase.getCategory(id));
+    public CategoryResponse getCategoryById(@PathVariable Long id) {
+        return getCategoryUseCase.getCategory(id);
     }
 
     @GetMapping("/name")
-    public ResponseEntity<CategoryResponse> getCategoryByName(@RequestParam("name") String name) {
-        return ResponseEntity.ok(getCategoryUseCase.getCategory(name));
+    public CategoryResponse getCategoryByName(@RequestParam("name") String name) {
+        return getCategoryUseCase.getCategory(name);
     }
 }

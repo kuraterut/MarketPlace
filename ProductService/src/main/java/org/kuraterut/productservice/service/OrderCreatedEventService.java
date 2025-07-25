@@ -4,10 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.kuraterut.productservice.model.OrderCreatedInbox;
-import org.kuraterut.productservice.model.Product;
-import org.kuraterut.productservice.model.ProductHolded;
-import org.kuraterut.productservice.model.ProductHoldedStatus;
+import org.kuraterut.productservice.dto.OrderItemDto;
+import org.kuraterut.productservice.model.event.inbox.OrderCreatedInbox;
+import org.kuraterut.productservice.model.entity.Product;
+import org.kuraterut.productservice.model.entity.ProductHolded;
+import org.kuraterut.productservice.model.utils.ProductHoldItemFailedReason;
+import org.kuraterut.productservice.model.utils.ProductHoldedStatus;
 import org.kuraterut.productservice.model.event.*;
 import org.kuraterut.productservice.repository.OrderCreatedInboxRepository;
 import org.kuraterut.productservice.repository.ProductHoldedRepository;
@@ -67,11 +69,10 @@ public class OrderCreatedEventService implements OrderCreatedEventUseCase {
         }
     }
 
-    //TODO Тайминги
     @Override
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedRateString = "${scheduling.process-order-created-rate}")
     @Transactional
-    public void executeOrderCreatedEvent() throws JsonProcessingException, ExecutionException, InterruptedException {
+    public void processOrderCreatedEvent() throws JsonProcessingException, ExecutionException, InterruptedException {
         List<OrderCreatedInbox> inboxes = orderCreatedInboxRepository.findTop100ByProcessedIsFalse();
         for (OrderCreatedInbox inbox : inboxes) {
             List<String> jsonItems = inbox.getJsonItems();

@@ -3,13 +3,11 @@ package org.kuraterut.productservice.mapper;
 import org.kuraterut.productservice.dto.requests.CreateCategoryRequest;
 import org.kuraterut.productservice.dto.requests.UpdateCategoryRequest;
 import org.kuraterut.productservice.dto.responses.CategoryResponse;
-import org.kuraterut.productservice.model.Category;
-import org.kuraterut.productservice.model.Product;
+import org.kuraterut.productservice.model.entity.Category;
+import org.kuraterut.productservice.model.entity.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 

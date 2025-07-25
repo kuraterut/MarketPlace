@@ -3,7 +3,7 @@ package org.kuraterut.authservice.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kuraterut.authservice.exception.model.UserNotFoundException;
-import org.kuraterut.authservice.model.UserDetailsImpl;
+import org.kuraterut.authservice.model.utils.UserDetailsImpl;
 import org.kuraterut.authservice.dto.requests.LoginRequest;
 import org.kuraterut.authservice.dto.responses.LoginResponse;
 import org.kuraterut.authservice.repository.UserRepository;

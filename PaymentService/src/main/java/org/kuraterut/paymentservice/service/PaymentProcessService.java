@@ -4,16 +4,19 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.kuraterut.paymentservice.model.PaymentAccount;
-import org.kuraterut.paymentservice.model.Transaction;
-import org.kuraterut.paymentservice.model.TransactionStatus;
-import org.kuraterut.paymentservice.model.TransactionType;
+import org.kuraterut.paymentservice.model.entity.PaymentAccount;
+import org.kuraterut.paymentservice.model.entity.Transaction;
+import org.kuraterut.paymentservice.model.event.inbox.PaymentEventInbox;
+import org.kuraterut.paymentservice.model.event.outbox.PaymentResultEventOutbox;
+import org.kuraterut.paymentservice.model.utils.PaymentResult;
+import org.kuraterut.paymentservice.model.utils.TransactionStatus;
+import org.kuraterut.paymentservice.model.utils.TransactionType;
 import org.kuraterut.paymentservice.model.event.*;
 import org.kuraterut.paymentservice.repository.PaymentAccountRepository;
 import org.kuraterut.paymentservice.repository.PaymentEventInboxRepository;
 import org.kuraterut.paymentservice.repository.PaymentResultOutboxRepository;
 import org.kuraterut.paymentservice.repository.TransactionRepository;
-import org.kuraterut.paymentservice.usecases.PaymentProcessUseCase;
+import org.kuraterut.paymentservice.usecases.eventprocessing.PaymentProcessUseCase;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -23,7 +26,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -58,7 +60,7 @@ public class PaymentProcessService implements PaymentProcessUseCase {
 
     @Override
     @Transactional
-    @Scheduled(fixedDelay = 3000)
+    @Scheduled(fixedRateString = "${scheduling.process-payment-event-rate}")
     public void processPaymentEvent() {
         List<PaymentEventInbox> inboxes = paymentEventInboxRepository.findTop100ByProcessedIsFalse();
         for (PaymentEventInbox inbox : inboxes) {
@@ -68,7 +70,7 @@ public class PaymentProcessService implements PaymentProcessUseCase {
             Optional<PaymentAccount> accountOpt = paymentAccountRepository.findByUserId(userId);
 
             if(accountOpt.isEmpty()){
-                PaymentResultOutbox outbox = new PaymentResultOutbox();
+                PaymentResultEventOutbox outbox = new PaymentResultEventOutbox();
                 outbox.setProcessed(false);
                 outbox.setOrderId(inbox.getOrderId());
                 outbox.setResult(PaymentResult.NOT_FOUND);
@@ -80,7 +82,7 @@ public class PaymentProcessService implements PaymentProcessUseCase {
             PaymentAccount account = accountOpt.get();
 
             int updatedRows = paymentAccountRepository.withdrawPaymentAccountIfAvailableByUserId(userId, amount);
-            PaymentResultOutbox outbox = new PaymentResultOutbox();
+            PaymentResultEventOutbox outbox = new PaymentResultEventOutbox();
             outbox.setProcessed(false);
             outbox.setOrderId(inbox.getOrderId());
 
@@ -106,10 +108,10 @@ public class PaymentProcessService implements PaymentProcessUseCase {
 
     @Override
     @Transactional
-    @Scheduled(fixedDelay = 3000)
+    @Scheduled(fixedRateString = "${scheduling.process-payment-result-rate}")
     public void processPaymentResult() throws ExecutionException, InterruptedException {
-        List<PaymentResultOutbox> outboxes = paymentResultOutboxRepository.findTop100ByProcessedIsFalse();
-        for (PaymentResultOutbox outbox : outboxes) {
+        List<PaymentResultEventOutbox> outboxes = paymentResultOutboxRepository.findTop100ByProcessedIsFalse();
+        for (PaymentResultEventOutbox outbox : outboxes) {
             PaymentResultEvent event = new PaymentResultEvent();
             event.setOrderId(outbox.getOrderId());
             event.setResult(outbox.getResult());

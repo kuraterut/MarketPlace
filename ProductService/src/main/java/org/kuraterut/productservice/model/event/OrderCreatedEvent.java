@@ -3,6 +3,7 @@ package org.kuraterut.productservice.model.event;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.kuraterut.productservice.dto.OrderItemDto;
 
 import java.util.List;
 

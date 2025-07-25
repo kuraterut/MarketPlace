@@ -5,6 +5,9 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.2.xsd">
 
-    <include file="v1.0/initial-schema.xml" relativeToChangelogFile="true"/>
+    <include file="v1.0/category-initial-schema.xml" relativeToChangelogFile="true"/>
+    <include file="v1.0/order-created-inbox-initial-schema.xml" relativeToChangelogFile="true"/>
+    <include file="v1.0/product-initial-schema.xml" relativeToChangelogFile="true"/>
+    <include file="v1.0/products-holded-initial-schema.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

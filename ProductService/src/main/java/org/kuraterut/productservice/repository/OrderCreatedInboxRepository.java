@@ -1,6 +1,6 @@
 package org.kuraterut.productservice.repository;
 
-import org.kuraterut.productservice.model.OrderCreatedInbox;
+import org.kuraterut.productservice.model.event.inbox.OrderCreatedInbox;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

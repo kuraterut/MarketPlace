@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.kuraterut.authservice.model.Role;
+import org.kuraterut.authservice.model.utils.Role;
 
 @NoArgsConstructor
 @AllArgsConstructor

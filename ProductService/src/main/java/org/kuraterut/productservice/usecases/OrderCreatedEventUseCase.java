@@ -7,5 +7,5 @@ import java.util.concurrent.ExecutionException;
 
 public interface OrderCreatedEventUseCase {
     void listenOrderCreated(String message, Acknowledgment ack);
-    void executeOrderCreatedEvent() throws JsonProcessingException, ExecutionException, InterruptedException;
+    void processOrderCreatedEvent() throws JsonProcessingException, ExecutionException, InterruptedException;
 }

@@ -1,8 +1,9 @@
 package org.kuraterut.paymentservice.mapper;
 
 import org.kuraterut.paymentservice.dto.response.PaymentAccountResponse;
-import org.kuraterut.paymentservice.model.PaymentAccount;
-import org.kuraterut.paymentservice.model.Transaction;
+import org.kuraterut.paymentservice.model.entity.PaymentAccount;
+import org.kuraterut.paymentservice.model.entity.Transaction;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -33,5 +34,9 @@ public class PaymentAccountMapper {
 
     public List<PaymentAccountResponse> toResponses(List<PaymentAccount> paymentAccounts) {
         return paymentAccounts.stream().map(this::toResponse).toList();
+    }
+
+    public Page<PaymentAccountResponse> toResponses(Page<PaymentAccount> paymentAccounts) {
+        return paymentAccounts.map(this::toResponse);
     }
 }

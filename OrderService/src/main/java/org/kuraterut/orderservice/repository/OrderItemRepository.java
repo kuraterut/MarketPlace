@@ -1,6 +1,6 @@
 package org.kuraterut.orderservice.repository;
 
-import org.kuraterut.orderservice.model.OrderItem;
+import org.kuraterut.orderservice.model.entity.OrderItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

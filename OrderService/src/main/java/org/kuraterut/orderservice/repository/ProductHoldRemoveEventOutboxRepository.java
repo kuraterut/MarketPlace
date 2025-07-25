@@ -1,6 +1,6 @@
 package org.kuraterut.orderservice.repository;
 
-import org.kuraterut.orderservice.model.ProductHoldRemoveEventOutbox;
+import org.kuraterut.orderservice.model.event.outbox.ProductHoldRemoveEventOutbox;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

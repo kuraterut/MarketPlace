@@ -5,13 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kuraterut.orderservice.exception.model.OrderNotFoundException;
-import org.kuraterut.orderservice.model.Order;
-import org.kuraterut.orderservice.model.OrderStatus;
-import org.kuraterut.orderservice.model.PaymentResultInbox;
-import org.kuraterut.orderservice.model.ProductHoldRemoveEventOutbox;
+import org.kuraterut.orderservice.model.entity.Order;
+import org.kuraterut.orderservice.model.utils.OrderStatus;
+import org.kuraterut.orderservice.model.event.inbox.PaymentResultInbox;
+import org.kuraterut.orderservice.model.event.outbox.ProductHoldRemoveEventOutbox;
 import org.kuraterut.orderservice.model.event.PaymentResultEvent;
 import org.kuraterut.orderservice.model.event.ProductHoldRemoveEvent;
-import org.kuraterut.orderservice.model.event.ProductHoldRemoveEventDetails;
+import org.kuraterut.orderservice.model.utils.ProductHoldRemoveEventDetails;
 import org.kuraterut.orderservice.repository.OrderRepository;
 import org.kuraterut.orderservice.repository.PaymentResultInboxRepository;
 import org.kuraterut.orderservice.repository.ProductHoldRemoveEventOutboxRepository;
@@ -55,7 +55,7 @@ public class PaymentResultProcessService implements PaymentResultProcessUseCase 
     }
 
     @Override
-    @Scheduled(fixedDelay = 3000)
+    @Scheduled(fixedRateString = "${scheduling.process-payment-result-rate}")
     @Transactional
     public void processPaymentResult() {
         List<PaymentResultInbox> inboxes = paymentResultInboxRepository.findTop100ByProcessedIsFalse();
@@ -94,7 +94,7 @@ public class PaymentResultProcessService implements PaymentResultProcessUseCase 
     }
 
     @Override
-    @Scheduled(fixedDelay = 3000)
+    @Scheduled(fixedRateString = "${scheduling.process-product-hold-remove-rate}")
     @Transactional
     public void processProductHoldRemoveEvent() throws ExecutionException, InterruptedException {
         List<ProductHoldRemoveEventOutbox> outboxes = productHoldRemoveEventOutboxRepository.findTop100ByProcessedIsFalse();

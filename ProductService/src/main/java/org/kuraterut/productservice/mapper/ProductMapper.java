@@ -3,11 +3,9 @@ package org.kuraterut.productservice.mapper;
 import org.kuraterut.productservice.dto.requests.CreateProductRequest;
 import org.kuraterut.productservice.dto.requests.UpdateProductRequest;
 import org.kuraterut.productservice.dto.responses.ProductResponse;
-import org.kuraterut.productservice.model.Product;
+import org.kuraterut.productservice.model.entity.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 public class ProductMapper {

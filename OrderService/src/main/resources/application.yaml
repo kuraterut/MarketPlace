@@ -15,8 +15,7 @@ spring:
     show-sql: true
   liquibase:
     change-log: classpath:db/migration/changelog-master.xml
-    #TODO Enable Luquibase
-    enabled: false
+    enabled: true
   kafka:
     bootstrap-servers: kafka:9092
     consumer:
@@ -49,3 +48,9 @@ kafka-topics:
   payment-request: payment-request
   payment-result: payment-result
   product-hold-remove: product-hold-remove
+
+scheduling:
+  process-create-order-rate: 3000
+  process-payment-event-rate: 3000
+  process-payment-result-rate: 3000
+  process-product-hold-remove-rate: 3000

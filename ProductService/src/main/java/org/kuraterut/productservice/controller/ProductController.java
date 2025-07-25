@@ -38,94 +38,97 @@ public class ProductController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('SELLER')")
-    public ResponseEntity<ProductResponse> createProduct(@RequestBody @Valid CreateProductRequest createProductRequest,
-                                                         @AuthenticationPrincipal AuthPrincipal authPrincipal) {
+    public ProductResponse createProduct(@RequestBody @Valid CreateProductRequest createProductRequest,
+                                         @AuthenticationPrincipal AuthPrincipal authPrincipal) {
         Long userId = authPrincipal.getUserId();
-        log.info("(Product Service Controller) User ID: {}", userId);
-        return ResponseEntity.ok(createProductUseCase.createProduct(createProductRequest, userId));
+        return createProductUseCase.createProduct(createProductRequest, userId);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('SELLER') or hasAuthority('ADMIN')")
-    public ResponseEntity<Void> deleteProduct(@PathVariable("id") Long id,
-                                              @AuthenticationPrincipal AuthPrincipal authPrincipal) {
+    @PreAuthorize("hasAuthority('SELLER')")
+    public void deleteProduct(@PathVariable("id") Long id,
+                              @AuthenticationPrincipal AuthPrincipal authPrincipal) {
         Long userId = authPrincipal.getUserId();
-        List<String> roles = authPrincipal.getRoles();
-        deleteProductUseCase.deleteProduct(id, userId, roles);
-        return ResponseEntity.noContent().build();
+        deleteProductUseCase.deleteProduct(id, userId);
+    }
+
+    @DeleteMapping("/admin/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public void adminDeleteProduct(@PathVariable("id") Long id) {
+        deleteProductUseCase.adminDeleteProduct(id);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('SELLER')")
-    public ResponseEntity<ProductResponse> updateProduct(@PathVariable("id") Long id,
-                                                         @RequestBody @Valid UpdateProductRequest request,
-                                                         @AuthenticationPrincipal AuthPrincipal authPrincipal){
+    public ProductResponse updateProduct(@PathVariable("id") Long id,
+                                         @RequestBody @Valid UpdateProductRequest request,
+                                         @AuthenticationPrincipal AuthPrincipal authPrincipal){
         Long userId = authPrincipal.getUserId();
-        return ResponseEntity.ok(updateProductUseCase.updateProduct(id, request, userId));
+        return updateProductUseCase.updateProduct(id, request, userId);
     }
 
     @GetMapping
-    public ResponseEntity<Page<ProductResponse>> getAllProducts(@RequestParam(name = "page", defaultValue = "0") int page,
-                                                                @RequestParam(name = "size", defaultValue = "10") int size,
-                                                                @RequestParam(name = "sortBy", defaultValue = "id") String sortBy,
-                                                                @RequestParam(name = "direction", defaultValue = "asc") String direction) {
+    public Page<ProductResponse> getAllProducts(@RequestParam(name = "page", defaultValue = "0") int page,
+                                                @RequestParam(name = "size", defaultValue = "10") int size,
+                                                @RequestParam(name = "sortBy", defaultValue = "id") String sortBy,
+                                                @RequestParam(name = "direction", defaultValue = "asc") String direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sortBy));
-        return ResponseEntity.ok(getProductUseCase.getAllProducts(pageable));
+        return getProductUseCase.getAllProducts(pageable);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductResponse> getProductById(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(getProductUseCase.getProductByProductId(id));
+    public ProductResponse getProductById(@PathVariable("id") Long id) {
+        return getProductUseCase.getProductByProductId(id);
     }
 
     @GetMapping("/filter/prefix")
-    public ResponseEntity<Page<ProductResponse>> getProductsByPrefix(@RequestParam("prefix") String prefix,
-                                                                     @RequestParam(defaultValue = "0") int page,
-                                                                     @RequestParam(defaultValue = "10") int size,
-                                                                     @RequestParam(defaultValue = "id") String sortBy,
-                                                                     @RequestParam(defaultValue = "asc") String direction) {
+    public Page<ProductResponse> getProductsByPrefix(@RequestParam("prefix") String prefix,
+                                                     @RequestParam(defaultValue = "0") int page,
+                                                     @RequestParam(defaultValue = "10") int size,
+                                                     @RequestParam(defaultValue = "id") String sortBy,
+                                                     @RequestParam(defaultValue = "asc") String direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sortBy));
-        return ResponseEntity.ok(getProductUseCase.getProductsStartingWithPrefix(prefix, pageable));
+        return getProductUseCase.getProductsStartingWithPrefix(prefix, pageable);
     }
 
     @GetMapping("/filter/seller")
-    public ResponseEntity<Page<ProductResponse>> getProductsBySeller(@RequestParam("sellerId") Long sellerId,
-                                                                     @RequestParam(defaultValue = "0") int page,
-                                                                     @RequestParam(defaultValue = "10") int size,
-                                                                     @RequestParam(defaultValue = "id") String sortBy,
-                                                                     @RequestParam(defaultValue = "asc") String direction) {
+    public Page<ProductResponse> getProductsBySeller(@RequestParam("sellerId") Long sellerId,
+                                                     @RequestParam(defaultValue = "0") int page,
+                                                     @RequestParam(defaultValue = "10") int size,
+                                                     @RequestParam(defaultValue = "id") String sortBy,
+                                                     @RequestParam(defaultValue = "asc") String direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sortBy));
-        return ResponseEntity.ok(getProductUseCase.getProductsBySellerId(sellerId, pageable));
+        return getProductUseCase.getProductsBySellerId(sellerId, pageable);
     }
 
     @GetMapping("/filter/category/{id}")
-    public ResponseEntity<Page<ProductResponse>> getProductsByCategory(@PathVariable("id") Long id,
-                                                                       @RequestParam(defaultValue = "0") int page,
-                                                                       @RequestParam(defaultValue = "10") int size,
-                                                                       @RequestParam(defaultValue = "id") String sortBy,
-                                                                       @RequestParam(defaultValue = "asc") String direction) {
+    public Page<ProductResponse> getProductsByCategory(@PathVariable("id") Long id,
+                                                       @RequestParam(defaultValue = "0") int page,
+                                                       @RequestParam(defaultValue = "10") int size,
+                                                       @RequestParam(defaultValue = "id") String sortBy,
+                                                       @RequestParam(defaultValue = "asc") String direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sortBy));
-        return ResponseEntity.ok(getProductUseCase.getProductsByCategoryId(id, pageable));
+        return getProductUseCase.getProductsByCategoryId(id, pageable);
     }
 
     @GetMapping("/filter/category/name")
-    public ResponseEntity<Page<ProductResponse>> getProductsByCategoryName(@RequestParam("categoryName") String categoryName,
-                                                                           @RequestParam(defaultValue = "0") int page,
-                                                                           @RequestParam(defaultValue = "10") int size,
-                                                                           @RequestParam(defaultValue = "id") String sortBy,
-                                                                           @RequestParam(defaultValue = "asc") String direction) {
+    public Page<ProductResponse> getProductsByCategoryName(@RequestParam("categoryName") String categoryName,
+                                                           @RequestParam(defaultValue = "0") int page,
+                                                           @RequestParam(defaultValue = "10") int size,
+                                                           @RequestParam(defaultValue = "id") String sortBy,
+                                                           @RequestParam(defaultValue = "asc") String direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sortBy));
-        return ResponseEntity.ok(getProductUseCase.getProductsByCategoryName(categoryName, pageable));
+        return getProductUseCase.getProductsByCategoryName(categoryName, pageable);
     }
 
     @GetMapping("/filter/price")
-    public ResponseEntity<Page<ProductResponse>> getProductsByPriceBetween(@RequestParam("min") BigDecimal min,
-                                                                           @RequestParam("max") BigDecimal max,
-                                                                           @RequestParam(defaultValue = "0") int page,
-                                                                           @RequestParam(defaultValue = "10") int size,
-                                                                           @RequestParam(defaultValue = "id") String sortBy,
-                                                                           @RequestParam(defaultValue = "asc") String direction) {
+    public Page<ProductResponse> getProductsByPriceBetween(@RequestParam("min") BigDecimal min,
+                                                           @RequestParam("max") BigDecimal max,
+                                                           @RequestParam(defaultValue = "0") int page,
+                                                           @RequestParam(defaultValue = "10") int size,
+                                                           @RequestParam(defaultValue = "id") String sortBy,
+                                                           @RequestParam(defaultValue = "asc") String direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sortBy));
-        return ResponseEntity.ok(getProductUseCase.getProductsByPriceBetween(min, max, pageable));
+        return getProductUseCase.getProductsByPriceBetween(min, max, pageable);
     }
 }

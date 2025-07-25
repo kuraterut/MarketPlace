@@ -1,6 +1,8 @@
 package org.kuraterut.paymentservice.repository;
 
-import org.kuraterut.paymentservice.model.PaymentAccount;
+import org.kuraterut.paymentservice.model.entity.PaymentAccount;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -8,14 +10,13 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface PaymentAccountRepository extends JpaRepository<PaymentAccount, Long> {
     Optional<PaymentAccount> findByUserId(Long userId);
-    List<PaymentAccount> findAllPaymentAccountByActive(Boolean isActive);
-    List<PaymentAccount> findAllPaymentAccountByBalanceBetween(BigDecimal min, BigDecimal max);
+    Page<PaymentAccount> findAllPaymentAccountByActive(Boolean isActive, Pageable pageable);
+    Page<PaymentAccount> findAllPaymentAccountByBalanceBetween(BigDecimal min, BigDecimal max, Pageable pageable);
 
     boolean existsByUserId(Long userId);
 

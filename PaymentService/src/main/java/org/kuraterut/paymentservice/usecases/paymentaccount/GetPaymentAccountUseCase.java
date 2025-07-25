@@ -1,14 +1,16 @@
 package org.kuraterut.paymentservice.usecases.paymentaccount;
 
 import org.kuraterut.paymentservice.dto.response.PaymentAccountResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 public interface GetPaymentAccountUseCase {
-    List<PaymentAccountResponse> getAllPaymentAccounts();
+    Page<PaymentAccountResponse> getAllPaymentAccounts(Pageable pageable);
     PaymentAccountResponse getPaymentAccountById(Long id);
     PaymentAccountResponse getPaymentAccountByUserId(Long userId);
-    List<PaymentAccountResponse> getPaymentAccountsByIsActive(boolean isActive);
-    List<PaymentAccountResponse> getPaymentAccountsByBalanceBetween(BigDecimal min, BigDecimal max);
+    Page<PaymentAccountResponse> getPaymentAccountsByIsActive(boolean isActive, Pageable pageable);
+    Page<PaymentAccountResponse> getPaymentAccountsByBalanceBetween(BigDecimal min, BigDecimal max, Pageable pageable);
 }
