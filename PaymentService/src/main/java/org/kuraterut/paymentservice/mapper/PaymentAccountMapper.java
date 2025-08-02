@@ -1,5 +1,6 @@
 package org.kuraterut.paymentservice.mapper;
 
+import org.kuraterut.paymentservice.dto.response.PaymentAccountListResponse;
 import org.kuraterut.paymentservice.dto.response.PaymentAccountResponse;
 import org.kuraterut.paymentservice.model.entity.PaymentAccount;
 import org.kuraterut.paymentservice.model.entity.Transaction;
@@ -25,18 +26,12 @@ public class PaymentAccountMapper {
         paymentAccountResponse.setUserId(paymentAccount.getUserId());
         paymentAccountResponse.setBalance(paymentAccount.getBalance());
         paymentAccountResponse.setActive(paymentAccount.isActive());
-        List<Long> transactionIds = paymentAccount.getTransactions().stream().map(Transaction::getId).toList();
-        paymentAccountResponse.setTransactionIds(transactionIds);
-        paymentAccountResponse.setCreatedAt(paymentAccount.getCreatedAt());
-        paymentAccountResponse.setUpdatedAt(paymentAccount.getUpdatedAt());
+        paymentAccountResponse.setCreatedAt(paymentAccount.getCreatedAt().toString());
+        paymentAccountResponse.setUpdatedAt(paymentAccount.getUpdatedAt().toString());
         return paymentAccountResponse;
     }
 
-    public List<PaymentAccountResponse> toResponses(List<PaymentAccount> paymentAccounts) {
-        return paymentAccounts.stream().map(this::toResponse).toList();
-    }
-
-    public Page<PaymentAccountResponse> toResponses(Page<PaymentAccount> paymentAccounts) {
-        return paymentAccounts.map(this::toResponse);
+    public PaymentAccountListResponse toResponses(Page<PaymentAccount> paymentAccounts) {
+        return new PaymentAccountListResponse(paymentAccounts.map(this::toResponse).stream().toList());
     }
 }

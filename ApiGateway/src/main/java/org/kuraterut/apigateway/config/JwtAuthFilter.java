@@ -9,6 +9,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 import org.springframework.http.HttpHeaders;
@@ -21,12 +22,14 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
 
     private final JwtService jwtService;
     private final SecurityProperties securityProperties;
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
 
-        if (securityProperties.getOpenEndpoints().stream().anyMatch(path::startsWith)) {
+        if (securityProperties.getOpenEndpoints().stream()
+                .anyMatch(pattern -> pathMatcher.match(pattern, path))) {
             return chain.filter(exchange);
         }
 

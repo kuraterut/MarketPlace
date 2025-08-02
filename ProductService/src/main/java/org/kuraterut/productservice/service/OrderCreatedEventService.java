@@ -16,6 +16,7 @@ import org.kuraterut.productservice.repository.ProductHoldedRepository;
 import org.kuraterut.productservice.repository.ProductRepository;
 import org.kuraterut.productservice.usecases.OrderCreatedEventUseCase;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.Acknowledgment;
@@ -72,6 +73,7 @@ public class OrderCreatedEventService implements OrderCreatedEventUseCase {
     @Override
     @Scheduled(fixedRateString = "${scheduling.process-order-created-rate}")
     @Transactional
+    @CacheEvict(cacheNames = "products", allEntries = true)
     public void processOrderCreatedEvent() throws JsonProcessingException, ExecutionException, InterruptedException {
         List<OrderCreatedInbox> inboxes = orderCreatedInboxRepository.findTop100ByProcessedIsFalse();
         for (OrderCreatedInbox inbox : inboxes) {

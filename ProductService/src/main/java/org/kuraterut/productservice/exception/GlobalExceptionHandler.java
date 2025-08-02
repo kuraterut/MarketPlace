@@ -33,8 +33,8 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
     }
 
-    @ExceptionHandler(CategoryAlreadyExists.class)
-    public ResponseEntity<ErrorResponse> handleCategoryAlreadyExists(CategoryAlreadyExists e) {
+    @ExceptionHandler(CategoryAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleCategoryAlreadyExists(CategoryAlreadyExistsException e) {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setMessage(e.getMessage());
         errorResponse.setTimestamp(OffsetDateTime.now());

@@ -1,5 +1,6 @@
 package org.kuraterut.productservice.usecases.product;
 
+import org.kuraterut.productservice.dto.responses.ProductListResponse;
 import org.kuraterut.productservice.dto.responses.ProductResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -7,11 +8,11 @@ import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
 
 public interface GetProductUseCase {
-    Page<ProductResponse> getAllProducts(Pageable pageable);
+    ProductListResponse getAllProducts(Pageable pageable);
     ProductResponse getProductByProductId(Long productId);
-    Page<ProductResponse> getProductsStartingWithPrefix(String prefix, Pageable pageable);
-    Page<ProductResponse> getProductsBySellerId(Long sellerId, Pageable pageable);
-    Page<ProductResponse> getProductsByCategoryId(Long categoryId, Pageable pageable);
-    Page<ProductResponse> getProductsByCategoryName(String categoryName, Pageable pageable);
-    Page<ProductResponse> getProductsByPriceBetween(BigDecimal min, BigDecimal max, Pageable pageable);
+    ProductListResponse getProductsStartingWithPrefix(String prefix, Pageable pageable);
+    ProductListResponse getProductsBySellerId(Long sellerId, Pageable pageable);
+    ProductListResponse getProductsByCategoryId(Long categoryId, Pageable pageable);
+    ProductListResponse getProductsByCategoryName(String categoryName, Pageable pageable);
+    ProductListResponse getProductsByPriceBetween(BigDecimal min, BigDecimal max, Pageable pageable);
 }

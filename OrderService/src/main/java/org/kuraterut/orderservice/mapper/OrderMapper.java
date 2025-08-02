@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.kuraterut.orderservice.dto.request.CreateOrderRequest;
+import org.kuraterut.orderservice.dto.response.OrderListResponse;
 import org.kuraterut.orderservice.model.event.dto.OrderItemDto;
 import org.kuraterut.orderservice.dto.response.OrderResponse;
 import org.kuraterut.orderservice.model.entity.Order;
@@ -64,8 +65,8 @@ public class OrderMapper {
         }
 
         OrderResponse orderResponse = new OrderResponse();
-        orderResponse.setCreatedAt(order.getCreatedAt());
-        orderResponse.setUpdatedAt(order.getUpdatedAt());
+        orderResponse.setCreatedAt(order.getCreatedAt().toString());
+        orderResponse.setUpdatedAt(order.getUpdatedAt().toString());
         orderResponse.setId(order.getId());
         orderResponse.setStatus(order.getStatus());
         orderResponse.setUserId(order.getUserId());
@@ -79,8 +80,8 @@ public class OrderMapper {
 //        return orders.stream().map(this::toResponse).toList();
 //    }
 
-    public Page<OrderResponse> toResponses(Page<Order> orders)  {
-        return orders.map(this::toResponse);
+    public OrderListResponse toResponses(Page<Order> orders)  {
+        return new OrderListResponse(orders.map(this::toResponse).stream().toList());
     }
 
 

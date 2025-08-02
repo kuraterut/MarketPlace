@@ -2,12 +2,15 @@ package org.kuraterut.productservice.mapper;
 
 import org.kuraterut.productservice.dto.requests.CreateCategoryRequest;
 import org.kuraterut.productservice.dto.requests.UpdateCategoryRequest;
+import org.kuraterut.productservice.dto.responses.CategoryListResponse;
 import org.kuraterut.productservice.dto.responses.CategoryResponse;
 import org.kuraterut.productservice.model.entity.Category;
 import org.kuraterut.productservice.model.entity.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,15 +28,17 @@ public class CategoryMapper {
         categoryResponse.setId(category.getId());
         categoryResponse.setName(category.getName());
         categoryResponse.setDescription(category.getDescription());
-        categoryResponse.setCreatedAt(category.getCreatedAt());
-        categoryResponse.setUpdatedAt(category.getUpdatedAt());
+        String createdAt = category.getCreatedAt()==null?null:category.getCreatedAt().toString();
+        String updatedAt = category.getUpdatedAt()==null?null:category.getUpdatedAt().toString();
+        categoryResponse.setCreatedAt(createdAt);
+        categoryResponse.setUpdatedAt(updatedAt);
         Set<Long> productIds = category.getProducts().stream().map(Product::getId).collect(Collectors.toSet());
         categoryResponse.setProductIds(productIds);
         return categoryResponse;
     }
 
-    public Page<CategoryResponse> toResponses(Page<Category> categories) {
-        return categories.map(this::toResponse);
+    public CategoryListResponse toResponses(Page<Category> categories) {
+        return new CategoryListResponse(categories.map(this::toResponse).stream().toList());
     }
 
     public void toEntity(Category category, UpdateCategoryRequest request) {

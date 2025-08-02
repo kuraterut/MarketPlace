@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-product
+spec:
+  serviceName: postgres-product-service
+  replicas: 1
+  selector:
+    matchLabels:
+      product-service: postgres
+  template:
+    metadata:
+      labels:
+        product-service: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:latest
+          envFrom:
+            - secretRef:
+                name: postgres-product-secret
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: postgres-product-storage
+              mountPath: /var/lib/postgresql/data
+          livenessProbe:
+            exec:
+              command: [ "pg_isready", "-U", "postgres" ]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+              exec:
+                command: [ "pg_isready", "-U", "postgres" ]
+              initialDelaySeconds: 5
+              periodSeconds: 10
+              timeoutSeconds: 5
+          resources:
+              requests:
+                cpu: "500m"
+                memory: "512Mi"
+              limits:
+                cpu: "1"
+                memory: "1Gi"
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-product-storage
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 3Gi

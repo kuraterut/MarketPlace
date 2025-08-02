@@ -2,6 +2,7 @@ package org.kuraterut.paymentservice.service;
 
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
+import org.kuraterut.paymentservice.dto.response.PaymentAccountListResponse;
 import org.kuraterut.paymentservice.dto.response.PaymentAccountResponse;
 import org.kuraterut.paymentservice.exception.model.*;
 import org.kuraterut.paymentservice.mapper.PaymentAccountMapper;
@@ -15,6 +16,10 @@ import org.kuraterut.paymentservice.usecases.paymentaccount.CreatePaymentAccount
 import org.kuraterut.paymentservice.usecases.paymentaccount.DeletePaymentAccountUseCase;
 import org.kuraterut.paymentservice.usecases.paymentaccount.GetPaymentAccountUseCase;
 import org.kuraterut.paymentservice.usecases.paymentaccount.UpdatePaymentAccountUseCase;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +30,7 @@ import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
+@CacheConfig(cacheNames = "payment_accounts")
 public class PaymentAccountService implements CreatePaymentAccountUseCase, UpdatePaymentAccountUseCase,
         DeletePaymentAccountUseCase, GetPaymentAccountUseCase {
 
@@ -34,6 +40,7 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
 
     @Override
     @Transactional
+    @CacheEvict(allEntries = true)
     public PaymentAccountResponse createPaymentAccount(Long userId) {
         try {
             PaymentAccount paymentAccount = paymentAccountMapper.toEntity(userId);
@@ -46,6 +53,7 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
 
     @Override
     @Transactional
+    @CacheEvict(allEntries = true)
     public void deletePaymentAccountById(Long id) {
         PaymentAccount paymentAccount = paymentAccountRepository.findById(id)
                 .orElseThrow(() -> new PaymentAccountNotFoundException("Payment account not found by id: " + id));
@@ -60,6 +68,7 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
 
     @Override
     @Transactional
+    @CacheEvict(allEntries = true)
     public void deletePaymentAccountByUserId(Long userId) {
         PaymentAccount paymentAccount = paymentAccountRepository.findByUserId(userId)
                 .orElseThrow(() -> new PaymentAccountNotFoundException("Payment account not found by userId: " + userId));
@@ -74,12 +83,14 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PaymentAccountResponse> getAllPaymentAccounts(Pageable pageable) {
+    @Cacheable(key = "'all_' + #pageable.pageNumber + '_' + #pageable.pageSize")
+    public PaymentAccountListResponse getAllPaymentAccounts(Pageable pageable) {
         return paymentAccountMapper.toResponses(paymentAccountRepository.findAll(pageable));
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(key = "'user_' + #userId")
     public PaymentAccountResponse getPaymentAccountByUserId(Long userId) {
         return paymentAccountMapper.toResponse(paymentAccountRepository.findByUserId(userId)
                 .orElseThrow(() -> new PaymentAccountNotFoundException("Payment account not found by user id: " + userId)));
@@ -87,6 +98,7 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(key = "#id")
     public PaymentAccountResponse getPaymentAccountById(Long id){
         return paymentAccountMapper.toResponse(paymentAccountRepository.findById(id)
                 .orElseThrow(() -> new PaymentAccountNotFoundException("Payment account not found by id: " + id)));
@@ -95,18 +107,21 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PaymentAccountResponse> getPaymentAccountsByIsActive(boolean isActive, Pageable pageable) {
+    @Cacheable(key = "'active_' + #isActive + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
+    public PaymentAccountListResponse getPaymentAccountsByIsActive(boolean isActive, Pageable pageable) {
         return paymentAccountMapper.toResponses(paymentAccountRepository.findAllPaymentAccountByActive(isActive, pageable));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PaymentAccountResponse> getPaymentAccountsByBalanceBetween(BigDecimal min, BigDecimal max, Pageable pageable) {
+    @Cacheable(key = "'balance_' + #min + '_' + #max + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
+    public PaymentAccountListResponse getPaymentAccountsByBalanceBetween(BigDecimal min, BigDecimal max, Pageable pageable) {
         return paymentAccountMapper.toResponses(paymentAccountRepository.findAllPaymentAccountByBalanceBetween(min, max, pageable));
     }
 
     @Override
     @Transactional
+    @CacheEvict(allEntries = true)
     public PaymentAccountResponse depositPaymentAccountByUserId(Long userId, BigDecimal amount) {
         PaymentAccount account = paymentAccountRepository.findByUserId(userId)
                 .orElseThrow(() -> new PaymentAccountNotFoundException("Payment account not found by user id: " + userId));
@@ -129,6 +144,7 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
 
     @Override
     @Transactional
+    @CacheEvict(allEntries = true)
     public PaymentAccountResponse withdrawPaymentAccountByUserId(Long userId, BigDecimal amount) {
         PaymentAccount account = paymentAccountRepository.findByUserId(userId)
                 .orElseThrow(() -> new PaymentAccountNotFoundException("Payment account not found by user id: " + userId));
@@ -151,6 +167,7 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
 
     @Override
     @Transactional
+    @CacheEvict(allEntries = true)
     public PaymentAccountResponse activatePaymentAccountById(Long id) {
         if(!paymentAccountRepository.existsById(id)) {
             throw new PaymentAccountNotFoundException("Bank account not found by id: " + id);
@@ -165,6 +182,7 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
 
     @Override
     @Transactional
+    @CacheEvict(allEntries = true)
     public PaymentAccountResponse activatePaymentAccountByUserId(Long userId) {
         if(!paymentAccountRepository.existsByUserId(userId)) {
             throw new PaymentAccountNotFoundException("Bank account not found by user id: " + userId);
@@ -179,6 +197,7 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
 
     @Override
     @Transactional
+    @CacheEvict(allEntries = true)
     public PaymentAccountResponse deactivatePaymentAccountById(Long id) {
         if(!paymentAccountRepository.existsById(id)) {
             throw new PaymentAccountNotFoundException("Bank account not found by id: " + id);
@@ -193,6 +212,7 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
 
     @Override
     @Transactional
+    @CacheEvict(allEntries = true)
     public PaymentAccountResponse deactivatePaymentAccountByUserId(Long userId) {
         if(!paymentAccountRepository.existsByUserId(userId)) {
             throw new PaymentAccountNotFoundException("Bank account not found by user id: " + userId);

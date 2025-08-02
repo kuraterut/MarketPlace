@@ -2,10 +2,13 @@ package org.kuraterut.productservice.mapper;
 
 import org.kuraterut.productservice.dto.requests.CreateProductRequest;
 import org.kuraterut.productservice.dto.requests.UpdateProductRequest;
+import org.kuraterut.productservice.dto.responses.ProductListResponse;
 import org.kuraterut.productservice.dto.responses.ProductResponse;
 import org.kuraterut.productservice.model.entity.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class ProductMapper {
@@ -27,13 +30,14 @@ public class ProductMapper {
         productResponse.setCategory(product.getCategory() == null ? null : product.getCategory().getName());
         productResponse.setStock(product.getStock());
         productResponse.setSellerId(product.getSellerId());
-        productResponse.setCreatedAt(product.getCreatedAt());
-        productResponse.setUpdatedAt(product.getUpdatedAt());
+        productResponse.setCreatedAt(product.getCreatedAt().toString());
+        productResponse.setUpdatedAt(product.getUpdatedAt().toString());
         return productResponse;
     }
 
-    public Page<ProductResponse> toResponses(Page<Product> products) {
-        return products.map(this::toResponse);
+    public ProductListResponse toResponses(Page<Product> products) {
+
+        return new ProductListResponse(products.map(this::toResponse).stream().toList());
     }
 
     public void toEntity(Product product, UpdateProductRequest request) {

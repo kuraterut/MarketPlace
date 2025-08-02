@@ -12,6 +12,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -25,6 +26,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     public JwtAuthenticationFilter(JwtService jwtService) {
         this.jwtService = jwtService;
+    }
+
+    private static final List<String> WHITELIST = List.of(
+            "/v3/api-docs",
+            "/v3/api-docs/",
+            "/v3/api-docs/**",
+            "/**/v3/api-docs/**",
+            "/**/v3/api-docs",
+            "/swagger-ui/**",
+            "/swagger-ui.html",
+            "/auth/**"
+    );
+
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+        log.info("PATH: {}", path);
+        return WHITELIST.stream().anyMatch(pattern -> pathMatcher.match(pattern, path));
     }
 
     @Override

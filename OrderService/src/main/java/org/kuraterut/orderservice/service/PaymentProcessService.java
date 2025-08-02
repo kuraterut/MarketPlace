@@ -7,6 +7,7 @@ import org.kuraterut.orderservice.model.event.PaymentEvent;
 import org.kuraterut.orderservice.repository.PaymentEventOutboxRepository;
 import org.kuraterut.orderservice.usecases.PaymentProcessUseCase;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
