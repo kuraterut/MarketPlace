@@ -13,8 +13,9 @@
         <module>AuthService</module>
         <module>ProductService</module>
         <module>OrderService</module>
-        <module>BankAccountService</module>
+        <module>PaymentService</module>
         <module>EurekaServer</module>
+        <module>JwtSecurityLib</module>
     </modules>
 
     <properties>
@@ -42,5 +43,16 @@
 
         </dependencies>
     </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 
 </project>

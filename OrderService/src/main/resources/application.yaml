@@ -1,0 +1,74 @@
+server:
+  port: 8084
+
+spring:
+  cache:
+    type: redis
+    redis:
+      time-to-live: 3600000
+      key-prefix: "order-service:"
+      use-key-prefix: true
+      cache-null-values: false
+  data:
+    redis:
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+      host: keydb-order
+      port: 6379
+      timeout: 5000
+  application:
+    name: order-service
+  datasource:
+    url: jdbc:postgresql://postgres-order:5432/order_db
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  liquibase:
+    change-log: classpath:db/migration/changelog-master.xml
+    enabled: true
+  kafka:
+    bootstrap-servers: kafka:9092
+    consumer:
+      group-id: order-consuming-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+      isolation-level: read_committed
+
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 2147483647
+      properties:
+        spring.json.add.type.headers=false:
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka
+
+kafka-topics:
+  order-created: order-created
+  product-hold-failed: product-hold-failed
+  product-hold-success: product-hold-success
+  payment-request: payment-request
+  payment-result: payment-result
+  product-hold-remove: product-hold-remove
+
+scheduling:
+  process-create-order-rate: 3000
+  process-payment-event-rate: 3000
+  process-payment-result-rate: 3000
+  process-product-hold-remove-rate: 3000
