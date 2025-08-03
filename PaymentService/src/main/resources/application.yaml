@@ -2,6 +2,24 @@ server:
   port: 8083
 
 spring:
+  cache:
+    type: redis
+    redis:
+      time-to-live: 3600000
+      key-prefix: "payment-service:"
+      use-key-prefix: true
+      cache-null-values: false
+  data:
+    redis:
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+      host: keydb-payment
+      port: 6379
+      timeout: 5000
   application:
     name: payment-service
   datasource:

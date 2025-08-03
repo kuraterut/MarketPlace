@@ -9,6 +9,7 @@ import org.kuraterut.paymentservice.model.entity.PaymentAccount;
 import org.kuraterut.paymentservice.model.event.UserRegistrationEvent;
 import org.kuraterut.paymentservice.repository.PaymentAccountRepository;
 import org.kuraterut.paymentservice.usecases.eventprocessing.UserRegistrationEventProcessUseCase;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ public class UserRegistrationEventProcessService implements UserRegistrationEven
     @Override
     @KafkaListener(topics = "${kafka-topics.user-registration}", groupId = "${spring.kafka.consumer.group-id}")
     @Transactional
+    @CacheEvict(cacheNames = "payment_accounts", allEntries = true)
     public void listenUserRegistrationEvent(String message, Acknowledgment ack) throws JsonProcessingException {
         UserRegistrationEvent event = objectMapper.readValue(message, UserRegistrationEvent.class);
         if(!paymentAccountRepository.existsByUserId(event.getUserId())) {

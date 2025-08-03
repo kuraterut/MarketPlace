@@ -9,5 +9,6 @@
     <include file="v1.0/payment-event-inbox-initial-schema.xml" relativeToChangelogFile="true"/>
     <include file="v1.0/payment-result-event-outbox-initial-schema.xml" relativeToChangelogFile="true"/>
     <include file="v1.0/transaction-initial-schema.xml" relativeToChangelogFile="true"/>
+    <include file="v1.0/initial-test-data-payment-accounts.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

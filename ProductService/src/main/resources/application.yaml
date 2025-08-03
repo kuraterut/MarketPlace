@@ -2,6 +2,24 @@ server:
   port: 8082
 
 spring:
+  cache:
+    type: redis
+    redis:
+      time-to-live: 3600000
+      key-prefix: "product_service:"
+      use-key-prefix: true
+      cache-null-values: false
+  data:
+    redis:
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+      host: keydb-product
+      port: 6379
+      timeout: 5000
   application:
     name: product-service
   datasource:
@@ -12,7 +30,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
   liquibase:
     change-log: classpath:db/migration/changelog-master.xml
     enabled: true
@@ -54,6 +72,6 @@ scheduling:
   process-order-created-rate: 3000
   process-remove-product-hold-rate: 3000
 
-#logging:
-#  level:
-#    org.springframework: DEBUG
+logging:
+  level:
+    org.springframework.data.redis: DEBUG

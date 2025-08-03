@@ -15,6 +15,8 @@ import org.kuraterut.orderservice.model.event.ProductHoldSuccessEvent;
 import org.kuraterut.orderservice.repository.OrderRepository;
 import org.kuraterut.orderservice.repository.PaymentEventOutboxRepository;
 import org.kuraterut.orderservice.usecases.ProductHoldProcessUseCase;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,7 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@CacheConfig(cacheNames = "orders")
 public class ProductHoldProcessService implements ProductHoldProcessUseCase {
     private final OrderRepository orderRepository;
     private final PaymentEventOutboxRepository paymentEventOutboxRepository;
@@ -35,6 +38,7 @@ public class ProductHoldProcessService implements ProductHoldProcessUseCase {
     @Override
     @KafkaListener(topics = "${kafka-topics.product-hold-failed}", groupId = "${spring.kafka.consumer.group-id}")
     @Transactional
+    @CacheEvict(allEntries = true)
     public void listenProductHoldFailed(String message, Acknowledgment ack){
         try{
             ProductHoldFailedEvent event = objectMapper.readValue(message, ProductHoldFailedEvent.class);
@@ -57,6 +61,7 @@ public class ProductHoldProcessService implements ProductHoldProcessUseCase {
     @Override
     @KafkaListener(topics = "${kafka-topics.product-hold-success}", groupId = "${spring.kafka.consumer.group-id}")
     @Transactional
+    @CacheEvict(allEntries = true)
     public void listenProductHoldSuccess(String message, Acknowledgment ack){
         try{
             ProductHoldSuccessEvent event = objectMapper.readValue(message, ProductHoldSuccessEvent.class);

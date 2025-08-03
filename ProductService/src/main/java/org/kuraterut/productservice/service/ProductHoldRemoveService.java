@@ -7,6 +7,7 @@ import org.kuraterut.productservice.model.utils.ProductHoldedStatus;
 import org.kuraterut.productservice.repository.ProductHoldedRepository;
 import org.kuraterut.productservice.repository.ProductRepository;
 import org.kuraterut.productservice.usecases.ProductHoldRemoveUseCase;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,7 @@ public class ProductHoldRemoveService implements ProductHoldRemoveUseCase {
     @Scheduled(fixedRateString = "${scheduling.process-remove-product-hold-rate}")
     @Transactional
     @Override
+    @CacheEvict(cacheNames = "products", allEntries = true)
     public void processRemoveProductHolds() {
         productHoldedRepository.deleteAllByStatus(ProductHoldedStatus.TO_REMOVE);
         List<ProductHolded> productHoldedList = productHoldedRepository.findTop100ByStatus(ProductHoldedStatus.TO_RETURN);

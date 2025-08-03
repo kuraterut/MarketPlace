@@ -18,6 +18,9 @@ import org.kuraterut.paymentservice.repository.PaymentResultOutboxRepository;
 import org.kuraterut.paymentservice.repository.TransactionRepository;
 import org.kuraterut.paymentservice.usecases.eventprocessing.PaymentProcessUseCase;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.Acknowledgment;
@@ -33,6 +36,7 @@ import java.util.concurrent.ExecutionException;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@CacheConfig
 public class PaymentProcessService implements PaymentProcessUseCase {
     private final ObjectMapper objectMapper;
     private final PaymentAccountRepository paymentAccountRepository;
@@ -61,6 +65,10 @@ public class PaymentProcessService implements PaymentProcessUseCase {
     @Override
     @Transactional
     @Scheduled(fixedRateString = "${scheduling.process-payment-event-rate}")
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "payment_accounts", allEntries = true),
+            @CacheEvict(cacheNames = "transactions", allEntries = true)
+    })
     public void processPaymentEvent() {
         List<PaymentEventInbox> inboxes = paymentEventInboxRepository.findTop100ByProcessedIsFalse();
         for (PaymentEventInbox inbox : inboxes) {

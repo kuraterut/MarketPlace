@@ -3,10 +3,7 @@ package org.kuraterut.paymentservice.exception;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
-import org.kuraterut.paymentservice.exception.model.PaymentAccountAlreadyExistsException;
-import org.kuraterut.paymentservice.exception.model.PaymentAccountIsNotEmptyException;
-import org.kuraterut.paymentservice.exception.model.PaymentAccountNotFoundException;
-import org.kuraterut.paymentservice.exception.model.UpdatePaymentAccountException;
+import org.kuraterut.paymentservice.exception.model.*;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,6 +52,16 @@ public class GlobalExceptionHandler {
         error.setMessage(ex.getMessage());
         error.setTimestamp(OffsetDateTime.now());
         log.warn("Payment Account Is Not Found: {}", ex.getMessage());
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(TransactionNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleTransactionNotFoundException(TransactionNotFoundException ex) {
+        ErrorResponse error = new ErrorResponse();
+        error.setStatus(HttpStatus.NOT_FOUND);
+        error.setMessage(ex.getMessage());
+        error.setTimestamp(OffsetDateTime.now());
+        log.warn("Transaction Is Not Found: {}", ex.getMessage());
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 

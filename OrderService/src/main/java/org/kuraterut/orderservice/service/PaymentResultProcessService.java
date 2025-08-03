@@ -17,6 +17,8 @@ import org.kuraterut.orderservice.repository.PaymentResultInboxRepository;
 import org.kuraterut.orderservice.repository.ProductHoldRemoveEventOutboxRepository;
 import org.kuraterut.orderservice.usecases.PaymentResultProcessUseCase;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.Acknowledgment;
@@ -30,6 +32,7 @@ import java.util.concurrent.ExecutionException;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@CacheConfig(cacheNames = "orders")
 public class PaymentResultProcessService implements PaymentResultProcessUseCase {
     private final ObjectMapper objectMapper;
     private final PaymentResultInboxRepository paymentResultInboxRepository;
@@ -57,6 +60,7 @@ public class PaymentResultProcessService implements PaymentResultProcessUseCase 
     @Override
     @Scheduled(fixedRateString = "${scheduling.process-payment-result-rate}")
     @Transactional
+    @CacheEvict(allEntries = true)
     public void processPaymentResult() {
         List<PaymentResultInbox> inboxes = paymentResultInboxRepository.findTop100ByProcessedIsFalse();
         for (PaymentResultInbox inbox : inboxes) {

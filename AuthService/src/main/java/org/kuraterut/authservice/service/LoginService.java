@@ -33,6 +33,7 @@ public class LoginService implements LoginUseCase {
             throw new UserNotFoundException("User not found by email: " + request.getEmail());
         }
         log.info("Start authentication");
+        log.info("Encoded request password: {}", passwordEncoder.encode(request.getPassword()));
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 request.getEmail(),
                 request.getPassword()

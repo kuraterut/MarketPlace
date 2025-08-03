@@ -3,6 +3,7 @@ package org.kuraterut.orderservice.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kuraterut.orderservice.dto.request.CreateOrderRequest;
+import org.kuraterut.orderservice.dto.response.OrderListResponse;
 import org.kuraterut.orderservice.dto.response.OrderResponse;
 import org.kuraterut.orderservice.exception.model.OrderNotFoundException;
 import org.kuraterut.orderservice.mapper.OrderMapper;
@@ -15,6 +16,9 @@ import org.kuraterut.orderservice.repository.OrderRepository;
 import org.kuraterut.orderservice.usecases.CreateOrderUseCase;
 import org.kuraterut.orderservice.usecases.GetOrderUseCase;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -29,6 +33,7 @@ import java.util.concurrent.ExecutionException;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@CacheConfig(cacheNames = "orders")
 public class OrderService implements CreateOrderUseCase, GetOrderUseCase{
     private final OrderRepository orderRepository;
     private final OrderOutboxRepository orderOutboxRepository;
@@ -41,6 +46,7 @@ public class OrderService implements CreateOrderUseCase, GetOrderUseCase{
 
     @Override
     @Transactional
+    @CacheEvict(allEntries = true)
     public OrderResponse createOrder(CreateOrderRequest request, Long userId)  {
         Order order = orderMapper.toEntity(request, userId);
 
@@ -55,13 +61,15 @@ public class OrderService implements CreateOrderUseCase, GetOrderUseCase{
 
     @Override
     @Transactional(readOnly = true)
-    public Page<OrderResponse> getAllOrders(Pageable pageable) {
+    @Cacheable(key = "'all_orders_page_' + #pageable.pageNumber + '_size_' + #pageable.pageSize")
+    public OrderListResponse getAllOrders(Pageable pageable) {
         Page<Order> orders = orderRepository.findAll(pageable);
         return orderMapper.toResponses(orders);
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(key = "'order_by_id_' + #orderId")
     public OrderResponse getOrderById(Long orderId)  {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException("Order not found by id: " + orderId));
@@ -70,35 +78,40 @@ public class OrderService implements CreateOrderUseCase, GetOrderUseCase{
 
     @Override
     @Transactional(readOnly = true)
-    public Page<OrderResponse> getAllOrdersByUserId(Long userId, Pageable pageable)  {
+    @Cacheable(key = "'orders_user_' + #userId + '_page_' + #pageable.pageNumber")
+    public OrderListResponse getAllOrdersByUserId(Long userId, Pageable pageable)  {
         Page<Order> orders = orderRepository.findAllByUserId(userId, pageable);
         return orderMapper.toResponses(orders);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<OrderResponse> getAllOrdersByOrderStatus(OrderStatus orderStatus, Pageable pageable)  {
+    @Cacheable(key = "'orders_status_' + #orderStatus.name() + '_page_' + #pageable.pageNumber")
+    public OrderListResponse getAllOrdersByOrderStatus(OrderStatus orderStatus, Pageable pageable)  {
         Page<Order> orders = orderRepository.findAllByStatus(orderStatus, pageable);
         return orderMapper.toResponses(orders);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<OrderResponse> getAllOrdersByOrderStatus(OrderStatus orderStatus, Long userId, Pageable pageable)  {
+    @Cacheable(key = "'orders_status_' + #orderStatus.name() + '_user_' + #userId + '_page_' + #pageable.pageNumber")
+    public OrderListResponse getAllOrdersByOrderStatus(OrderStatus orderStatus, Long userId, Pageable pageable)  {
         Page<Order> orders = orderRepository.findAllByStatusAndUserId(orderStatus, userId, pageable);
         return orderMapper.toResponses(orders);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<OrderResponse> getAllOrdersByCreatedAtAfter(OffsetDateTime afterCreatedAt, Pageable pageable)  {
+    @Cacheable(key = "'orders_after_' + #afterCreatedAt.toEpochSecond() + '_page_' + #pageable.pageNumber")
+    public OrderListResponse getAllOrdersByCreatedAtAfter(OffsetDateTime afterCreatedAt, Pageable pageable)  {
         Page<Order> orders = orderRepository.findAllByCreatedAtAfter(afterCreatedAt, pageable);
         return orderMapper.toResponses(orders);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<OrderResponse> getAllOrdersByCreatedAtAfter(OffsetDateTime afterCreatedAt, Long userId, Pageable pageable)  {
+    @Cacheable(key = "'orders_after_' + #afterCreatedAt.toEpochSecond() + '_user_' + #userId + '_page_' + #pageable.pageNumber")
+    public OrderListResponse getAllOrdersByCreatedAtAfter(OffsetDateTime afterCreatedAt, Long userId, Pageable pageable)  {
         Page<Order> orders = orderRepository.findAllByCreatedAtAfterAndUserId(afterCreatedAt, userId, pageable);
         return orderMapper.toResponses(orders);
     }

@@ -53,6 +53,43 @@ spring:
                 name: paymentCircuitBreaker
                 fallbackUri: forward:/fallback/payment
 
+        - id: product-service-docs
+          uri: lb://product-service
+          predicates:
+            - Path=/product-service/v3/api-docs
+          filters:
+            - name: StripPrefix
+              args:
+                parts: 1
+
+        - id: order-service-docs
+          uri: lb://order-service
+          predicates:
+            - Path=/order-service/v3/api-docs
+          filters:
+            - name: StripPrefix
+              args:
+                parts: 1
+
+        - id: payment-service-docs
+          uri: lb://payment-service
+          predicates:
+            - Path=/payment-service/v3/api-docs
+          filters:
+            - name: StripPrefix
+              args:
+                parts: 1
+
+        - id: auth-service-docs
+          uri: lb://auth-service
+          predicates:
+            - Path=/auth-service/v3/api-docs
+          filters:
+            - name: StripPrefix
+              args:
+                parts: 1
+
+
     circuitbreaker:
       resilience4j:
         instances:
@@ -91,8 +128,29 @@ management:
     health:
       show-details: always
 
+springdoc:
+  swagger-ui:
+    urls:
+      - name: payment-service
+        url: /payment-service/v3/api-docs
+      - name: order-service
+        url: /order-service/v3/api-docs
+      - name: product-service
+        url: /product-service/v3/api-docs
+      - name: auth-service
+        url: /auth-service/v3/api-docs
+
+    path: /swagger-ui.html
+
 security:
   open-endpoints:
+    - /product-service/v3/api-docs
+    - /order-service/v3/api-docs
+    - /payment-service/v3/api-docs
+    - /auth-service/v3/api-docs
+    - /swagger-ui.html
+    - /swagger-ui/**
+    - /v3/api-docs/**
     - /api/auth/login
     - /api/auth/register
     - /actuator/health

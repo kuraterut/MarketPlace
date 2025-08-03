@@ -3,6 +3,7 @@ package org.kuraterut.productservice.service;
 import lombok.RequiredArgsConstructor;
 import org.kuraterut.productservice.dto.requests.CreateProductRequest;
 import org.kuraterut.productservice.dto.requests.UpdateProductRequest;
+import org.kuraterut.productservice.dto.responses.ProductListResponse;
 import org.kuraterut.productservice.dto.responses.ProductResponse;
 import org.kuraterut.productservice.exception.model.CategoryNotFoundException;
 import org.kuraterut.productservice.exception.model.PermissionDeniedException;
@@ -16,6 +17,9 @@ import org.kuraterut.productservice.usecases.product.CreateProductUseCase;
 import org.kuraterut.productservice.usecases.product.DeleteProductUseCase;
 import org.kuraterut.productservice.usecases.product.GetProductUseCase;
 import org.kuraterut.productservice.usecases.product.UpdateProductUseCase;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -26,6 +30,7 @@ import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
+@CacheConfig(cacheNames = "products")
 public class ProductService implements CreateProductUseCase, DeleteProductUseCase, GetProductUseCase, UpdateProductUseCase {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
@@ -33,6 +38,7 @@ public class ProductService implements CreateProductUseCase, DeleteProductUseCas
 
     @Override
     @Transactional
+    @CacheEvict(allEntries = true)
     public ProductResponse createProduct(CreateProductRequest request, Long userId) {
         Product product = productMapper.toEntity(request);
         Category category = categoryRepository.findByName(request.getCategory())
@@ -45,6 +51,7 @@ public class ProductService implements CreateProductUseCase, DeleteProductUseCas
 
     @Override
     @Transactional
+    @CacheEvict(key = "#id")
     public void deleteProduct(Long id, Long userId) {
         boolean isOwner = productRepository.existsByIdAndSellerId(id, userId);
 
@@ -61,6 +68,7 @@ public class ProductService implements CreateProductUseCase, DeleteProductUseCas
 
     @Override
     @Transactional
+    @CacheEvict(key = "#id")
     public void adminDeleteProduct(Long id) {
         if (!productRepository.existsById(id)) {
             throw new ProductNotFoundException("Product not found by id: " + id);
@@ -72,12 +80,14 @@ public class ProductService implements CreateProductUseCase, DeleteProductUseCas
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ProductResponse> getAllProducts(Pageable pageable) {
+    @Cacheable(key = "'all_products_' + #pageable.pageNumber + '_' + #pageable.pageSize")
+    public ProductListResponse getAllProducts(Pageable pageable) {
         return productMapper.toResponses(productRepository.findAll(pageable));
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(key = "#productId", unless = "#result == null")
     public ProductResponse getProductByProductId(Long productId) {
         return productMapper.toResponse(productRepository.findById(productId)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found by id: " + productId)));
@@ -85,36 +95,42 @@ public class ProductService implements CreateProductUseCase, DeleteProductUseCas
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ProductResponse> getProductsStartingWithPrefix(String prefix, Pageable pageable) {
+    @Cacheable(key = "'prefix_products_' + #pageable.pageNumber + '_' + #pageable.pageSize")
+    public ProductListResponse getProductsStartingWithPrefix(String prefix, Pageable pageable) {
         return productMapper.toResponses(productRepository.findByNameStartingWithIgnoreCase(prefix, pageable));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ProductResponse> getProductsBySellerId(Long sellerId, Pageable pageable) {
+    @Cacheable(key = "'sellerId_products_' + #sellerId + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
+    public ProductListResponse getProductsBySellerId(Long sellerId, Pageable pageable) {
         return productMapper.toResponses(productRepository.findBySellerId(sellerId, pageable));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ProductResponse> getProductsByCategoryId(Long categoryId, Pageable pageable) {
+    @Cacheable(key = "'categoryId_products_' + #categoryId + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
+    public ProductListResponse getProductsByCategoryId(Long categoryId, Pageable pageable) {
         return productMapper.toResponses(productRepository.findByCategoryId(categoryId, pageable));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ProductResponse> getProductsByCategoryName(String categoryName, Pageable pageable) {
+    @Cacheable(key = "'categoryName_products_' + #categoryName + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
+    public ProductListResponse getProductsByCategoryName(String categoryName, Pageable pageable) {
         return productMapper.toResponses(productRepository.findByCategoryName(categoryName, pageable));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ProductResponse> getProductsByPriceBetween(BigDecimal min, BigDecimal max, Pageable pageable) {
+    @Cacheable(key = "'price_between_products_' + #min + '_' + #max + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
+    public ProductListResponse getProductsByPriceBetween(BigDecimal min, BigDecimal max, Pageable pageable) {
         return productMapper.toResponses(productRepository.findByPriceBetween(min, max, pageable));
     }
 
     @Override
     @Transactional
+    @CacheEvict(allEntries = true)
     public ProductResponse updateProduct(Long id, UpdateProductRequest request, Long userId){
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found by id: " + id));
@@ -129,6 +145,4 @@ public class ProductService implements CreateProductUseCase, DeleteProductUseCas
         }
         return productMapper.toResponse(productRepository.save(product));
     }
-
-
 }
