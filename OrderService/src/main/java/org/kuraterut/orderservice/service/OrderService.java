@@ -51,7 +51,7 @@ public class OrderService implements CreateOrderUseCase, GetOrderUseCase{
         Order order = orderMapper.toEntity(request, userId);
 
         order.setStatus(OrderStatus.CREATED);
-        order = orderRepository.save(order);
+        order = orderRepository.saveAndFlush(order);
 
         CreateOrderEventOutbox createOrderEventOutbox = orderMapper.toOutbox(order);
         orderOutboxRepository.save(createOrderEventOutbox);

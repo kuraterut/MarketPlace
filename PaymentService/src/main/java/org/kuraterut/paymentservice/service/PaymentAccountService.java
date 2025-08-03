@@ -46,7 +46,7 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
     public PaymentAccountResponse createPaymentAccount(Long userId) {
         try {
             PaymentAccount paymentAccount = paymentAccountMapper.toEntity(userId);
-            paymentAccount = paymentAccountRepository.save(paymentAccount);
+            paymentAccount = paymentAccountRepository.saveAndFlush(paymentAccount);
             return paymentAccountMapper.toResponse(paymentAccount);
         } catch (DataIntegrityViolationException | ConstraintViolationException e){
             throw new PaymentAccountAlreadyExistsException("Payment Account is already exists with userId: " + userId);
@@ -138,7 +138,6 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
             transactionRepository.save(transaction);
             throw new UpdatePaymentAccountException("Can't deposit account");
         }
-        // Очищаем Persistence Context для данного entity
         entityManager.flush();
         entityManager.clear();
 
@@ -165,6 +164,9 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
             transactionRepository.save(transaction);
             throw new UpdatePaymentAccountException("Can't withdraw account");
         }
+        entityManager.flush();
+        entityManager.clear();
+
         transaction.setStatus(TransactionStatus.COMPLETED);
         transactionRepository.save(transaction);
         return paymentAccountMapper.toResponse(paymentAccountRepository.findByUserId(userId)
@@ -182,6 +184,9 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
         if (rows == 0){
             throw new UpdatePaymentAccountException("Can't activate account");
         }
+        entityManager.flush();
+        entityManager.clear();
+
         return paymentAccountMapper.toResponse(paymentAccountRepository.findById(id)
                 .orElseThrow(() -> new PaymentAccountNotFoundException("Bank account not found by id: " + id)));
     }
@@ -197,6 +202,9 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
         if (rows == 0){
             throw new UpdatePaymentAccountException("Can't activate account");
         }
+        entityManager.flush();
+        entityManager.clear();
+
         return paymentAccountMapper.toResponse(paymentAccountRepository.findByUserId(userId)
                 .orElseThrow(() -> new PaymentAccountNotFoundException("Bank account not found by user id: " + userId)));
     }
@@ -212,6 +220,9 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
         if (rows == 0){
             throw new UpdatePaymentAccountException("Can't deactivate account");
         }
+        entityManager.flush();
+        entityManager.clear();
+
         return paymentAccountMapper.toResponse(paymentAccountRepository.findById(id)
                 .orElseThrow(() -> new PaymentAccountNotFoundException("Bank account not found by id: " + id)));
     }
@@ -227,6 +238,9 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
         if (rows == 0){
             throw new UpdatePaymentAccountException("Can't deactivate account");
         }
+        entityManager.flush();
+        entityManager.clear();
+
         return paymentAccountMapper.toResponse(paymentAccountRepository.findByUserId(userId)
                 .orElseThrow(() -> new PaymentAccountNotFoundException("Bank account not found by user id: " + userId)));
     }

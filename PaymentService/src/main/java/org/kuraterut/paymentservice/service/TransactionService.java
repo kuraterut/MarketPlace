@@ -42,7 +42,7 @@ public class TransactionService implements GetTransactionUseCase, CreateTransact
                 .orElseThrow(() -> new PaymentAccountNotFoundException("Account not found by user ID: " + userId));
         Transaction transaction = transactionMapper.toEntity(request);
         transaction.setAccount(paymentAccount);
-        transaction = transactionRepository.save(transaction);
+        transaction = transactionRepository.saveAndFlush(transaction);
         return transactionMapper.toResponse(transaction);
     }
 
