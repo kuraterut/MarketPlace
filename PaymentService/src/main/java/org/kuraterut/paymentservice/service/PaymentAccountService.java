@@ -1,5 +1,6 @@
 package org.kuraterut.paymentservice.service;
 
+import jakarta.persistence.EntityManager;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import org.kuraterut.paymentservice.dto.response.PaymentAccountListResponse;
@@ -37,6 +38,7 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
     private final PaymentAccountRepository paymentAccountRepository;
     private final PaymentAccountMapper paymentAccountMapper;
     private final TransactionRepository transactionRepository;
+    private final EntityManager entityManager;
 
     @Override
     @Transactional
@@ -136,6 +138,10 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
             transactionRepository.save(transaction);
             throw new UpdatePaymentAccountException("Can't deposit account");
         }
+        // Очищаем Persistence Context для данного entity
+        entityManager.flush();
+        entityManager.clear();
+
         transaction.setStatus(TransactionStatus.COMPLETED);
         transactionRepository.save(transaction);
         return paymentAccountMapper.toResponse(paymentAccountRepository.findByUserId(userId)
