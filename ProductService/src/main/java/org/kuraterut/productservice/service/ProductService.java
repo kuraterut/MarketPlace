@@ -45,7 +45,7 @@ public class ProductService implements CreateProductUseCase, DeleteProductUseCas
                 .orElseThrow(() -> new CategoryNotFoundException("Category not found by name: " + request.getCategory()));
         product.setCategory(category);
         product.setSellerId(userId);
-        product = productRepository.save(product);
+        product = productRepository.saveAndFlush(product);
         return productMapper.toResponse(product);
     }
 
@@ -143,6 +143,6 @@ public class ProductService implements CreateProductUseCase, DeleteProductUseCas
                     .orElseThrow(() -> new CategoryNotFoundException("Category not found by name: " + request.getCategory()));
             product.setCategory(category);
         }
-        return productMapper.toResponse(productRepository.save(product));
+        return productMapper.toResponse(productRepository.saveAndFlush(product));
     }
 }

@@ -39,7 +39,7 @@ public class CategoryService implements CreateCategoryUseCase, DeleteCategoryUse
     public CategoryResponse createCategory(CreateCategoryRequest request) {
         try{
             Category category = categoryMapper.toEntity(request);
-            return categoryMapper.toResponse(categoryRepository.save(category));
+            return categoryMapper.toResponse(categoryRepository.saveAndFlush(category));
         } catch (DataIntegrityViolationException | ConstraintViolationException e) {
             throw new CategoryAlreadyExistsException(e.getMessage());
         }
@@ -106,7 +106,7 @@ public class CategoryService implements CreateCategoryUseCase, DeleteCategoryUse
         Category category = categoryRepository.findByName(name)
                 .orElseThrow(() -> new CategoryNotFoundException("Category not found by name: " + name));
         categoryMapper.toEntity(category, request);
-        return categoryMapper.toResponse(categoryRepository.save(category));
+        return categoryMapper.toResponse(categoryRepository.saveAndFlush(category));
     }
 
     @Override
@@ -122,6 +122,6 @@ public class CategoryService implements CreateCategoryUseCase, DeleteCategoryUse
             throw new CategoryAlreadyExistsException("Category is already exists with name: " + request.getName());
         }
         categoryMapper.toEntity(category, request);
-        return categoryMapper.toResponse(categoryRepository.save(category));
+        return categoryMapper.toResponse(categoryRepository.saveAndFlush(category));
     }
 }
