@@ -43,7 +43,6 @@ public class ProductController {
     private final UpdateProductUseCase updateProductUseCase;
     private final GetProductUseCase getProductUseCase;
 
-
     @PostMapping
     @PreAuthorize("hasAuthority('SELLER')")
     @Operation(summary = "Create Product")
