@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.2.xsd">
+
+    <changeSet id="v1.0-insert-test-products" author="kuraterut">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="products"/>
+            <tableExists tableName="categories"/>
+<!--            <tableExists tableName="users"/>-->
+<!--            <sqlCheck expectedResult="1">SELECT COUNT(*) FROM users WHERE email='seller@example.com'</sqlCheck>-->
+<!--            <sqlCheck expectedResult="1">SELECT COUNT(*) FROM categories WHERE name='category1'</sqlCheck>-->
+        </preConditions>
+
+        <insert tableName="products">
+            <column name="name" value="Test Product"/>
+            <column name="description" value="Test product created by seller"/>
+            <column name="price" value="50.00"/>
+            <column name="category_id" valueComputed="(SELECT id FROM categories WHERE name='category1')"/>
+            <column name="stock" value="5"/>
+            <column name="seller_id" value = "3"/>
+            <column name="created_at" valueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueComputed="CURRENT_TIMESTAMP"/>
+            <column name="version" value="0"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

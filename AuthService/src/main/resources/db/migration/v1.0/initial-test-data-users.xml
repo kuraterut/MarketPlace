@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.2.xsd">
+
+    <changeSet id="v1.0-insert-test-users" author="kuraterut">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="users"/>
+        </preConditions>
+
+        <insert tableName="users">
+            <column name="email" value="admin@example.com"/>
+            <column name="role" value="ADMIN"/>
+            <column name="password" value="$2a$10$FKkFwb6mnT5WLHaAvKH9weuuzB8xOIAyHJKZzNPjZ4rz9dZ4rpjPe"/> <!-- password: admin123 -->
+            <column name="version" value="0"/>
+        </insert>
+
+        <insert tableName="users">
+            <column name="email" value="customer@example.com"/>
+            <column name="role" value="CUSTOMER"/>
+            <column name="password" value="$2a$10$FKkFwb6mnT5WLHaAvKH9weuuzB8xOIAyHJKZzNPjZ4rz9dZ4rpjPe"/> <!-- password: admin123 -->
+            <column name="version" value="0"/>
+        </insert>
+
+        <insert tableName="users">
+            <column name="email" value="seller@example.com"/>
+            <column name="role" value="SELLER"/>
+            <column name="password" value="$2a$10$FKkFwb6mnT5WLHaAvKH9weuuzB8xOIAyHJKZzNPjZ4rz9dZ4rpjPe"/> <!-- password: admin123 -->
+            <column name="version" value="0"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

@@ -65,8 +65,10 @@ public class OrderMapper {
         }
 
         OrderResponse orderResponse = new OrderResponse();
-        orderResponse.setCreatedAt(order.getCreatedAt().toString());
-        orderResponse.setUpdatedAt(order.getUpdatedAt().toString());
+        String createdAt = order.getCreatedAt()==null?null:order.getCreatedAt().toString();
+        String updatedAt = order.getUpdatedAt()==null?null:order.getUpdatedAt().toString();
+        orderResponse.setCreatedAt(createdAt);
+        orderResponse.setUpdatedAt(updatedAt);
         orderResponse.setId(order.getId());
         orderResponse.setStatus(order.getStatus());
         orderResponse.setUserId(order.getUserId());

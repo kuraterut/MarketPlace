@@ -30,8 +30,10 @@ public class ProductMapper {
         productResponse.setCategory(product.getCategory() == null ? null : product.getCategory().getName());
         productResponse.setStock(product.getStock());
         productResponse.setSellerId(product.getSellerId());
-        productResponse.setCreatedAt(product.getCreatedAt().toString());
-        productResponse.setUpdatedAt(product.getUpdatedAt().toString());
+        String createdAt = product.getCreatedAt()==null?null:product.getCreatedAt().toString();
+        String updatedAt = product.getUpdatedAt()==null?null:product.getUpdatedAt().toString();
+        productResponse.setCreatedAt(createdAt);
+        productResponse.setUpdatedAt(updatedAt);
         return productResponse;
     }
 

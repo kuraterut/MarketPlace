@@ -30,8 +30,10 @@ public class TransactionMapper {
         transactionResponse.setDescription(transaction.getDescription());
         transactionResponse.setStatus(transaction.getStatus());
         transactionResponse.setOrderId(transaction.getOrderId());
-        transactionResponse.setCreatedAt(transaction.getCreatedAt().toString());
-        transactionResponse.setUpdatedAt(transaction.getUpdatedAt().toString());
+        String createdAt = transaction.getCreatedAt()==null?null:transaction.getCreatedAt().toString();
+        String updatedAt = transaction.getUpdatedAt()==null?null:transaction.getUpdatedAt().toString();
+        transactionResponse.setCreatedAt(createdAt);
+        transactionResponse.setUpdatedAt(updatedAt);
         return transactionResponse;
     }
 

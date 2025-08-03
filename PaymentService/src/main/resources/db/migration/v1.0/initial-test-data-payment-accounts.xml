@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.2.xsd">
+
+    <changeSet id="v1.0-insert-test-payment-accounts" author="kuraterut">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="payment_accounts"/>
+<!--            <tableExists tableName="users"/>-->
+<!--            <sqlCheck expectedResult="1">SELECT COUNT(*) FROM users WHERE email='customer@example.com'</sqlCheck>-->
+<!--            <sqlCheck expectedResult="1">SELECT COUNT(*) FROM users WHERE email='seller@example.com'</sqlCheck>-->
+        </preConditions>
+
+        <!-- Customer account -->
+        <insert tableName="payment_accounts">
+            <column name="user_id" value="2"/>
+            <column name="balance" value="10.0000"/>
+            <column name="active" value="true"/>
+            <column name="created_at" valueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueComputed="CURRENT_TIMESTAMP"/>
+            <column name="version" value="0"/>
+        </insert>
+
+        <!-- Seller account -->
+        <insert tableName="payment_accounts">
+            <column name="user_id" value="3"/>
+            <column name="balance" value="10.0000"/>
+            <column name="active" value="true"/>
+            <column name="created_at" valueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueComputed="CURRENT_TIMESTAMP"/>
+            <column name="version" value="0"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

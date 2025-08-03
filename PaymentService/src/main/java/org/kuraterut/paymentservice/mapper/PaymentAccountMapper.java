@@ -26,8 +26,10 @@ public class PaymentAccountMapper {
         paymentAccountResponse.setUserId(paymentAccount.getUserId());
         paymentAccountResponse.setBalance(paymentAccount.getBalance());
         paymentAccountResponse.setActive(paymentAccount.isActive());
-        paymentAccountResponse.setCreatedAt(paymentAccount.getCreatedAt().toString());
-        paymentAccountResponse.setUpdatedAt(paymentAccount.getUpdatedAt().toString());
+        String createdAt = paymentAccount.getCreatedAt()==null?null:paymentAccount.getCreatedAt().toString();
+        String updatedAt = paymentAccount.getUpdatedAt()==null?null:paymentAccount.getUpdatedAt().toString();
+        paymentAccountResponse.setCreatedAt(createdAt);
+        paymentAccountResponse.setUpdatedAt(updatedAt);
         return paymentAccountResponse;
     }
 
