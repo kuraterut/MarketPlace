@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "product.fullname" . }}
+  labels:
+    {{- include "product.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.product.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "product.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "product.selectorLabels" . | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/product/configmap.yaml") . | sha256sum }}
+    spec:
+      containers:
+        - name: product-service
+          image: "{{ .Values.product.image.repository }}:{{ .Values.product.image.tag }}"
+          imagePullPolicy: {{ .Values.product.image.pullPolicy }}
+          ports:
+            - containerPort: 8082
+          envFrom:
+            - configMapRef:
+                name: {{ include "product.fullname" . }}-config
+            - secretRef:
+                name: {{ include "product.fullname" . }}-secrets
+          resources:
+          {{- toYaml .Values.product.resources | nindent 10 }}
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8082
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8082
+            initialDelaySeconds: 15
+            periodSeconds: 5

@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-config
+data:
+  kafka-server.properties: |
+    broker.id=${BROKER_ID}
+    listeners=PLAINTEXT://:9092
+    advertised.listeners=PLAINTEXT://${POD_NAME}.kafka-headless.${NAMESPACE}.svc.cluster.local:9092
+    num.network.threads=3
+    num.io.threads=8
+    socket.send.buffer.bytes=102400
+    socket.receive.buffer.bytes=102400
+    socket.request.max.bytes=104857600
+    log.dirs=/var/lib/kafka/data
+    num.partitions=3
+    num.recovery.threads.per.data.dir=1
+    offsets.topic.replication.factor=3
+    transaction.state.log.replication.factor=3
+    transaction.state.log.min.isr=2
+    log.retention.hours=168
+    log.segment.bytes=1073741824
+    log.retention.check.interval.ms=300000
+    zookeeper.connect=zookeeper-0.zookeeper-headless:2181,zookeeper-1.zookeeper-headless:2181,zookeeper-2.zookeeper-headless:2181
+    default.replication.factor=3
+    min.insync.replicas=2
+    auto.create.topics.enable=false
+    delete.topic.enable=true
+    unclean.leader.election.enable=false
+    compression.type=producer
+
+  zookeeper.properties: |
+    tickTime=2000
+    initLimit=10
+    syncLimit=5
+    dataDir=/var/lib/zookeeper/data
+    dataLogDir=/var/lib/zookeeper/log
+    clientPort=2181
+    maxClientCnxns=60
+    autopurge.snapRetainCount=3
+    autopurge.purgeInterval=24
+    server.1=zookeeper-0.zookeeper-headless:2888:3888
+    server.2=zookeeper-1.zookeeper-headless:2888:3888
+    server.3=zookeeper-2.zookeeper-headless:2888:3888

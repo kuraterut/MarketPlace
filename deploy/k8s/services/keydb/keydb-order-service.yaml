@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: keydb-order
+  labels:
+    app: keydb-order
+spec:
+  ports:
+    - port: 6379
+      targetPort: 6379
+      name: redis
+  selector:
+    app: keydb-order
+    role: master
+  type: ClusterIP
