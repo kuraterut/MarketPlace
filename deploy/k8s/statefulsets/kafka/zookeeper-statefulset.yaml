@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: zookeeper
+spec:
+  serviceName: zookeeper-headless
+  replicas: 3
+  selector:
+    matchLabels:
+      app: zookeeper
+  template:
+    metadata:
+      labels:
+        app: zookeeper
+    spec:
+      containers:
+        - name: zookeeper
+          image: bitnami/zookeeper:3.9
+          env:
+            - name: ZOO_SERVER_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
+            - name: ZOO_SERVERS
+              value: "zookeeper-0.zookeeper-headless:2888:3888,zookeeper-1.zookeeper-headless:2888:3888,zookeeper-2.zookeeper-headless:2888:3888"
+          ports:
+            - containerPort: 2181
+              name: client
+            - containerPort: 2888
+              name: server
+            - containerPort: 3888
+              name: leader-election
+          volumeMounts:
+            - name: config
+              mountPath: /conf
+            - name: data
+              mountPath: /data
+            - name: datalog
+              mountPath: /datalog
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - "zookeeper-ready 2181"
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - "zookeeper-ready 2181"
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 300m
+              memory: 1Gi
+            limits:
+              cpu: 1
+              memory: 2Gi
+      volumes:
+        - name: config
+          configMap:
+            name: kafka-config
+            items:
+              - key: zookeeper.properties
+                path: zookeeper.properties
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: "ssd"
+        resources:
+          requests:
+            storage: 10Gi
+    - metadata:
+        name: datalog
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: "ssd"
+        resources:
+          requests:
+            storage: 10Gi

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-payment-service
+  labels:
+    app: postgres-payment
+    role: master
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+      name: postgres
+  selector:
+    app: postgres-payment
+    role: master
+  type: ClusterIP

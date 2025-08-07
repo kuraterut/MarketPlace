@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-auth-service-headless
+  labels:
+    app: postgres-auth
+spec:
+  clusterIP: None
+  ports:
+    - port: 5432
+      name: postgres
+    - port: 8008
+      name: patroni
+  selector:
+    app: postgres-auth

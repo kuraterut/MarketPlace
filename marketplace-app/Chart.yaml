@@ -1,0 +1,22 @@
+apiVersion: v2
+name: marketplace-app
+description: Marketplace Microservices Application
+version: 0.1.0
+appVersion: "1.0.0"
+dependencies:
+  - name: postgresql
+    version: 12.2.8
+    repository: https://charts.bitnami.com/bitnami
+    condition: postgresql.enabled
+    alias: postgres-product
+
+  - name: keydb
+    version: 2.0.1  # Актуальная версия
+    repository: oci://registry-1.docker.io/bitnamicharts/keydb
+    condition: keydb.enabled
+    alias: keydb-product
+
+  - name: kafka
+    version: 22.1.5
+    repository: https://charts.bitnami.com/bitnami
+    condition: kafka.enabled

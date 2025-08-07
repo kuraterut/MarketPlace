@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-service-config
+data:
+  application.yaml: |
+    server:
+      port: 8081
+    
+    spring:
+      application:
+        name: auth-service
+      kafka:
+        bootstrap-servers: kafka:9092
+        consumer:
+          group-id: auth-consuming-group
+    
+    jwt:
+      expiration: 86400000  # 24 часа

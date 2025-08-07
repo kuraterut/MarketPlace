@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: keydb-order
+spec:
+  serviceName: keydb-order-service-headless
+  replicas: 3
+  selector:
+    matchLabels:
+      app: keydb-order
+  template:
+    metadata:
+      labels:
+        app: keydb-order
+    spec:
+      containers:
+        - name: keydb
+          image: eqalpha/keydb:latest
+          command: ["keydb-server", "/etc/keydb/keydb.conf"]
+          ports:
+            - containerPort: 6379
+              name: redis
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          volumeMounts:
+            - name: config
+              mountPath: /etc/keydb
+            - name: data
+              mountPath: /data
+          livenessProbe:
+            exec:
+              command: ["keydb-cli", "ping"]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command: ["keydb-cli", "ping"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            limits:
+              cpu: "2"
+              memory: "2Gi"
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+      volumes:
+        - name: config
+          configMap:
+            name: keydb-order-config
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: "ssd"
+        resources:
+          requests:
+            storage: 10Gi

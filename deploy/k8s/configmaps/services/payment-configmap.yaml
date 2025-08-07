@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: payment-service-config
+data:
+  application.yaml: |
+    server:
+      port: 8083
+    
+    spring:
+      application:
+        name: payment-service
+      kafka:
+        bootstrap-servers: kafka:9092
+        consumer:
+          group-id: payment-consuming-group
+          isolation-level: read_committed
+          max-poll-records: 5  # Ограничение для критичных транзакций
+        producer:
+          transaction-id-prefix: tx-payment-
+    
+    kafka-topics:
+      payment-request: payment-request
+      payment-result: payment-result
+    
+    eureka:
+      instance:
+        lease-renewal-interval-in-seconds: 10
+      client:
+        registry-fetch-interval-seconds: 5

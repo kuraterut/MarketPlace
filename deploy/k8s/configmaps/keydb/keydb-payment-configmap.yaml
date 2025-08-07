@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keydb-payment-config
+data:
+  keydb.conf: |
+    server-threads 4
+    active-replica yes
+    replica-read-only no
+    multi-master no
+    min-replicas-to-write 1
+    min-replicas-max-lag 10
