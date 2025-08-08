@@ -18,6 +18,7 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="EurekaServer" options="-parameters" />
       <module name="OrderService" options="-parameters" />
       <module name="PaymentService" options="-parameters" />
       <module name="ProductService" options="-parameters" />

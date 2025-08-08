@@ -41,12 +41,19 @@ pipeline {
             steps {
                 script {
                     sh '''
+                    cd ApiGateway
                     docker build -t $DOCKER_IMAGE_GATEWAY_SERVICE .
+                    cd ../AuthService
                     docker build -t $DOCKER_IMAGE_AUTH_SERVICE .
+                    cd ../EurekaServer
                     docker build -t $DOCKER_IMAGE_EUREKA_SERVER .
+                    cd ../OrderService
                     docker build -t $DOCKER_IMAGE_ORDER_SERVICE .
+                    cd ../PaymentService
                     docker build -t $DOCKER_IMAGE_PAYMENT_SERVICE .
+                    cd ../ProductService
                     docker build -t $DOCKER_IMAGE_PRODUCT_SERVICE .
+                    cd ..
                     '''
                 }
             }
