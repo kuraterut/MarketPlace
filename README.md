@@ -46,7 +46,11 @@
 1. Убедитесь, что установлены:
     - Docker
 
-2. Запустите инфраструктурные сервисы (Должен быть запущен Docker Daemon):
+2. Установите docker-сеть `marketplace-net`: 
+   ```bash
+   docker network create marketplace-net
+   ```
+3. Запустите инфраструктурные сервисы (Должен быть запущен Docker Daemon):
    ```bash
    docker compose up --build -d
    ```

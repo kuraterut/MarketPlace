@@ -28,6 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.jwtService = jwtService;
     }
 
+    //TODO Сделать в application.yaml
     private static final List<String> WHITELIST = List.of(
             "/v3/api-docs",
             "/v3/api-docs/",
@@ -36,7 +37,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/**/v3/api-docs",
             "/swagger-ui/**",
             "/swagger-ui.html",
-            "/auth/**"
+            "/auth/**",
+            "/actuator/**",
+            "/**/actuator/**"
     );
 
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
