@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
 #SERVICES
   eureka-server:
@@ -262,4 +260,6 @@ volumes:
 
 networks:
   marketplace-net:
+    name: marketplace-net
     driver: bridge
+    external: true
