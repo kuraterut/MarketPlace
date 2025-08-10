@@ -4,19 +4,34 @@ description: Marketplace Microservices Application
 version: 0.1.0
 appVersion: "1.0.0"
 dependencies:
-  - name: postgresql
-    version: 12.2.8
-    repository: https://charts.bitnami.com/bitnami
-    condition: postgresql.enabled
-    alias: postgres-product
+  - name: api-gateway
+    version: 0.1.0
+    repository: "file://charts/api-gateway"
 
-  - name: keydb
-    version: 2.0.1  # Актуальная версия
-    repository: oci://registry-1.docker.io/bitnamicharts/keydb
-    condition: keydb.enabled
-    alias: keydb-product
+  - name: auth-service
+    version: 0.1.0
+    repository: "file://charts/auth-service"
+
+  - name: eureka-server
+    version: 0.1.0
+    repository: "file://charts/eureka-server"
 
   - name: kafka
-    version: 22.1.5
-    repository: https://charts.bitnami.com/bitnami
-    condition: kafka.enabled
+    version: 0.1.0
+    repository: "file://charts/kafka"
+
+  - name: order-service
+    version: 0.1.0
+    repository: "file://charts/order-service"
+
+  - name: payment-service
+    version: 0.1.0
+    repository: "file://charts/payment-service"
+
+  - name: product-service
+    version: 0.1.0
+    repository: "file://charts/product-service"
+
+  - name: zookeeper
+    version: 0.1.0
+    repository: "file://charts/zookeeper"

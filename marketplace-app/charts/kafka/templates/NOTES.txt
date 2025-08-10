@@ -1,0 +1,14 @@
+Thank you for installing {{ .Chart.Name }}!
+
+Kafka StatefulSet '{{ include "kafka.fullname" . }}' is deployed with {{ .Values.replicaCount }} replicas.
+
+Kafka is available via the headless service '{{ include "kafka.serviceName" . }}' on port {{ .Values.service.port }}.
+
+To connect to Kafka broker from inside the cluster:
+
+  kafka-console-producer.sh --broker-list {{ include "kafka.serviceName" . }}:{{ .Values.service.port }} --topic test
+
+To check pods:
+
+  kubectl get pods -l app.kubernetes.io/name={{ include "kafka.fullname" . }}
+

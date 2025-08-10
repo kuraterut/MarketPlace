@@ -1,0 +1,72 @@
+replicaCount: 2
+
+image:
+  repository: kuraterut/marketplace-order-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8084
+  containerPort: 8084
+
+resources:
+  requests:
+    cpu: "250m"
+    memory: "512Mi"
+  limits:
+    cpu: "1"
+    memory: "1Gi"
+
+ingress:
+  enabled: false
+  className: nginx
+  host: order.example.com
+  tls:
+    enabled: false
+    secretName: ""
+
+postgres:
+  host: postgres-order
+  port: 5432
+  database: order_db
+  username: postgres
+  password: postgres
+  persistence:
+    size: 5Gi
+    storageClass: standard
+
+keydb:
+  persistence:
+    size: 2Gi
+    storageClass: standard
+  host: keydb-order
+  port: 6379
+
+kafka:
+  bootstrapServers: kafka:9092
+  consumerGroupId: order-consuming-group
+
+scheduling:
+  processCreateOrderRate: 3000
+  processPaymentEventRate: 3000
+  processPaymentResultRate: 3000
+  processProductHoldRemoveRate: 3000
+
+eureka:
+  serviceUrl: http://eureka-server:8761/eureka
+
+kafkaTopics:
+  orderCreated: order-created
+  productHoldFailed: product-hold-failed
+  productHoldSuccess: product-hold-success
+  paymentRequest: payment-request
+  paymentResult: payment-result
+  productHoldRemove: product-hold-remove
+
+imagePullSecrets: []
+
+podAnnotations: {}
+podLabels: {}
+
+

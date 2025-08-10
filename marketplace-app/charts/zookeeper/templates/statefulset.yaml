@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "zookeeper.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "zookeeper.fullname" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "zookeeper.fullname" . }}
+  serviceName: {{ include "zookeeper.serviceName" . }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "zookeeper.fullname" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: zookeeper
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 2181
+              name: client
+            - containerPort: 2888
+              name: quorum
+            - containerPort: 3888
+              name: leader-election
+          volumeMounts:
+            - name: datadir
+              mountPath: /data
+          env:
+            - name: ZOOKEEPER_SERVER_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: ZOOKEEPER_CLIENT_PORT
+              value: "2181"
+            - name: ZOOKEEPER_TICK_TIME
+              value: "{{ .Values.config.tickTime }}"
+            - name: ZOOKEEPER_INIT_LIMIT
+              value: "{{ .Values.config.initLimit }}"
+            - name: ZOOKEEPER_SYNC_LIMIT
+              value: "{{ .Values.config.syncLimit }}"
+          readinessProbe:
+            exec:
+              command:
+                - zkServer.sh
+                - status
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+                - zkServer.sh
+                - status
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+  volumeClaimTemplates:
+    - metadata:
+        name: datadir
+      spec:
+        accessModes: {{ toJson .Values.persistence.accessModes }}
+        storageClassName: {{ if .Values.persistence.storageClass }}{{ .Values.persistence.storageClass }}{{ else }}null{{ end }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.size }}

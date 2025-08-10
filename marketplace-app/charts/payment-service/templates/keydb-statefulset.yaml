@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "payment-service.fullname" . }}-keydb
+  labels:
+    app: {{ include "payment-service.name" . }}-keydb
+    release: {{ .Release.Name }}
+spec:
+  serviceName: {{ include "payment-service.fullname" . }}-keydb
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "payment-service.name" . }}-keydb
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "payment-service.name" . }}-keydb
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: keydb
+          image: eqalpha/keydb:latest
+          ports:
+            - containerPort: 6379
+          args:
+            - "--requirepass"
+            - {{ .Values.keydb.password | quote }}
+          volumeMounts:
+            - name: keydb-data
+              mountPath: /data
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+  volumeClaimTemplates:
+    - metadata:
+        name: keydb-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: {{ .Values.keydbStorage.size }}
+        storageClassName: {{ .Values.keydbStorage.storageClassName }}

@@ -1,0 +1,32 @@
+replicaCount: 3
+
+image:
+  repository: bitnami/kafka
+  tag: 3.4.0
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 9092
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+persistence:
+  enabled: true
+  storageClass: ""
+  accessModes:
+    - ReadWriteOnce
+  size: 10Gi
+
+zookeeper:
+  serviceName: zookeeper-zookeeper
+
+config:
+  logRetentionHours: 168
+  logRetentionBytes: 1073741824

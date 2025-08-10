@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: keydb-product
+spec:
+  serviceName: "keydb-product"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keydb-product
+  template:
+    metadata:
+      labels:
+        app: keydb-product
+    spec:
+      containers:
+        - name: keydb
+          image: eqalpha/keydb:latest
+          ports:
+            - containerPort: 6379
+          volumeMounts:
+            - name: keydb-data
+              mountPath: /data
+  volumeClaimTemplates:
+    - metadata:
+        name: keydb-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi

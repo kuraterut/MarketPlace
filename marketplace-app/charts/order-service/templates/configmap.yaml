@@ -1,0 +1,93 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "order-service.fullname" . }}-config
+  labels:
+    {{- include "order-service.labels" . | nindent 4 }}
+data:
+  application.yml: |-
+    server:
+      port: {{ .Values.service.port }}
+
+    spring:
+      cache:
+        type: redis
+        redis:
+          time-to-live: 3600000
+          key-prefix: "order-service:"
+          use-key-prefix: true
+          cache-null-values: false
+      data:
+        redis:
+          lettuce:
+            pool:
+              max-active: 8
+              max-idle: 8
+              min-idle: 0
+              max-wait: -1ms
+          host: {{ .Values.keydb.host }}
+          port: {{ .Values.keydb.port }}
+          timeout: 5000
+      application:
+        name: order-service
+      datasource:
+        url: jdbc:postgresql://{{ .Values.postgres.host }}:{{ .Values.postgres.port }}/{{ .Values.postgres.database }}
+        driver-class-name: org.postgresql.Driver
+      jpa:
+        hibernate:
+          ddl-auto: update
+        show-sql: true
+      liquibase:
+        change-log: classpath:db/migration/changelog-master.xml
+        enabled: true
+      kafka:
+        bootstrap-servers: {{ .Values.kafka.bootstrapServers }}
+        consumer:
+          group-id: {{ .Values.kafka.consumerGroupId }}
+          auto-offset-reset: earliest
+          key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+          value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+          properties:
+            spring.json.trusted.packages: "*"
+          isolation-level: read_committed
+        producer:
+          key-serializer: org.apache.kafka.common.serialization.StringSerializer
+          value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+          acks: all
+          retries: 2147483647
+          properties:
+            spring.json.add.type.headers: false
+
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: health, info, prometheus
+      endpoint:
+        health:
+          show-details: always
+      metrics:
+        enable:
+          http.server.requests: true
+          tomcat: true
+        tags:
+          application: order-service
+
+    eureka:
+      client:
+        service-url:
+          defaultZone: {{ .Values.eureka.serviceUrl }}
+
+    kafka-topics:
+      order-created: {{ .Values.kafkaTopics.orderCreated }}
+      product-hold-failed: {{ .Values.kafkaTopics.productHoldFailed }}
+      product-hold-success: {{ .Values.kafkaTopics.productHoldSuccess }}
+      payment-request: {{ .Values.kafkaTopics.paymentRequest }}
+      payment-result: {{ .Values.kafkaTopics.paymentResult }}
+      product-hold-remove: {{ .Values.kafkaTopics.productHoldRemove }}
+
+    scheduling:
+      process-create-order-rate: {{ .Values.scheduling.processCreateOrderRate }}
+      process-payment-event-rate: {{ .Values.scheduling.processPaymentEventRate }}
+      process-payment-result-rate: {{ .Values.scheduling.processPaymentResultRate }}
+      process-product-hold-remove-rate: {{ .Values.scheduling.processProductHoldRemoveRate }}

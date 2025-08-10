@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "zookeeper.serviceName" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "zookeeper.fullname" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: 2181
+      protocol: TCP
+      name: client
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: {{ include "zookeeper.fullname" . }}

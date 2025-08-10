@@ -1,0 +1,72 @@
+enabled: true
+
+replicaCount: 2
+
+image:
+  repository: kuraterut/marketplace-apigateway-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+  containerPort: 8080
+
+ingress:
+  enabled: false
+  className: nginx
+  host: gateway.example.com
+  tls:
+    enabled: false
+    secretName: gateway-tls-secret
+  annotations: {}
+
+spring:
+  profiles:
+    active: prod
+  management:
+    endpoint:
+      health:
+        show-details: always
+
+probes:
+  readiness:
+    path: /actuator/health
+    initialDelaySeconds: 15
+    periodSeconds: 10
+    failureThreshold: 5
+  liveness:
+    path: /actuator/health
+    initialDelaySeconds: 30
+    periodSeconds: 20
+    failureThreshold: 5
+
+resources:
+  requests:
+    cpu: "200m"
+    memory: "256Mi"
+  limits:
+    cpu: "1000m"
+    memory: "1Gi"
+
+imagePullSecrets: []
+
+eureka:
+  uri: http://eureka-server:8761/eureka
+
+auth:
+  url: http://auth-service:8081
+  jwtPublic: ""
+  # If you keep JWT public key in secret, set name/key below (optional)
+  jwtSecret:
+    existingSecret: ""   # if set, Gateway will read public key from this Secret
+    keyName: "jwt-public-key"
+    value: "7A25432A462D4A614E645267556B58703273357638792F423F4528482B4D6251"
+
+gateway:
+  routePrefix: /api
+  enableRateLimit: false
+
+
+podAnnotations: {}
+podLabels: {}

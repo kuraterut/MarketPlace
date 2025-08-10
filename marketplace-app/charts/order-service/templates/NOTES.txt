@@ -1,0 +1,11 @@
+Order Service has been deployed.
+
+You can access it via:
+
+1) If Ingress enabled:
+   http://{{ .Values.ingress.host }}
+
+2) Or via port-forwarding:
+   kubectl port-forward svc/{{ include "order-service.fullname" . }} {{ .Values.service.port }}:{{ .Values.service.port }}
+
+Remember to check pod logs for status.
