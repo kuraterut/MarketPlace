@@ -1,0 +1,36 @@
+{{- if .Values.keydb.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "auth-service.fullname" . }}-keydb
+  labels:
+    {{- include "auth-service.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "auth-service.fullname" . }}-keydb
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "auth-service.fullname" . }}-keydb
+  template:
+    metadata:
+      labels:
+        app: {{ include "auth-service.fullname" . }}-keydb
+    spec:
+      containers:
+        - name: keydb
+          image: eqalpha/keydb:latest
+          ports:
+            - containerPort: 6379
+          args: ["--requirepass", "$(KEYDB_PASSWORD)"]
+          volumeMounts:
+            - name: keydb-data
+              mountPath: /data
+  volumeClaimTemplates:
+    - metadata:
+        name: keydb-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: {{ .Values.keydb.persistence.size }}
+{{- end }}

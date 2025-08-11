@@ -1,0 +1,15 @@
+Api Gateway installed as: {{ include "api-gateway.fullname" . }}
+
+To access:
+1) If Ingress enabled:
+   http://{{ .Values.ingress.host }}
+
+2) Otherwise:
+   kubectl port-forward svc/{{ include "api-gateway.fullname" . }} {{ .Values.service.port }}:{{ .Values.service.port }}
+
+Environment variables:
+  EUREKA_URI - {{ include "api-gateway.eurekaUri" . }}
+  AUTH_SERVICE_URL - {{ include "api-gateway.authUrl" . }}
+  JWT secret name - {{ include "api-gateway.jwtSecretName" . }}
+
+If you use external JWT secret, set auth.jwtSecret.existingSecret in values.

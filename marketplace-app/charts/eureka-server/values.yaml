@@ -1,0 +1,33 @@
+replicaCount: 1
+
+image:
+  repository: kuraterut/marketplace-eureka-server
+  tag: latest
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 8761
+  containerPort: 8761
+
+ingress:
+  enabled: false
+  className: nginx
+  host: eureka.example.com
+  tls:
+    enabled: false
+    secretName: ""
+
+resources:
+  requests:
+    cpu: "200m"
+    memory: "256Mi"
+  limits:
+    cpu: "1"
+    memory: "512Mi"
+
+# Image pull secrets (если нужно)
+imagePullSecrets: []
+
+podAnnotations: {}
+podLabels: {}

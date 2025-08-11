@@ -1,0 +1,68 @@
+replicaCount: 1
+
+image:
+  repository: kuraterut/marketplace-payment-service
+  tag: latest
+  pullPolicy: Always
+
+ingress:
+  enabled: false
+  className: nginx
+  host: payment.example.com
+  tls:
+    enabled: false
+    secretName: ""
+
+service:
+  type: ClusterIP
+  port: 8083
+
+postgresql:
+  username: postgres
+  password: postgres
+  database: payment_db
+  port: 5432
+
+keydb:
+  host: keydb-payment
+  port: 6379
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+postgresStorage:
+  size: 10Gi
+  storageClassName: standard
+
+keydbStorage:
+  size: 5Gi
+  storageClassName: standard
+
+
+kafka:
+  bootstrapServers: kafka:9092
+  consumerGroupId: payment-consuming-group
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 150
+  periodSeconds: 20
+  timeoutSeconds: 30
+  successThreshold: 1
+  failureThreshold: 3
+
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 150
+  periodSeconds: 20
+  timeoutSeconds: 30
+  successThreshold: 1
+  failureThreshold: 3
+
+
+# kafka, eureka и другие параметры можно положить сюда по необходимости

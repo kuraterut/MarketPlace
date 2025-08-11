@@ -39,7 +39,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/swagger-ui.html",
             "/auth/**",
             "/actuator/**",
-            "/**/actuator/**"
+            "/**/actuator/**",
+            "/actuator/health",
+            "/actuator/health/**",
+            "/**/actuator/health/**",
+            "/**/actuator/health"
     );
 
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
@@ -47,7 +51,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
-        log.info("PATH: {}", path);
+        log.info("PATH: {}, {}", path, WHITELIST.stream().anyMatch(pattern -> pathMatcher.match(pattern, path)));
         return WHITELIST.stream().anyMatch(pattern -> pathMatcher.match(pattern, path));
     }
 

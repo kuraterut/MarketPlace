@@ -1,0 +1,8 @@
+1. To install the product-service chart:
+
+   helm install product-service ./product-service
+
+2. To uninstall:
+
+   helm uninstall product-service
+

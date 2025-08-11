@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "api-gateway.fullname" . }}
+  labels:
+    {{- include "api-gateway.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{ include "api-gateway.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "api-gateway.selectorLabels" . | nindent 8 }}
+      annotations:
+        {{- toYaml .Values.podAnnotations | nindent 8 }}
+    spec:
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+{{ toYaml .Values.imagePullSecrets | indent 8 }}
+      {{- end }}
+      containers:
+        - name: api-gateway
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.containerPort }}
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "api-gateway.fullname" . }}-config
+                  key: SPRING_PROFILES_ACTIVE
+            - name: EUREKA_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "api-gateway.fullname" . }}-config
+                  key: EUREKA_URI
+            - name: AUTH_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "api-gateway.fullname" . }}-config
+                  key: AUTH_SERVICE_URL
+            - name: JWT_SECRET
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "api-gateway.fullname" . }}-config
+                  key: JWT_SECRET
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: {{ .Values.global.kafka.bootstrapServers | default (printf "%s-kafka-headless.%s.svc.cluster.local:9092" .Release.Name .Release.Namespace) | quote }}
+            - name: JWT_PUBLIC_KEY_SECRET
+              value: {{ include "api-gateway.jwtSecretName" . | quote }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.probes.readiness.path | quote }}
+              port: http
+            initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
+            timeoutSeconds: {{.Values.probes.readiness.timeoutSeconds}}
+            failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.probes.liveness.path | quote }}
+              port: http
+            initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
+            timeoutSeconds: {{.Values.probes.liveness.timeoutSeconds}}
+            failureThreshold: {{ .Values.probes.liveness.failureThreshold }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}

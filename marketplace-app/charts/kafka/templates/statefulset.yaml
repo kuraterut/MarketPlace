@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "kafka.fullname" . }}
+  labels:
+    app: {{ .Chart.Name }}
+spec:
+  serviceName: {{ .Values.service.name }}
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+    spec:
+      containers:
+        - name: kafka
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.service.port }}
+              name: kafka
+            - containerPort: {{ .Values.service.controllerPort }}
+              name: controller
+          env:
+            - name: KAFKA_CFG_NODE_ID
+              value: "0"
+            - name: KAFKA_CFG_PROCESS_ROLES
+              value: "broker,controller"
+            - name: KAFKA_CFG_CONTROLLER_LISTENER_NAMES
+              value: "CONTROLLER"
+            - name: KAFKA_CFG_LISTENERS
+              value: "PLAINTEXT://:{{ .Values.service.port }},CONTROLLER://:{{ .Values.service.controllerPort }}"
+            - name: KAFKA_CFG_ADVERTISED_LISTENERS
+              value: "PLAINTEXT://{{ include "kafka.fullname" . }}-0.{{ include "kafka.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}"
+            - name: KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP
+              value: "PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT"
+            - name: KAFKA_CFG_CONTROLLER_QUORUM_VOTERS
+              value: "0@{{ include "kafka.fullname" . }}-0.{{ include "kafka.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.controllerPort }}"
+            - name: KAFKA_CFG_LOG_DIRS
+              value: "/bitnami/kafka/data-logs"
+          volumeMounts:
+            - name: data
+              mountPath: /bitnami/kafka/data-logs
+      # Очистка каталога от мусора перед стартом Kafka
+      initContainers:
+        - name: cleanup
+          image: busybox
+          command: ["sh", "-c", "rm -rf /bitnami/kafka/data-logs/*"]
+          volumeMounts:
+            - name: data
+              mountPath: /bitnami/kafka/data-logs
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: {{ .Values.persistence.size }}

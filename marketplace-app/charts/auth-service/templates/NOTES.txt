@@ -1,0 +1,10 @@
+1. Auth Service будет доступен через:
+   {{- if .Values.ingress.enabled }}
+   http://{{ .Values.ingress.host }}
+   {{- else }}
+   ClusterIP Service: {{ include "auth-service.fullname" . }}:{{ .Values.service.port }}
+   {{- end }}
+
+2. Postgres Secret:
+   {{ include "auth-service.postgresSecretName" . }}
+

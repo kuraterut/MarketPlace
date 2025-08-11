@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "api-gateway.fullname" . }}-config
+  labels:
+    {{- include "api-gateway.labels" . | nindent 4 }}
+data:
+  SPRING_PROFILES_ACTIVE: {{ .Values.spring.profiles.active | quote }}
+  EUREKA_URI: {{ include "api-gateway.eurekaUri" . | quote }}
+  AUTH_SERVICE_URL: {{ include "api-gateway.authUrl" . | quote }}
+  GATEWAY_PREFIX: {{ .Values.gateway.routePrefix | quote }}
+  ENABLE_RATE_LIMIT: "{{ .Values.gateway.enableRateLimit }}"
+  JWT_SECRET: "{{ .Values.global.jwt.secret}}"

@@ -1,0 +1,24 @@
+dependencies:
+- name: api-gateway
+  repository: file://charts/api-gateway
+  version: 0.1.0
+- name: auth-service
+  repository: file://charts/auth-service
+  version: 0.1.0
+- name: eureka-server
+  repository: file://charts/eureka-server
+  version: 0.1.0
+- name: kafka
+  repository: file://charts/kafka
+  version: 0.1.0
+- name: order-service
+  repository: file://charts/order-service
+  version: 0.1.0
+- name: payment-service
+  repository: file://charts/payment-service
+  version: 0.1.0
+- name: product-service
+  repository: file://charts/product-service
+  version: 0.1.0
+digest: sha256:2e78187436257ddcd9c585351afcab4bf0c109e550b2ec6065c757f0f6c91ebe
+generated: "2025-08-11T12:41:54.2932207+03:00"
