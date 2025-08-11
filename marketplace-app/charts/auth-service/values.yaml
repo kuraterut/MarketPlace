@@ -1,0 +1,67 @@
+
+replicaCount: 1
+
+image:
+  repository: kuraterut/marketplace-auth-service
+  tag: latest
+  pullPolicy: Always
+
+
+service:
+  type: ClusterIP
+  port: 8081
+  containerPort: 8081
+
+postgresql:
+  enabled: true
+  existingSecret: "" # если указать имя, то StatefulSet не создастся
+  host: auth-postgres
+  port: 5432
+  database: auth_db
+  username: postgres
+  password: postgres
+  persistence:
+    size: 1Gi
+
+keydb:
+  enabled: true
+  existingSecret: ""
+  host: auth-keydb
+  port: 6379
+  password: keydbpass
+  persistence:
+    size: 512Mi
+
+readinessProbe:
+  path: /actuator/health
+  initialDelaySeconds: 150
+  periodSeconds: 30
+  timeoutSeconds: 60
+
+livenessProbe:
+  path: /actuator/health
+  initialDelaySeconds: 150
+  periodSeconds: 30
+  timeoutSeconds: 60
+
+rollingUpdate:
+  maxSurge: 1
+  maxUnavailable: 0
+
+resources:
+  requests:
+    cpu: "200m"
+    memory: "256Mi"
+  limits:
+    cpu: "1000m"
+    memory: "1Gi"
+
+ingress:
+  enabled: false
+  host: auth.local
+  className: nginx
+  annotations: {}
+
+kafka:
+  bootstrapServers: kafka:9092
+  consumerGroupId: auth-consuming-group

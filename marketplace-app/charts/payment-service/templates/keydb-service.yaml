@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "payment-service.fullname" . }}-keydb
+  labels:
+    app: {{ include "payment-service.name" . }}-keydb
+    release: {{ .Release.Name }}
+spec:
+  ports:
+    - port: 6379
+      targetPort: 6379
+      protocol: TCP
+      name: redis
+  clusterIP: None
+  selector:
+    app: {{ include "payment-service.name" . }}-keydb
+    release: {{ .Release.Name }}

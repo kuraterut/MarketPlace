@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "auth-service.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "auth-service.name" . | quote }}
+    helm.sh/chart: {{ include "auth-service.chart" . | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "auth-service.name" . | quote }}
+      app.kubernetes.io/instance: {{ .Release.Name | quote }}
+  strategy:
+    rollingUpdate:
+      maxSurge: {{ .Values.rollingUpdate.maxSurge}}
+      maxUnavailable: {{ .Values.rollingUpdate.maxUnavailable}}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "auth-service.name" . | quote }}
+        app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    spec:
+      {{- if .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+{{ toYaml .Values.global.imagePullSecrets | indent 8 }}
+      {{- end }}
+      containers:
+        - name: auth-service
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+          ports:
+            - containerPort: {{ .Values.service.containerPort }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "auth-service.fullname" . }}-config
+
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+          livenessProbe:
+            httpGet:
+              path: "{{ .Values.livenessProbe.path }}"
+              port: {{ .Values.service.containerPort }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{.Values.livenessProbe.timeoutSeconds}}
+          readinessProbe:
+            httpGet:
+              path: "{{ .Values.readinessProbe.path }}"
+              port: {{ .Values.service.containerPort }}
+              httpHeaders:
+                - name: X-Readiness-Check
+                  value: "true"
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{.Values.readinessProbe.timeoutSeconds}}

@@ -1,0 +1,85 @@
+replicaCount: 1
+
+image:
+  repository: kuraterut/marketplace-order-service
+  tag: latest
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 8084
+  containerPort: 8084
+
+resources:
+  requests:
+    cpu: "250m"
+    memory: "512Mi"
+  limits:
+    cpu: "1"
+    memory: "1Gi"
+
+ingress:
+  enabled: false
+  className: nginx
+  host: order.example.com
+  tls:
+    enabled: false
+    secretName: ""
+
+postgresql:
+  host: postgres-order
+  port: 5432
+  database: order_db
+  username: postgres
+  password: postgres
+  persistence:
+    size: 5Gi
+    storageClass: standard
+
+keydb:
+  persistence:
+    size: 2Gi
+    storageClass: standard
+  host: keydb-order
+  port: 6379
+
+kafka:
+  consumerGroupId: order-consuming-group
+
+scheduling:
+  processCreateOrderRate: 3000
+  processPaymentEventRate: 3000
+  processPaymentResultRate: 3000
+  processProductHoldRemoveRate: 3000
+
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 150
+  periodSeconds: 20
+  timeoutSeconds: 30
+  successThreshold: 1
+  failureThreshold: 3
+
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 150
+  periodSeconds: 20
+  timeoutSeconds: 30
+  successThreshold: 1
+  failureThreshold: 3
+
+kafkaTopics:
+  orderCreated: order-created
+  productHoldFailed: product-hold-failed
+  productHoldSuccess: product-hold-success
+  paymentRequest: payment-request
+  paymentResult: payment-result
+  productHoldRemove: product-hold-remove
+
+imagePullSecrets: []
+
+podAnnotations: {}
+podLabels: {}
+
+

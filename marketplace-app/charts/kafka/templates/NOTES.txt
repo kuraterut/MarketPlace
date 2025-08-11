@@ -1,0 +1,7 @@
+Kafka StatefulSet {{ include "kafka.fullname" . }} deployed ({{ .Values.replicaCount }} replicas).
+
+Check pods:
+  kubectl get pods -l app.kubernetes.io/name={{ include "kafka.name" . }}
+
+To view server.properties for pod 0:
+  kubectl exec -it {{ include "kafka.fullname" . }}-0 -- cat /opt/bitnami/kafka/config/server.properties

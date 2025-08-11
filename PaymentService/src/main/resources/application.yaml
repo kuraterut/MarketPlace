@@ -85,6 +85,11 @@ scheduling:
   process-payment-event-rate: 3000
   process-payment-result-rate: 3000
 
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.boot.actuate: DEBUG
+
 #logging:
 #  level:
 #    org.springframework: DEBUG

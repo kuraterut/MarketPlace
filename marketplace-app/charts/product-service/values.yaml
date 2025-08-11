@@ -1,0 +1,62 @@
+replicaCount: 1
+
+image:
+  repository: kuraterut/marketplace-product-service
+  tag: latest
+  pullPolicy: Always
+
+service:
+  port: 8082
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+ingress:
+  enabled: false
+  annotations: {}
+  host: product-service.example.com
+  tls:
+    secretName: tls-secret
+
+kafka:
+  consumerGroupId: product-consuming-group
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 150
+  periodSeconds: 15
+  timeoutSeconds: 30
+  successThreshold: 1
+  failureThreshold: 3
+
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 150
+  periodSeconds: 20
+  timeoutSeconds: 30
+  successThreshold: 1
+  failureThreshold: 3
+
+
+postgresql:
+  host: postgres-product
+  port: 5432
+  database: product_db
+  username: postgres
+  password: postgres
+  persistence:
+    size: 5Gi
+    storageClass: standard
+
+keydb:
+  persistence:
+    size: 2Gi
+    storageClass: standard
+  host: keydb-product
+  port: 6379
+
