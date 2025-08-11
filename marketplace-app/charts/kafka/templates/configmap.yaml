@@ -1,21 +1,6 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "kafka.fullname" . }}-config
-  labels:
-    app.kubernetes.io/name: {{ include "kafka.fullname" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+  name: marketplace-app-kafka-config-template
 data:
-  server.properties: |
-    broker.id=${HOSTNAME##*-}
-    log.dirs=/kafka-logs
-    zookeeper.connect={{ .Values.zookeeper.serviceName }}:2181
-    log.retention.hours={{ .Values.config.logRetentionHours }}
-    log.retention.bytes={{ .Values.config.logRetentionBytes }}
-    listeners=PLAINTEXT://:9092
-    advertised.listeners=PLAINTEXT://{{ include "kafka.fullname" . }}-{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:9092
-    num.network.threads=3
-    num.io.threads=8
-    socket.send.buffer.bytes=102400
-    socket.receive.buffer.bytes=102400
-    socket.request.max.bytes=104857600
+  advertised.listeners: "PLAINTEXT://{{ .Values.service.name }}-0.{{ .Values.service.name }}.default.svc.cluster.local:{{ .Values.service.port }}"

@@ -31,7 +31,3 @@ dependencies:
   - name: product-service
     version: 0.1.0
     repository: "file://charts/product-service"
-
-  - name: zookeeper
-    version: 0.1.0
-    repository: "file://charts/zookeeper"

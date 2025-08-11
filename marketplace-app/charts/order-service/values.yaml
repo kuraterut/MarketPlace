@@ -1,9 +1,9 @@
-replicaCount: 2
+replicaCount: 1
 
 image:
   repository: kuraterut/marketplace-order-service
   tag: latest
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 service:
   type: ClusterIP
@@ -26,7 +26,7 @@ ingress:
     enabled: false
     secretName: ""
 
-postgres:
+postgresql:
   host: postgres-order
   port: 5432
   database: order_db
@@ -44,7 +44,6 @@ keydb:
   port: 6379
 
 kafka:
-  bootstrapServers: kafka:9092
   consumerGroupId: order-consuming-group
 
 scheduling:
@@ -53,8 +52,22 @@ scheduling:
   processPaymentResultRate: 3000
   processProductHoldRemoveRate: 3000
 
-eureka:
-  serviceUrl: http://eureka-server:8761/eureka
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 150
+  periodSeconds: 20
+  timeoutSeconds: 30
+  successThreshold: 1
+  failureThreshold: 3
+
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 150
+  periodSeconds: 20
+  timeoutSeconds: 30
+  successThreshold: 1
+  failureThreshold: 3
 
 kafkaTopics:
   orderCreated: order-created

@@ -1,11 +1,11 @@
 enabled: true
 
-replicaCount: 2
+replicaCount: 1
 
 image:
   repository: kuraterut/marketplace-apigateway-service
   tag: latest
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 service:
   type: ClusterIP
@@ -32,13 +32,15 @@ spring:
 probes:
   readiness:
     path: /actuator/health
-    initialDelaySeconds: 15
-    periodSeconds: 10
+    initialDelaySeconds: 60
+    periodSeconds: 20
+    timeoutSeconds: 30
     failureThreshold: 5
   liveness:
     path: /actuator/health
-    initialDelaySeconds: 30
+    initialDelaySeconds: 60
     periodSeconds: 20
+    timeoutSeconds: 30
     failureThreshold: 5
 
 resources:

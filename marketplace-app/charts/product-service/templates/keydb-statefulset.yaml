@@ -1,23 +1,29 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: keydb-product
+  name: {{ include "product-service.fullname" . }}-keydb
+  labels:
+    app: keydb
+    release: {{ .Release.Name }}
 spec:
-  serviceName: "keydb-product"
-  replicas: 1
   selector:
     matchLabels:
-      app: keydb-product
+      app: keydb
+      release: {{ .Release.Name }}
+  serviceName: {{ include "product-service.fullname" . }}-keydb
+  replicas: 1
   template:
     metadata:
       labels:
-        app: keydb-product
+        app: keydb
+        release: {{ .Release.Name }}
     spec:
       containers:
         - name: keydb
           image: eqalpha/keydb:latest
           ports:
             - containerPort: 6379
+              name: keydb
           volumeMounts:
             - name: keydb-data
               mountPath: /data
@@ -25,7 +31,8 @@ spec:
     - metadata:
         name: keydb-data
       spec:
-        accessModes: ["ReadWriteOnce"]
+        accessModes: [ "ReadWriteOnce" ]
         resources:
           requests:
-            storage: 1Gi
+            storage: {{ .Values.keydb.persistence.size }}
+        storageClassName: {{ .Values.keydb.persistence.storageClass | default "standard" }}

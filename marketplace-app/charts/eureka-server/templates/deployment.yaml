@@ -37,22 +37,24 @@ spec:
             - name: EUREKA_CLIENT_FETCH_REGISTRY
               value: "false"
             - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
-              value: "http://eureka-server:8761/eureka/"
+              value: {{.Values.global.eureka.serviceUrl | quote}}
             - name: SPRING_APPLICATION_NAME
               value: "eureka-server"
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
               port: http
-            initialDelaySeconds: 15
-            periodSeconds: 10
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            timeoutSeconds: 30
             failureThreshold: 3
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
               port: http
-            initialDelaySeconds: 30
+            initialDelaySeconds: 60
             periodSeconds: 20
+            timeoutSeconds: 30
             failureThreshold: 3
           resources:
 {{ toYaml .Values.resources | indent 12 }}

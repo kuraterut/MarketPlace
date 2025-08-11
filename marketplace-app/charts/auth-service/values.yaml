@@ -1,15 +1,15 @@
 
-replicaCount: 2
+replicaCount: 1
 
 image:
   repository: kuraterut/marketplace-auth-service
   tag: latest
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 
 service:
   type: ClusterIP
-  port: 80
+  port: 8081
   containerPort: 8081
 
 postgresql:
@@ -34,13 +34,15 @@ keydb:
 
 readinessProbe:
   path: /actuator/health
-  initialDelaySeconds: 20
-  periodSeconds: 10
+  initialDelaySeconds: 150
+  periodSeconds: 30
+  timeoutSeconds: 60
 
 livenessProbe:
   path: /actuator/health
-  initialDelaySeconds: 40
-  periodSeconds: 15
+  initialDelaySeconds: 150
+  periodSeconds: 30
+  timeoutSeconds: 60
 
 rollingUpdate:
   maxSurge: 1
@@ -59,3 +61,7 @@ ingress:
   host: auth.local
   className: nginx
   annotations: {}
+
+kafka:
+  bootstrapServers: kafka:9092
+  consumerGroupId: auth-consuming-group

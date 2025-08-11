@@ -3,69 +3,59 @@ kind: StatefulSet
 metadata:
   name: {{ include "kafka.fullname" . }}
   labels:
-    app.kubernetes.io/name: {{ include "kafka.fullname" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    app: {{ .Chart.Name }}
 spec:
+  serviceName: {{ .Values.service.name }}
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "kafka.fullname" . }}
-  serviceName: {{ include "kafka.serviceName" . }}
+      app: {{ .Chart.Name }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ include "kafka.fullname" . }}
-        app.kubernetes.io/instance: {{ .Release.Name }}
+        app: {{ .Chart.Name }}
     spec:
       containers:
         - name: kafka
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - containerPort: 9092
+            - containerPort: {{ .Values.service.port }}
               name: kafka
-          volumeMounts:
-            - name: datadir
-              mountPath: /kafka-logs
-            - name: config
-              mountPath: /opt/bitnami/kafka/config/server.properties
-              subPath: server.properties
+            - containerPort: {{ .Values.service.controllerPort }}
+              name: controller
           env:
-            - name: KAFKA_BROKER_ID
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.name
-            - name: KAFKA_CFG_ZOOKEEPER_CONNECT
-              value: "{{ .Values.zookeeper.serviceName }}:2181"
-            - name: KAFKA_CFG_LOG_RETENTION_HOURS
-              value: "{{ .Values.config.logRetentionHours }}"
-            - name: KAFKA_CFG_LOG_RETENTION_BYTES
-              value: "{{ .Values.config.logRetentionBytes }}"
-          readinessProbe:
-            tcpSocket:
-              port: 9092
-            initialDelaySeconds: 10
-            periodSeconds: 10
-          livenessProbe:
-            tcpSocket:
-              port: 9092
-            initialDelaySeconds: 15
-            periodSeconds: 20
-          resources:
-          {{- toYaml .Values.resources | nindent 10 }}
+            - name: KAFKA_CFG_NODE_ID
+              value: "0"
+            - name: KAFKA_CFG_PROCESS_ROLES
+              value: "broker,controller"
+            - name: KAFKA_CFG_CONTROLLER_LISTENER_NAMES
+              value: "CONTROLLER"
+            - name: KAFKA_CFG_LISTENERS
+              value: "PLAINTEXT://:{{ .Values.service.port }},CONTROLLER://:{{ .Values.service.controllerPort }}"
+            - name: KAFKA_CFG_ADVERTISED_LISTENERS
+              value: "PLAINTEXT://{{ include "kafka.fullname" . }}-0.{{ include "kafka.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}"
+            - name: KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP
+              value: "PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT"
+            - name: KAFKA_CFG_CONTROLLER_QUORUM_VOTERS
+              value: "0@{{ include "kafka.fullname" . }}-0.{{ include "kafka.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.controllerPort }}"
+            - name: KAFKA_CFG_LOG_DIRS
+              value: "/bitnami/kafka/data-logs"
+          volumeMounts:
+            - name: data
+              mountPath: /bitnami/kafka/data-logs
+      # Очистка каталога от мусора перед стартом Kafka
+      initContainers:
+        - name: cleanup
+          image: busybox
+          command: ["sh", "-c", "rm -rf /bitnami/kafka/data-logs/*"]
+          volumeMounts:
+            - name: data
+              mountPath: /bitnami/kafka/data-logs
   volumeClaimTemplates:
     - metadata:
-        name: datadir
+        name: data
       spec:
-        accessModes: {{ toJson .Values.persistence.accessModes }}
-        storageClassName: {{ if .Values.persistence.storageClass }}{{ .Values.persistence.storageClass }}{{ else }}null{{ end }}
+        accessModes: ["ReadWriteOnce"]
         resources:
           requests:
             storage: {{ .Values.persistence.size }}
-    - metadata:
-        name: config
-      spec:
-        accessModes: [ "ReadWriteOnce" ]
-        resources:
-          requests:
-            storage: 1Mi

@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: kuraterut/marketplace-eureka-server
   tag: latest
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 service:
   type: ClusterIP

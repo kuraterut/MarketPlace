@@ -20,8 +20,5 @@ dependencies:
 - name: product-service
   repository: file://charts/product-service
   version: 0.1.0
-- name: zookeeper
-  repository: file://charts/zookeeper
-  version: 0.1.0
-digest: sha256:daca639f6b1f29c6958caa89788cca04f5c7c2724e9982734e15c2303b03a241
-generated: "2025-08-10T18:05:37.3020046+03:00"
+digest: sha256:2e78187436257ddcd9c585351afcab4bf0c109e550b2ec6065c757f0f6c91ebe
+generated: "2025-08-11T12:41:54.2932207+03:00"

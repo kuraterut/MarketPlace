@@ -7,19 +7,14 @@
 Return chart name (or override)
 */ -}}
 {{- define "auth-service.name" -}}
-{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
+auth-service
 {{- end -}}
 
 {{- /*
-Return chart full name: <release>-<name> (truncated to 63 chars)
-Allow override by .Values.fullnameOverride
+Return the full name of the release (например, имя Helm релиза + chart name)
 */ -}}
 {{- define "auth-service.fullname" -}}
-{{- if .Values.fullnameOverride -}}
-{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
 {{- printf "%s-%s" .Release.Name (include "auth-service.name" .) | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
 {{- end -}}
 
 {{- /*
@@ -60,12 +55,14 @@ Secret name for Postgres credentials.
 Имя секрета для KeyDB
 */}}
 {{- define "auth-service.keydbSecretName" -}}
-{{- if .Values.keydb.existingSecret }}
-{{ .Values.keydb.existingSecret }}
-{{- else }}
 {{ include "auth-service.fullname" . }}-keydb
 {{- end }}
+
+
+{{- define "auth-service.postgresConfig" -}}
+{{ include "auth-service.fullname" . }}-postgres
 {{- end }}
+
 
 
 {{- /*

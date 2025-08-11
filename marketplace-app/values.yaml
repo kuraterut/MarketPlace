@@ -3,5 +3,8 @@ global:
     - name: my-docker-secret
   springProfile: prod
   kafka:
-    bootstrapServers: kafka:9092
-
+    bootstrapServers: marketplace-app-kafka-0.marketplace-app-kafka.default.svc.cluster.local:9092
+  jwt:
+    secret: 7A25432A462D4A614E645267556B58703273357638792F423F4528482B4D6251
+  eureka:
+    serviceUrl: http://marketplace-app-eureka-server:8761/eureka

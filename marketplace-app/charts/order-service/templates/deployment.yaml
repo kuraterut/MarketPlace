@@ -27,36 +27,30 @@ spec:
           ports:
             - containerPort: {{ .Values.service.containerPort }}
               name: http
-          env:
-            - name: SPRING_DATASOURCE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "order-service.fullname" . }}-secret
-                  key: postgres-password
-          volumeMounts:
-            - name: config-volume
-              mountPath: /config
-              readOnly: true
+          envFrom:
+            - configMapRef:
+                name: {{ include "order-service.fullname" . }}-config
           readinessProbe:
+            {{- if .Values.readinessProbe.enabled }}
             httpGet:
               path: /actuator/health/readiness
-              port: http
-            initialDelaySeconds: 15
-            periodSeconds: 10
-            failureThreshold: 3
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+            {{- end }}
           livenessProbe:
+            {{- if .Values.livenessProbe.enabled }}
             httpGet:
               path: /actuator/health/liveness
-              port: http
-            initialDelaySeconds: 30
-            periodSeconds: 20
-            failureThreshold: 3
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+            {{- end }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
-      volumes:
-        - name: config-volume
-          configMap:
-            name: {{ include "order-service.fullname" . }}-config
-            items:
-              - key: application.yml
-                path: application.yml

@@ -23,26 +23,9 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.service.port }}
-          env:
-            - name: SPRING_DATASOURCE_URL
-              value: {{ .Values.env.SPRING_DATASOURCE_URL | quote }}
-            - name: SPRING_DATASOURCE_USERNAME
-              value: {{ .Values.env.SPRING_DATASOURCE_USERNAME | quote }}
-            - name: SPRING_DATASOURCE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "product-service.fullname" . }}-secret
-                  key: postgres-password
-            - name: SPRING_REDIS_HOST
-              value: {{ .Values.env.SPRING_REDIS_HOST | quote }}
-            - name: SPRING_REDIS_PORT
-              value: {{ .Values.env.SPRING_REDIS_PORT | quote }}
-            - name: SERVER_PORT
-              value: {{ .Values.env.SERVER_PORT | quote }}
-            - name: KAFKA_BOOTSTRAP_SERVERS
-              value: {{ .Values.kafka.bootstrapServers | quote }}
-            - name: KAFKA_CONSUMER_GROUP_ID
-              value: {{ .Values.kafka.consumerGroupId | quote }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "product-service.fullname" . }}-config
           resources:
             requests:
               cpu: {{ .Values.resources.requests.cpu }}

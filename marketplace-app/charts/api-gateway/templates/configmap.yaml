@@ -10,3 +10,4 @@ data:
   AUTH_SERVICE_URL: {{ include "api-gateway.authUrl" . | quote }}
   GATEWAY_PREFIX: {{ .Values.gateway.routePrefix | quote }}
   ENABLE_RATE_LIMIT: "{{ .Values.gateway.enableRateLimit }}"
+  JWT_SECRET: "{{ .Values.global.jwt.secret}}"

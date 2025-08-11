@@ -49,3 +49,20 @@ Helper for container image name with tag
 {{- define "product-service.image" -}}
 {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
 {{- end -}}
+
+{{- /*
+Helper for kafka bootstrap server string.
+Priority:
+  1) .Values.global.kafka.bootstrapServers
+  2) .Values.kafka.bootstrapServers
+  3) Construct from release name: <release>-kafka-headless.<namespace>.svc.cluster.local:9092
+*/ -}}
+{{- define "product-service.kafkaBootstrap" -}}
+{{- if .Values.global.kafka.bootstrapServers }}
+{{- .Values.global.kafka.bootstrapServers -}}
+{{- else if .Values.kafka.bootstrapServers }}
+{{- .Values.kafka.bootstrapServers -}}
+{{- else }}
+{{- printf "%s-kafka-headless.%s.svc.cluster.local:9092" .Release.Name .Release.Namespace -}}
+{{- end -}}
+{{- end -}}

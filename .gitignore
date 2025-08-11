@@ -5,6 +5,7 @@ target/
 .env
 .tgz
 .lock
+.ps1
 
 ### IntelliJ IDEA ###
 .idea/modules.xml

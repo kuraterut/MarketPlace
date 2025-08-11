@@ -22,3 +22,20 @@ helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 app.kubernetes.io/name: {{ include "order-service.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
+
+{{- /*
+Helper for kafka bootstrap server string.
+Priority:
+  1) .Values.global.kafka.bootstrapServers
+  2) .Values.kafka.bootstrapServers
+  3) Construct from release name: <release>-kafka-headless.<namespace>.svc.cluster.local:9092
+*/ -}}
+{{- define "order-service.kafkaBootstrap" -}}
+{{- if .Values.global.kafka.bootstrapServers }}
+{{- .Values.global.kafka.bootstrapServers -}}
+{{- else if .Values.kafka.bootstrapServers }}
+{{- .Values.kafka.bootstrapServers -}}
+{{- else }}
+{{- printf "%s-kafka-headless.%s.svc.cluster.local:9092" .Release.Name .Release.Namespace -}}
+{{- end -}}
+{{- end -}}

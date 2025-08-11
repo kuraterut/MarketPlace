@@ -3,6 +3,7 @@ package org.kuraterut.jwtsecuritylib.config;
 import org.kuraterut.jwtsecuritylib.filter.JwtAuthenticationFilter;
 import org.kuraterut.jwtsecuritylib.model.JwtProperties;
 import org.kuraterut.jwtsecuritylib.service.JwtService;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -42,6 +43,7 @@ public class JwtSecurityAutoConfiguration {
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/swagger-ui.html").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers(EndpointRequest.toAnyEndpoint()).permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

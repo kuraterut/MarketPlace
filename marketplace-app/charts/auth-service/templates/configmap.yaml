@@ -6,3 +6,15 @@ metadata:
     {{- include "auth-service.labels" . | nindent 4 }}
 data:
   SPRING_PROFILES_ACTIVE: "{{ .Values.global.springProfile }}"
+  JWT_SECRET: "{{ .Values.global.jwt.secret }}"
+  SPRING_DATASOURCE_URL: >-
+    jdbc:postgresql://{{ include "auth-service.fullname" . }}-postgres:{{ .Values.postgresql.port }}/{{ .Values.postgresql.database }}
+  SPRING_DATASOURCE_USERNAME: "{{ .Values.postgresql.username }}"
+  SPRING_DATASOURCE_PASSWORD: "{{ .Values.postgresql.password }}"
+  SPRING_DATA_REDIS_HOST: {{ include "auth-service.fullname" . }}-keydb
+  SPRING_DATA_REDIS_PORT: "{{ .Values.keydb.port }}"
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: "{{ include "auth-service.kafkaBootstrap" . }}"
+  SERVER_PORT: "{{ .Values.service.port}}"
+  KAFKA_CONSUMER_GROUP_ID: "{{ .Values.kafka.consumerGroupId}}"
+  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "{{ .Values.global.eureka.serviceUrl}}"
+

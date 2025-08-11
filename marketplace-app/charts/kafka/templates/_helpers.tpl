@@ -1,11 +1,11 @@
+{{- define "kafka.name" -}}
+kafka
+{{- end }}
+
 {{- define "kafka.fullname" -}}
-{{- printf "%s-%s" .Release.Name .Chart.Name | trunc 63 | trimSuffix "-" -}}
+{{ printf "%s-%s" .Release.Name (include "kafka.name" .) | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{- define "kafka.serviceName" -}}
-{{- printf "%s-%s" .Release.Name .Chart.Name | trunc 63 | trimSuffix "-" -}}
-{{- end }}
-
-{{- define "kafka.pvcName" -}}
-{{- printf "%s-%s" .Release.Name .Chart.Name | trunc 63 | trimSuffix "-" -}}
+{{ include "kafka.fullname" . }}
 {{- end }}

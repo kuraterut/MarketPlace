@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: kuraterut/marketplace-product-service
   tag: latest
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 service:
   port: 8082
@@ -23,29 +23,40 @@ ingress:
   tls:
     secretName: tls-secret
 
-env:
-  SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-product:5432/product_db
-  SPRING_DATASOURCE_USERNAME: postgres
-  SPRING_REDIS_HOST: keydb-product
-  SPRING_REDIS_PORT: "6379"
-  SERVER_PORT: "8082"
-
 kafka:
-  bootstrapServers: kafka:9092
   consumerGroupId: product-consuming-group
 
 readinessProbe:
   enabled: true
-  initialDelaySeconds: 10
-  periodSeconds: 10
-  timeoutSeconds: 5
+  initialDelaySeconds: 150
+  periodSeconds: 15
+  timeoutSeconds: 30
   successThreshold: 1
   failureThreshold: 3
 
 livenessProbe:
   enabled: true
-  initialDelaySeconds: 30
+  initialDelaySeconds: 150
   periodSeconds: 20
-  timeoutSeconds: 5
+  timeoutSeconds: 30
   successThreshold: 1
   failureThreshold: 3
+
+
+postgresql:
+  host: postgres-product
+  port: 5432
+  database: product_db
+  username: postgres
+  password: postgres
+  persistence:
+    size: 5Gi
+    storageClass: standard
+
+keydb:
+  persistence:
+    size: 2Gi
+    storageClass: standard
+  host: keydb-product
+  port: 6379
+

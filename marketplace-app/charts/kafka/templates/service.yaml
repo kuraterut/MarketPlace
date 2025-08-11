@@ -1,17 +1,17 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "kafka.serviceName" . }}
+  name: {{ include "kafka.fullname" . }}
   labels:
-    app.kubernetes.io/name: {{ include "kafka.fullname" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    app: {{ .Chart.Name }}
 spec:
-  type: {{ .Values.service.type }}
-  ports:
-    - port: {{ .Values.service.port }}
-      targetPort: 9092
-      protocol: TCP
-      name: kafka
   clusterIP: None
   selector:
-    app.kubernetes.io/name: {{ include "kafka.fullname" . }}
+    app: {{ .Chart.Name }}
+  ports:
+    - name: kafka
+      port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.port }}
+    - name: controller
+      port: {{ .Values.service.controllerPort }}
+      targetPort: {{ .Values.service.controllerPort }}

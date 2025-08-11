@@ -3,20 +3,28 @@ replicaCount: 1
 image:
   repository: kuraterut/marketplace-payment-service
   tag: latest
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
+
+ingress:
+  enabled: false
+  className: nginx
+  host: payment.example.com
+  tls:
+    enabled: false
+    secretName: ""
 
 service:
   type: ClusterIP
   port: 8083
 
-postgres:
+postgresql:
   username: postgres
   password: postgres
   database: payment_db
   port: 5432
 
 keydb:
-  password: "keydb_password_here"
+  host: keydb-payment
   port: 6379
 
 resources:
@@ -35,14 +43,6 @@ keydbStorage:
   size: 5Gi
   storageClassName: standard
 
-env:
-  SPRING_DATASOURCE_URL: "jdbc:postgresql://payment-service-postgres:5432/payment_db"
-  SPRING_DATASOURCE_USERNAME: "postgres"
-  SPRING_DATASOURCE_PASSWORD: "postgres"
-  SPRING_REDIS_HOST: "payment-service-keydb"
-  SPRING_REDIS_PORT: 6379
-  SERVER_PORT: 8083
-
 
 kafka:
   bootstrapServers: kafka:9092
@@ -50,17 +50,17 @@ kafka:
 
 readinessProbe:
   enabled: true
-  initialDelaySeconds: 10
-  periodSeconds: 10
-  timeoutSeconds: 5
+  initialDelaySeconds: 150
+  periodSeconds: 20
+  timeoutSeconds: 30
   successThreshold: 1
   failureThreshold: 3
 
 livenessProbe:
   enabled: true
-  initialDelaySeconds: 30
+  initialDelaySeconds: 150
   periodSeconds: 20
-  timeoutSeconds: 5
+  timeoutSeconds: 30
   successThreshold: 1
   failureThreshold: 3
 
