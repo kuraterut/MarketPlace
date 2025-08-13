@@ -25,7 +25,7 @@ public class TransactionMapper {
         TransactionResponse transactionResponse = new TransactionResponse();
         transactionResponse.setId(transaction.getId());
         transactionResponse.setPaymentAccountId(transaction.getAccount().getId());
-        transaction.setAmount(transaction.getAmount());
+        transactionResponse.setAmount(transaction.getAmount());
         transactionResponse.setType(transaction.getType());
         transactionResponse.setDescription(transaction.getDescription());
         transactionResponse.setStatus(transaction.getStatus());

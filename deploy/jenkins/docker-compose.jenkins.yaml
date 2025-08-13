@@ -8,11 +8,12 @@ services:
     ports:
       - "8079:8080"
       - "50000:50000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - jenkins_data:/var/jenkins_home
-      - //var/run/docker.sock:/var/run/docker.sock
     environment:
-      - DOCKER_HOST=unix:///var/run/docker.sock
+      - DOCKER_HOST=tcp://host.docker.internal:2375
       - JAVA_OPTS=-Djenkins.install.runSetupWizard=false
     networks:
       - jenkins-net

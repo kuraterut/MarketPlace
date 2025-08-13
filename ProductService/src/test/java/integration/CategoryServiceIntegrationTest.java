@@ -31,7 +31,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @Testcontainers
 @EnableCaching
 @TestPropertySource(locations = "classpath:application-test.yaml")
-class CategoryServiceTest {
+public class CategoryServiceIntegrationTest {
 
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16")
