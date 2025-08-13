@@ -1,6 +1,7 @@
 package org.kuraterut.paymentservice.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.kuraterut.paymentservice.dto.request.CreateTransactionRequest;
 import org.kuraterut.paymentservice.dto.response.TransactionListResponse;
 import org.kuraterut.paymentservice.dto.response.TransactionResponse;
@@ -29,6 +30,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @CacheConfig(cacheNames = "transactions")
+@Slf4j
 public class TransactionService implements GetTransactionUseCase, CreateTransactionUseCase {
     private final TransactionRepository transactionRepository;
     private final PaymentAccountRepository paymentAccountRepository;
@@ -38,11 +40,17 @@ public class TransactionService implements GetTransactionUseCase, CreateTransact
     @Transactional
     @CacheEvict(allEntries = true)
     public TransactionResponse createTransaction(CreateTransactionRequest request, Long userId) {
+        log.info("Start method createTransaction");
         PaymentAccount paymentAccount = paymentAccountRepository.findByUserId(userId)
-                .orElseThrow(() -> new PaymentAccountNotFoundException("Account not found by user ID: " + userId));
+                .orElseThrow(() -> {
+                    log.warn("Payment account not found by userId: {}", userId);
+                    return new PaymentAccountNotFoundException("Account not found by user ID: " + userId);
+                });
+        log.info("payment account found: {}", paymentAccount.getId());
         Transaction transaction = transactionMapper.toEntity(request);
         transaction.setAccount(paymentAccount);
         transaction = transactionRepository.saveAndFlush(transaction);
+        log.info("Transaction created and saved: {}", transaction.getId());
         return transactionMapper.toResponse(transaction);
     }
 
