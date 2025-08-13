@@ -53,14 +53,13 @@ public class ProductService implements CreateProductUseCase, DeleteProductUseCas
     @Transactional
     @CacheEvict(key = "#id")
     public void deleteProduct(Long id, Long userId) {
-        boolean isOwner = productRepository.existsByIdAndSellerId(id, userId);
-
-        if (!isOwner) {
-            throw new PermissionDeniedException("Permission Denied. You are not allowed to delete this product");
-        }
-
         if (!productRepository.existsById(id)) {
             throw new ProductNotFoundException("Product not found by id: " + id);
+        }
+
+        boolean isOwner = productRepository.existsByIdAndSellerId(id, userId);
+        if (!isOwner) {
+            throw new PermissionDeniedException("Permission Denied. You are not allowed to delete this product");
         }
 
         productRepository.deleteById(id);

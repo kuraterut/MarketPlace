@@ -21,6 +21,7 @@ public class PaymentResultInbox {
     private Long orderId;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private PaymentResult result;
 
     private boolean processed;
