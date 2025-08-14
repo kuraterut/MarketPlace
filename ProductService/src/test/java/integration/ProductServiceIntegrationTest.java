@@ -17,6 +17,7 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.containers.wait.strategy.WaitStrategy;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 import java.time.Duration;
 
@@ -33,13 +34,13 @@ public class ProductServiceIntegrationTest {
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16")
             .withDatabaseName("testdb")
             .withUsername("test")
-            .withPassword("test");
+            .withPassword("test")
+            .withStartupTimeout(Duration.ofSeconds(60));
 
     @Container
-    static GenericContainer<?> keydb = new GenericContainer<>("eqalpha/keydb:latest")
+    static GenericContainer<?> redis = new GenericContainer<>(DockerImageName.parse("redis:7.2-alpine"))
             .withExposedPorts(6379)
-            .waitingFor(Wait.forListeningPort()
-                    .withStartupTimeout(Duration.ofSeconds(30)));
+            .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(30)));
 
     @DynamicPropertySource
     static void registerProps(DynamicPropertyRegistry registry) {
@@ -48,8 +49,8 @@ public class ProductServiceIntegrationTest {
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
 
-        registry.add("spring.data.redis.host", keydb::getHost);
-        registry.add("spring.data.redis.port", keydb::getFirstMappedPort);
+        registry.add("spring.data.redis.host", redis::getHost);
+        registry.add("spring.data.redis.port", redis::getFirstMappedPort);
 
         registry.add("spring.cache.type", () -> "redis");
         registry.add("spring.cache.redis.time-to-live", () -> "30000"); // 30 seconds
@@ -78,7 +79,8 @@ public class ProductServiceIntegrationTest {
 
         // Verify cache entry exists
         await()
-                .atMost(Duration.ofSeconds(10))
+                .atMost(Duration.ofSeconds(30))
+                .pollInterval(Duration.ofSeconds(1))
                 .untilAsserted(() -> {
                     var cache = cacheManager.getCache("products");
                     assertThat(cache).isNotNull();
