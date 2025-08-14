@@ -13,6 +13,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.containers.wait.strategy.WaitStrategy;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -26,28 +27,34 @@ import static org.awaitility.Awaitility.await;
 @Testcontainers
 @EnableCaching
 @TestPropertySource(locations = "classpath:application-test.yaml")
-class ProductServiceIntegrationTest {
+public class ProductServiceIntegrationTest {
 
     @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16")
             .withDatabaseName("testdb")
             .withUsername("test")
             .withPassword("test");
 
     @Container
     static GenericContainer<?> keydb = new GenericContainer<>("eqalpha/keydb:latest")
-            .withExposedPorts(6379);
+            .withExposedPorts(6379)
+            .waitingFor(Wait.forListeningPort()
+                    .withStartupTimeout(Duration.ofSeconds(30)));
 
     @DynamicPropertySource
     static void registerProps(DynamicPropertyRegistry registry) {
-        postgres.start();
-        keydb.start();
+
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
 
         registry.add("spring.data.redis.host", keydb::getHost);
-        registry.add("spring.data.redis.port", () -> keydb.getMappedPort(6379));
+        registry.add("spring.data.redis.port", keydb::getFirstMappedPort);
+
+        registry.add("spring.cache.type", () -> "redis");
+        registry.add("spring.cache.redis.time-to-live", () -> "30000"); // 30 seconds
+
+
         registry.add("jwt.secret", () -> "test-secret-key-1234567890hasfhasfhasfhashhshasfhha");
         registry.add("eureka.client.enabled", () -> false);
         registry.add("spring.kafka.listener.auto-startup", () -> false);
@@ -66,14 +73,23 @@ class ProductServiceIntegrationTest {
     void cacheWorksForGetAllProducts() {
         var pageable = PageRequest.of(0, 5);
 
+        // First call - should populate cache
         var firstCall = productService.getAllProducts(pageable);
+
+        // Verify cache entry exists
+        await()
+                .atMost(Duration.ofSeconds(10))
+                .untilAsserted(() -> {
+                    var cache = cacheManager.getCache("products");
+                    assertThat(cache).isNotNull();
+                    var cachedValue = cache.get("all_products_0_5");
+                    assertThat(cachedValue).isNotNull();
+                    assertThat(cachedValue.get()).isEqualTo(firstCall);
+                });
+
+        // Second call - should come from cache
         var secondCall = productService.getAllProducts(pageable);
         assertThat(secondCall).isEqualTo(firstCall);
-        await()
-                .atMost(Duration.ofSeconds(30))
-                .untilAsserted(() ->
-                        assertThat(cacheManager.getCache("products").get("all_products_0_5")).isNotNull()
-                );
     }
 }
 
