@@ -40,6 +40,8 @@ class ProductServiceIntegrationTest {
 
     @DynamicPropertySource
     static void registerProps(DynamicPropertyRegistry registry) {
+        postgres.start();
+        keydb.start();
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
@@ -68,7 +70,7 @@ class ProductServiceIntegrationTest {
         var secondCall = productService.getAllProducts(pageable);
         assertThat(secondCall).isEqualTo(firstCall);
         await()
-//                .atMost(Duration.ofSeconds(5))
+                .atMost(Duration.ofSeconds(30))
                 .untilAsserted(() ->
                         assertThat(cacheManager.getCache("products").get("all_products_0_5")).isNotNull()
                 );

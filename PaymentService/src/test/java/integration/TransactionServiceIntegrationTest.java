@@ -56,6 +56,7 @@ public class TransactionServiceIntegrationTest {
     @DynamicPropertySource
     static void registerPgProperties(DynamicPropertyRegistry registry) {
         postgres.start();
+        keydb.start();
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
