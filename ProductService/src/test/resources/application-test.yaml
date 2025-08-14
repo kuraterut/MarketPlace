@@ -4,7 +4,7 @@ eureka:
 
 spring:
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: dummy:1234
     consumer:
       auto-offset-reset: earliest
     properties:
