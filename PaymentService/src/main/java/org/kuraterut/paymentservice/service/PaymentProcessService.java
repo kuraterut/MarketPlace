@@ -52,14 +52,18 @@ public class PaymentProcessService implements PaymentProcessUseCase {
     @KafkaListener(topics = "${kafka-topics.payment-request}", groupId = "${spring.kafka.consumer.group-id}")
     @Transactional
     public void listenPaymentEvent(String message, Acknowledgment ack) throws JsonProcessingException {
+        log.info("[PaymentProcessService:listenPaymentEvent] Start listenPaymentEvent");
         PaymentEvent event = objectMapper.readValue(message, PaymentEvent.class);
+        log.info("[PaymentProcessService:listenPaymentEvent] Received event {}", event);
         PaymentEventInbox inbox = new PaymentEventInbox();
         inbox.setProcessed(false);
         inbox.setOrderId(event.getOrderId());
         inbox.setUserId(event.getUserId());
         inbox.setAmount(event.getAmount());
         paymentEventInboxRepository.save(inbox);
+        log.info("[PaymentProcessService:listenPaymentEvent] PaymentEventInbox created and saved");
         ack.acknowledge();
+        log.info("[PaymentProcessService:listenPaymentEvent] Acknowledged");
     }
 
     @Override
@@ -70,14 +74,19 @@ public class PaymentProcessService implements PaymentProcessUseCase {
             @CacheEvict(cacheNames = "transactions", allEntries = true)
     })
     public void processPaymentEvent() {
+        log.info("[PaymentProcessService:processPaymentEvent] Start processPaymentEvent");
         List<PaymentEventInbox> inboxes = paymentEventInboxRepository.findTop100ByProcessedIsFalse();
+        log.info("[PaymentProcessService:processPaymentEvent] Unprocessed PaymentEvent inboxes found");
         for (PaymentEventInbox inbox : inboxes) {
+            log.info("[PaymentProcessService:processPaymentEvent] Process inbox event {}", inbox);
             BigDecimal amount = inbox.getAmount();
             Long userId = inbox.getUserId();
 
+            log.info("[PaymentProcessService:processPaymentEvent] Try find Payment Account By User ID: {}", userId);
             Optional<PaymentAccount> accountOpt = paymentAccountRepository.findByUserId(userId);
 
             if(accountOpt.isEmpty()){
+                log.warn("[PaymentProcessService:processPaymentEvent] Account not found By User ID: {}", userId);
                 PaymentResultEventOutbox outbox = new PaymentResultEventOutbox();
                 outbox.setProcessed(false);
                 outbox.setOrderId(inbox.getOrderId());
@@ -85,10 +94,12 @@ public class PaymentProcessService implements PaymentProcessUseCase {
                 paymentResultOutboxRepository.save(outbox);
                 inbox.setProcessed(true);
                 paymentEventInboxRepository.save(inbox);
+                log.info("[PaymentProcessService:processPaymentEvent] PaymentResultEventOutbox created and saved");
                 continue;
             }
             PaymentAccount account = accountOpt.get();
-
+            log.info("[PaymentProcessService:processPaymentEvent] Account found By User ID: {}", userId);
+            log.info("[PaymentProcessService:processPaymentEvent] Try withdraw Payment Account If Available");
             int updatedRows = paymentAccountRepository.withdrawPaymentAccountIfAvailableByUserId(userId, amount);
             PaymentResultEventOutbox outbox = new PaymentResultEventOutbox();
             outbox.setProcessed(false);
@@ -101,9 +112,11 @@ public class PaymentProcessService implements PaymentProcessUseCase {
             transaction.setOrderId(inbox.getOrderId());
 
             if(updatedRows == 0){
+                log.warn("[PaymentProcessService:processPaymentEvent] Withdraw failed, Not Enough Money");
                 outbox.setResult(PaymentResult.NOT_ENOUGH_MONEY);
                 transaction.setStatus(TransactionStatus.FAILED);
             } else {
+                log.info("[PaymentProcessService:processPaymentEvent] Withdraw successful");
                 outbox.setResult(PaymentResult.SUCCESS);
                 transaction.setStatus(TransactionStatus.COMPLETED);
             }
@@ -111,6 +124,7 @@ public class PaymentProcessService implements PaymentProcessUseCase {
             paymentResultOutboxRepository.save(outbox);
             inbox.setProcessed(true);
             paymentEventInboxRepository.save(inbox);
+            log.info("[PaymentProcessService:processPaymentEvent] PaymentResultOutbox created and saved, Inbox processed");
         }
     }
 
@@ -118,15 +132,19 @@ public class PaymentProcessService implements PaymentProcessUseCase {
     @Transactional
     @Scheduled(fixedRateString = "${scheduling.process-payment-result-rate}")
     public void processPaymentResult() throws ExecutionException, InterruptedException {
+        log.info("[PaymentProcessService:processPaymentResult] Start processPaymentResult");
         List<PaymentResultEventOutbox> outboxes = paymentResultOutboxRepository.findTop100ByProcessedIsFalse();
+        log.info("[PaymentProcessService:processPaymentResult] Unprocessed PaymentResultEventOutbox found");
         for (PaymentResultEventOutbox outbox : outboxes) {
+            log.info("[PaymentProcessService:processPaymentResult] Process inbox event {}", outbox);
             PaymentResultEvent event = new PaymentResultEvent();
             event.setOrderId(outbox.getOrderId());
             event.setResult(outbox.getResult());
             paymentResultEventKafkaTemplate.send(paymentResultTopic, event).get();
+            log.info("[PaymentProcessService:processPaymentResult] paymentResultEvent was sent to message broker");
             outbox.setProcessed(true);
             paymentResultOutboxRepository.save(outbox);
+            log.info("[PaymentProcessService:processPaymentResult] PaymentResultOutbox processed");
         }
     }
-
 }

@@ -31,7 +31,6 @@ import java.util.List;
 @SecurityRequirement(name = "Bearer Token")
 @Tag(name = "Payment controller", description = "Controller for payment account manipulation")
 public class PaymentController {
-    //TODO Добавить тестовые данные в Ликви
 
     private final CreatePaymentAccountUseCase createPaymentAccountUseCase;
     private final GetPaymentAccountUseCase getPaymentAccountUseCase;

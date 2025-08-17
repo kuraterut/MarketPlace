@@ -43,9 +43,12 @@ public class RegisterService implements RegisterUseCase {
     @Transactional
     @Retryable(value = OptimisticLockingFailureException.class, maxAttempts = 3, backoff = @Backoff(delay = 100))
     public RegisterResponse register(RegisterRequest registerRequest) throws ExecutionException, InterruptedException {
+        log.info("[RegisterService:register] Start registration");
         if(userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
+            log.info("[RegisterService:register] User already exists with email {}", registerRequest.getEmail());
             throw new UserAlreadyExistsException("User already exists with email: " + registerRequest.getEmail());
         }
+
         User user = User.builder()
                 .email(registerRequest.getEmail())
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
@@ -54,8 +57,11 @@ public class RegisterService implements RegisterUseCase {
 
         user = userRepository.save(user);
 
+        log.info("[RegisterService:register] User created and saved: {}", user);
+
         if(registerRequest.getRole() != Role.ADMIN) {
             userRegistrationEventKafkaTemplate.send(userRegistrationTopic, new UserRegistrationEvent(user.getId())).get();
+            log.info("[RegisterService:register] User registration event was sent to message broker");
         }
 
         UserDetailsImpl userDetails = new UserDetailsImpl(user.getEmail(), user.getPassword(), user.getId(), List.of(user.getRole()));
@@ -63,7 +69,7 @@ public class RegisterService implements RegisterUseCase {
         String token = jwtGeneratorService.generateToken(userDetails);
         RegisterResponse registerResponse = new RegisterResponse();
         registerResponse.setToken(token);
-
+        log.info("[RegisterService:register] User registration success: {}", registerResponse);
         return registerResponse;
     }
 }

@@ -10,12 +10,12 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public interface GetTransactionUseCase {
-    TransactionListResponse getAllTransactions(Long userId, Pageable pageable);
-    TransactionResponse getTransactionById(Long id, Long userId);
-    TransactionListResponse getTransactionsByAmountBetween(BigDecimal min, BigDecimal max, Long userId, Pageable pageable);
-    TransactionListResponse getTransactionsByTransactionType(TransactionType type, Long userId, Pageable pageable);
-    TransactionListResponse getTransactionsByTransactionStatus(TransactionStatus status, Long userId, Pageable pageable);
-    TransactionListResponse getTransactionsByOrderId(Long orderId, Long userId, Pageable pageable);
+    TransactionListResponse getAllTransactionsAndUserId(Long userId, Pageable pageable);
+    TransactionResponse getTransactionByIdAndUserId(Long id, Long userId);
+    TransactionListResponse getTransactionsByAmountBetweenAndUserId(BigDecimal min, BigDecimal max, Long userId, Pageable pageable);
+    TransactionListResponse getTransactionsByTransactionTypeAndUserId(TransactionType type, Long userId, Pageable pageable);
+    TransactionListResponse getTransactionsByTransactionStatusAndUserId(TransactionStatus status, Long userId, Pageable pageable);
+    TransactionListResponse getTransactionsByOrderIdAndUserId(Long orderId, Long userId, Pageable pageable);
 
     TransactionResponse getTransactionById(Long id);
     TransactionListResponse getAllTransactions(Pageable pageable);

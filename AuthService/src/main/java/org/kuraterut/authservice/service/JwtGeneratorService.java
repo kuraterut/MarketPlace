@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
@@ -25,7 +26,9 @@ public class JwtGeneratorService {
     private String secret;
 
     public String generateToken(UserDetailsImpl userDetails) {
-        var key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        log.info("[JwtGeneratorService:generateToken] Generating JWT token for user {}", userDetails);
+
+        SecretKey key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         Map<String, Object> claims = new HashMap<>();
         claims.put("user_id", userDetails.getUserId());
         claims.put("email", userDetails.getUsername());
@@ -33,14 +36,14 @@ public class JwtGeneratorService {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList()));
 
-        log.info("(Auth Service JWT Generator) User ID: {}", userDetails.getUserId());
-
-        return Jwts.builder()
+        String token = Jwts.builder()
                 .setSubject(userDetails.getUsername())
                 .setClaims(claims)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 3600000))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
+        log.info("[JwtGeneratorService:generateToken] Generated JWT token: {}", token);
+        return token;
     }
 }

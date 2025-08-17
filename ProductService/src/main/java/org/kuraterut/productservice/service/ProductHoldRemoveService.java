@@ -26,12 +26,18 @@ public class ProductHoldRemoveService implements ProductHoldRemoveUseCase {
     @Override
     @CacheEvict(cacheNames = "products", allEntries = true)
     public void processRemoveProductHolds() {
+        log.info("[ProductHoldRemoveService:processRemoveProductHolds] Start processRemoveProductHolds");
         productHoldedRepository.deleteAllByStatus(ProductHoldedStatus.TO_REMOVE);
+        log.info("[ProductHoldRemoveService:processRemoveProductHolds] Deleted all holded products by status");
         List<ProductHolded> productHoldedList = productHoldedRepository.findTop100ByStatus(ProductHoldedStatus.TO_RETURN);
+        log.info("[ProductHoldRemoveService:processRemoveProductHolds] Found holded products: {}", productHoldedList);
         for (ProductHolded productHolded : productHoldedList) {
             productRepository.raiseStock(productHolded.getProductId(), productHolded.getQuantity());
+            log.info("[ProductHoldRemoveService:processRemoveProductHolds] Raise Stock: productId: {}, quantity: {}",
+                    productHolded.getProductId(), productHolded.getQuantity());
             productHolded.setStatus(ProductHoldedStatus.TO_REMOVE);
         }
         productHoldedRepository.saveAll(productHoldedList);
+        log.info("[ProductHoldRemoveService:processRemoveProductHolds] Saved all holded products");
     }
 }

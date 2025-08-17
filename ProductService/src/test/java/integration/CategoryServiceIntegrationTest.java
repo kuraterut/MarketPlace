@@ -92,7 +92,7 @@ public class CategoryServiceIntegrationTest {
         CategoryResponse created = categoryService.createCategory(request);
         assertThat(created.getName()).isEqualTo("testCategoryName");
 
-        CategoryResponse fetched = categoryService.getCategory(created.getId());
+        CategoryResponse fetched = categoryService.getCategoryById(created.getId());
         assertThat(fetched.getId()).isEqualTo(created.getId());
         assertThat(fetched.getName()).isEqualTo(created.getName());
         assertThat(fetched.getDescription()).isEqualTo(created.getDescription());
@@ -108,7 +108,7 @@ public class CategoryServiceIntegrationTest {
         toSaveCategory.setId(null);
         Category category = categoryRepository.saveAndFlush(toSaveCategory);
 
-        categoryService.deleteCategory(category.getId());
+        categoryService.deleteCategoryById(category.getId());
 
         assertThat(categoryRepository.findById(category.getId())).isEmpty();
     }
@@ -120,9 +120,9 @@ public class CategoryServiceIntegrationTest {
         Category category = categoryRepository.saveAndFlush(toSaveCategory);
 
         // Первый вызов — из БД
-        CategoryResponse first = categoryService.getCategory(category.getId());
+        CategoryResponse first = categoryService.getCategoryById(category.getId());
         // Второй вызов — должен идти из кэша
-        CategoryResponse second = categoryService.getCategory(category.getId());
+        CategoryResponse second = categoryService.getCategoryById(category.getId());
 
         assertThat(first).isEqualTo(second);
     }

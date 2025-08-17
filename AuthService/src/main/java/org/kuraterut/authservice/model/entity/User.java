@@ -8,8 +8,7 @@ import org.kuraterut.authservice.model.utils.Role;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Getter
-@Setter
+@Data
 @Table(name = "users")
 public class User {
     @Id

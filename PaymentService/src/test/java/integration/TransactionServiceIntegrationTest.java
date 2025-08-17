@@ -109,7 +109,7 @@ public class TransactionServiceIntegrationTest {
 
         var created = transactionService.createTransaction(request, userId);
 
-        var found = transactionService.getTransactionById(created.getId(), userId);
+        var found = transactionService.getTransactionByIdAndUserId(created.getId(), userId);
 
         assertThat(found).isNotNull();
         assertThat(found.getId()).isEqualTo(created.getId());
@@ -117,7 +117,7 @@ public class TransactionServiceIntegrationTest {
 
     @Test
     void getTransactionById_notFound() {
-        assertThatThrownBy(() -> transactionService.getTransactionById(9999L, userId))
+        assertThatThrownBy(() -> transactionService.getTransactionByIdAndUserId(9999L, userId))
                 .isInstanceOf(TransactionNotFoundException.class);
     }
 
@@ -130,8 +130,8 @@ public class TransactionServiceIntegrationTest {
 
         var pageable = PageRequest.of(0, 10);
 
-        transactionService.getAllTransactions(userId, pageable);
-        transactionService.getAllTransactions(userId, pageable); // второй вызов для кэша
+        transactionService.getAllTransactionsAndUserId(userId, pageable);
+        transactionService.getAllTransactionsAndUserId(userId, pageable); // второй вызов для кэша
 
         var cacheKey = "all_transactions_user_" + userId + "_page_0_size_10";
         assertThat(cacheManager.getCache("transactions").get(cacheKey)).isNotNull();
@@ -146,7 +146,7 @@ public class TransactionServiceIntegrationTest {
 
         var pageable = org.springframework.data.domain.PageRequest.of(0, 10);
 
-        var result = transactionService.getTransactionsByAmountBetween(
+        var result = transactionService.getTransactionsByAmountBetweenAndUserId(
                 BigDecimal.valueOf(100),
                 BigDecimal.valueOf(300),
                 userId,
