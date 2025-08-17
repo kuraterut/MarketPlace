@@ -121,7 +121,6 @@ public class ProductServiceIntegrationTest {
         // First call - should populate cache
         var firstCall = productService.getAllProducts(pageable);
 
-
         // Verify cache entry exists
         await()
                 .atMost(Duration.ofSeconds(30))

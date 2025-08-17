@@ -30,16 +30,21 @@ public class PaymentProcessService implements PaymentProcessUseCase {
     @Scheduled(fixedRateString = "${scheduling.process-payment-event-rate}")
     @Transactional
     public void processPaymentEvents() throws ExecutionException, InterruptedException {
+        log.info("[PaymentProcessService:processPaymentEvents] Start processPaymentEvents");
         List<PaymentEventOutbox> outboxes = paymentEventOutboxRepository.findTop100ByProcessedIsFalse();
+        log.info("[PaymentProcessService:processPaymentEvents] Payment Event Outbox list found");
         for (PaymentEventOutbox outbox : outboxes) {
+            log.info("[PaymentProcessService:processPaymentEvents] Processing outbox {}", outbox);
             PaymentEvent event = new PaymentEvent();
             event.setAmount(outbox.getAmount());
             event.setOrderId(outbox.getOrderId());
             event.setUserId(outbox.getUserId());
 
             paymentEventKafkaTemplate.send(paymentRequestTopic, event).get();
+            log.info("[PaymentProcessService:processPaymentEvents] Send payment event to message broker {}", event);
             outbox.setProcessed(true);
             paymentEventOutboxRepository.save(outbox);
+            log.info("[PaymentProcessService:processPaymentEvents] Out box processed");
         }
     }
 }

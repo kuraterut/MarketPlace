@@ -164,10 +164,9 @@ public class OrderController {
             @Parameter(description = "Page sorting attribute") @RequestParam(defaultValue = "id") String sortBy,
             @Parameter(description = "Page sorting direction") @RequestParam(defaultValue = "asc") String direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sortBy));
-        return getOrderUseCase.getAllOrdersByOrderStatus(status, authPrincipal.getUserId(), pageable);
+        return getOrderUseCase.getAllOrdersByOrderStatusAndUserId(status, authPrincipal.getUserId(), pageable);
     }
 
-    //TODO Прописать Postman для Created At
     @GetMapping("/admin/createdAt")
     @PreAuthorize("hasAuthority('ADMIN')")
     @Operation(summary = "Getting all orders filter by creating timestamp (Pageable)")
@@ -206,6 +205,6 @@ public class OrderController {
             @Parameter(description = "Page sorting attribute") @RequestParam(defaultValue = "id") String sortBy,
             @Parameter(description = "Page sorting direction") @RequestParam(defaultValue = "asc") String direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sortBy));
-        return getOrderUseCase.getAllOrdersByCreatedAtAfter(createdAt, authPrincipal.getUserId(), pageable);
+        return getOrderUseCase.getAllOrdersByCreatedAtAfterAndUserId(createdAt, authPrincipal.getUserId(), pageable);
     }
 }

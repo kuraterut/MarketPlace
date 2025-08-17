@@ -3,6 +3,7 @@ package org.kuraterut.productservice.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.kuraterut.productservice.model.utils.ProductHoldedStatus;
 import org.kuraterut.productservice.model.event.ProductHoldRemoveEvent;
 import org.kuraterut.productservice.model.utils.ProductHoldRemoveEventDetails;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProductHoldRemoveEventService implements ProductHoldRemoveEventUseCase {
     private final ProductHoldedRepository productHoldedRepository;
     private final ObjectMapper objectMapper;
@@ -23,12 +25,16 @@ public class ProductHoldRemoveEventService implements ProductHoldRemoveEventUseC
     @Transactional
     @Override
     public void listenProductHoldRemoveEvent(String message, Acknowledgment ack) throws JsonProcessingException {
+        log.info("[ProductHoldRemoveEventService:listenProductHoldRemoveEvent] Start listenProductHoldRemoveEvent");
         ProductHoldRemoveEvent event = objectMapper.readValue(message, ProductHoldRemoveEvent.class);
+        log.info("[ProductHoldRemoveEventService:listenProductHoldRemoveEvent] ProductHoldRemoveEvent serialized successfully");
         if (event.getDetails() == ProductHoldRemoveEventDetails.TO_REMOVE){
             productHoldedRepository.updateStatusByOrderId(event.getOrderId(), ProductHoldedStatus.TO_REMOVE);
         } else {
             productHoldedRepository.updateStatusByOrderId(event.getOrderId(), ProductHoldedStatus.TO_RETURN);
         }
+        log.info("[ProductHoldRemoveEventService:listenProductHoldRemoveEvent] status updated by order ID");
         ack.acknowledge();
+        log.info("[ProductHoldRemoveEventService:listenProductHoldRemoveEvent] acknowledged");
     }
 }

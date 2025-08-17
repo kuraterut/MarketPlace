@@ -90,7 +90,7 @@ class CategoryServiceTest {
     void deleteCategoryById_success() {
         when(categoryRepository.existsById(1L)).thenReturn(true);
 
-        categoryService.deleteCategory(1L);
+        categoryService.deleteCategoryById(1L);
 
         verify(productRepository).clearCategoryForProductsByCategoryId(1L);
         verify(categoryRepository).deleteById(1L);
@@ -100,7 +100,7 @@ class CategoryServiceTest {
     void deleteCategoryById_notFound_throwsException() {
         when(categoryRepository.existsById(1L)).thenReturn(false);
 
-        assertThatThrownBy(() -> categoryService.deleteCategory(1L))
+        assertThatThrownBy(() -> categoryService.deleteCategoryById(1L))
                 .isInstanceOf(CategoryNotFoundException.class);
     }
 
@@ -117,7 +117,7 @@ class CategoryServiceTest {
         when(categoryRepository.findByName("categoryTestName")).thenReturn(Optional.of(category));
         when(categoryMapper.toResponse(category)).thenReturn(response);
 
-        CategoryResponse result = categoryService.getCategory("categoryTestName");
+        CategoryResponse result = categoryService.getCategoryByName("categoryTestName");
 
         assertThat(result).isEqualTo(response);
     }

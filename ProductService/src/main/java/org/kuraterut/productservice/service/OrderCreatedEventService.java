@@ -31,8 +31,8 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
+@Slf4j
 public class OrderCreatedEventService implements OrderCreatedEventUseCase {
     private final OrderCreatedInboxRepository orderCreatedInboxRepository;
     private final ProductRepository productRepository;
@@ -53,6 +53,7 @@ public class OrderCreatedEventService implements OrderCreatedEventUseCase {
     @Transactional
     public void listenOrderCreated(String message, Acknowledgment ack) {
         try{
+            log.info("[OrderCreatedEventService:listenOrderCreated] Start listenOrderCreated");
             OrderCreatedEvent event = mapper.readValue(message, OrderCreatedEvent.class);
             OrderCreatedInbox inbox = new OrderCreatedInbox();
             inbox.setOrderId(event.getOrderId());
@@ -64,7 +65,9 @@ public class OrderCreatedEventService implements OrderCreatedEventUseCase {
             inbox.setJsonItems(jsonItems);
             inbox.setProcessed(false);
             orderCreatedInboxRepository.save(inbox);
+            log.info("[OrderCreatedEventService:listenOrderCreated] order created inbox saved");
             ack.acknowledge();
+            log.info("[OrderCreatedEventService:listenOrderCreated] order created acknowledged");
         } catch (JsonProcessingException e) {
             log.error(e.getMessage());
         }
@@ -75,7 +78,9 @@ public class OrderCreatedEventService implements OrderCreatedEventUseCase {
     @Transactional
     @CacheEvict(cacheNames = "products", allEntries = true)
     public void processOrderCreatedEvent() throws JsonProcessingException, ExecutionException, InterruptedException {
+        log.info("[OrderCreatedEventService:processOrderCreatedEvent] Start processOrderCreatedEvent");
         List<OrderCreatedInbox> inboxes = orderCreatedInboxRepository.findTop100ByProcessedIsFalse();
+        log.info("[OrderCreatedEventService:processOrderCreatedEvent] inboxes found");
         for (OrderCreatedInbox inbox : inboxes) {
             List<String> jsonItems = inbox.getJsonItems();
             boolean flagAsFailed = false;
@@ -85,6 +90,7 @@ public class OrderCreatedEventService implements OrderCreatedEventUseCase {
                 OrderItemDto orderItem = mapper.readValue(jsonItem, OrderItemDto.class);
                 Optional<Product> productOptional = productRepository.findById(orderItem.getProductId());
                 if(productOptional.isEmpty()) {
+                    log.info("[OrderCreatedEventService:processOrderCreatedEvent] Product not found");
                     ProductHoldItemFailed productHoldItemFailed = new ProductHoldItemFailed();
                     productHoldItemFailed.setProductId(orderItem.getProductId());
                     productHoldItemFailed.setQuantity(orderItem.getQuantity());
@@ -94,8 +100,10 @@ public class OrderCreatedEventService implements OrderCreatedEventUseCase {
                     continue;
                 }
                 Product product = productOptional.get();
+                log.info("[OrderCreatedEventService:processOrderCreatedEvent] Product found");
 
                 if (productRepository.reduceStockIfAvailable(orderItem.getProductId(), orderItem.getQuantity()) == 0){
+                    log.info("[OrderCreatedEventService:processOrderCreatedEvent] Not Enough Items");
                     flagAsFailed = true;
                     ProductHoldItemFailed productHoldItemFailed = new ProductHoldItemFailed();
                     productHoldItemFailed.setProductId(orderItem.getProductId());
@@ -104,6 +112,7 @@ public class OrderCreatedEventService implements OrderCreatedEventUseCase {
                     itemsFailed.add(productHoldItemFailed);
                 }
                 else{
+                    log.info("[OrderCreatedEventService:processOrderCreatedEvent] Items Holded");
                     ProductHolded productHolded = new ProductHolded();
                     productHolded.setProductId(orderItem.getProductId());
                     productHolded.setQuantity(orderItem.getQuantity());
@@ -122,12 +131,14 @@ public class OrderCreatedEventService implements OrderCreatedEventUseCase {
                 }
             }
             if(flagAsFailed){
+                log.info("[OrderCreatedEventService:processOrderCreatedEvent] Flag as failed, product holded to return");
                 productHoldedRepository.updateStatusByOrderId(inbox.getOrderId(), ProductHoldedStatus.TO_RETURN);
                 ProductHoldFailedEvent productHoldFailedEvent = new ProductHoldFailedEvent();
                 productHoldFailedEvent.setOrderId(inbox.getOrderId());
                 productHoldFailedEvent.setItems(itemsFailed);
                 productHoldFailedEventKafkaTemplate.send(productHoldFailedTopic, productHoldFailedEvent).get();
             } else{
+                log.info("[OrderCreatedEventService:processOrderCreatedEvent] Flag as success, product holded");
                 ProductHoldSuccessEvent productHoldSuccessEvent = new ProductHoldSuccessEvent();
                 productHoldSuccessEvent.setOrderId(inbox.getOrderId());
                 productHoldSuccessEvent.setItems(itemSuccesses);
@@ -135,6 +146,7 @@ public class OrderCreatedEventService implements OrderCreatedEventUseCase {
             }
             inbox.setProcessed(true);
             orderCreatedInboxRepository.save(inbox);
+            log.info("[OrderCreatedEventService:processOrderCreatedEvent] Inbox processed");
         }
     }
 }

@@ -28,12 +28,16 @@ public class UserRegistrationEventProcessService implements UserRegistrationEven
     @Transactional
     @CacheEvict(cacheNames = "payment_accounts", allEntries = true)
     public void listenUserRegistrationEvent(String message, Acknowledgment ack) throws JsonProcessingException {
+        log.info("[UserRegistrationEventProcessService:listenUserRegistrationEvent] Start listenUserRegistrationEvent");
         UserRegistrationEvent event = objectMapper.readValue(message, UserRegistrationEvent.class);
+        log.info("[UserRegistrationEventProcessService:listenUserRegistrationEvent] Received user registration event: {}", event);
         if(!paymentAccountRepository.existsByUserId(event.getUserId())) {
             PaymentAccount account = paymentAccountMapper.toEntity(event.getUserId());
             paymentAccountRepository.save(account);
+            log.info("[UserRegistrationEventProcessService:listenUserRegistrationEvent] Saved user account: {}", account);
         }
         ack.acknowledge();
+        log.info("[UserRegistrationEventProcessService:listenUserRegistrationEvent] Acknowledged");
     }
 
 }
