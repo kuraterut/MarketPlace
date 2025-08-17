@@ -22,14 +22,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        log.info("Loading user by email: " + email);
+        log.info("[UserDetailsServiceImpl:loadUserByUsername] Start Loading user by email: {}", email);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> {
-                    log.info("User not found by email: " + email);
+                    log.info("[UserDetailsServiceImpl:loadUserByUsername] User not found by email: {}", email);
                     return new UsernameNotFoundException("User not found with email: " + email);
                 });
 
-        log.info("User found: " + user.getEmail());
+        log.info("[UserDetailsServiceImpl:loadUserByUsername] User found: {}", user);
         return new UserDetailsImpl(user.getEmail(), user.getPassword(), user.getId(), List.of(user.getRole()));
     }
 }

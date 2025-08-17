@@ -23,9 +23,10 @@ import java.util.stream.Collectors;
 
 @ControllerAdvice
 @Slf4j
-public class GlobalExceptionHandler {
+public class ProductGlobalExceptionHandler {
     @ExceptionHandler(PermissionDeniedException.class)
     public ResponseEntity<ErrorResponse> handlePermissionDeniedException(PermissionDeniedException e) {
+        log.warn("[ProductGlobalExceptionHandler]: handle PermissionDeniedException, message: {}", e.getMessage());
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setMessage(e.getMessage());
         errorResponse.setTimestamp(OffsetDateTime.now());
@@ -35,6 +36,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(CategoryAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleCategoryAlreadyExists(CategoryAlreadyExistsException e) {
+        log.warn("[ProductGlobalExceptionHandler]: handle CategoryAlreadyExistsException, message: {}", e.getMessage());
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setMessage(e.getMessage());
         errorResponse.setTimestamp(OffsetDateTime.now());
@@ -44,6 +46,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(CategoryNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleCategoryNotFoundException(CategoryNotFoundException e) {
+        log.warn("[ProductGlobalExceptionHandler]: handle CategoryNotFoundException, message: {}", e.getMessage());
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setMessage(e.getMessage());
         errorResponse.setTimestamp(OffsetDateTime.now());
@@ -53,6 +56,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ProductNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleProductNotFoundException(ProductNotFoundException e) {
+        log.warn("[ProductGlobalExceptionHandler]: handle ProductNotFoundException, message: {}", e.getMessage());
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setMessage(e.getMessage());
         errorResponse.setTimestamp(OffsetDateTime.now());
@@ -62,6 +66,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ProductAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleProductAlreadyExists(ProductAlreadyExistsException e) {
+        log.warn("[ProductGlobalExceptionHandler]: handle ProductAlreadyExistsException, message: {}", e.getMessage());
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setMessage(e.getMessage());
         errorResponse.setTimestamp(OffsetDateTime.now());
@@ -76,10 +81,12 @@ public class GlobalExceptionHandler {
                 .stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .toList();
+
+        log.warn("[ProductGlobalExceptionHandler]: handle MethodArgumentNotValidException, message: {}", errors);
+
         ErrorResponse errorResponse = new ErrorResponse(
                 errors, HttpStatus.BAD_REQUEST, OffsetDateTime.now()
         );
-        log.warn("Method Argument Not Valid Error: {}", errorResponse.toString());
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
@@ -89,8 +96,8 @@ public class GlobalExceptionHandler {
         List<String> errors = violations.stream()
                 .map(v -> v.getPropertyPath() + ": " + v.getMessage())
                 .collect(Collectors.toList());
+        log.warn("[ProductGlobalExceptionHandler]: handle ConstraintViolationException, message: {}", errors);
 
-        log.warn("Validation error: {}", errors);
         return ResponseEntity.badRequest()
                 .body(new ErrorResponse(errors, HttpStatus.BAD_REQUEST, OffsetDateTime.now()));
     }
@@ -101,14 +108,14 @@ public class GlobalExceptionHandler {
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .collect(Collectors.toList());
 
-        log.warn("Data binding error: {}", errors);
+        log.warn("[ProductGlobalExceptionHandler]: handle BindException, message: {}", errors);
         return ResponseEntity.badRequest()
                 .body(new ErrorResponse(errors, HttpStatus.BAD_REQUEST, OffsetDateTime.now()));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
-        log.warn("Access denied: {}", ex.getMessage());
+        log.warn("[ProductGlobalExceptionHandler]: handle AccessDeniedException, message: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(new ErrorResponse(
                         List.of("Access denied"),
@@ -119,7 +126,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException ex) {
-        log.warn("Authentication failed: {}", ex.getMessage());
+        log.warn("[ProductGlobalExceptionHandler]: handle AuthenticationException, message: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(new ErrorResponse(
                         List.of("Authentication failed"),
@@ -130,7 +137,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
-        log.error("Data integrity violation: {}", ex.getMessage(), ex);
+        log.warn("[ProductGlobalExceptionHandler]: handle DataIntegrityViolationException, message: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new ErrorResponse(
                         List.of("Data conflict (duplicate or invalid data)"),
@@ -144,7 +151,7 @@ public class GlobalExceptionHandler {
         Throwable rootCause = ex.getRootCause();
         String errorMsg = (rootCause != null) ? rootCause.getMessage() : ex.getMessage();
 
-        log.error("JPA error: {}", errorMsg, ex);
+        log.warn("[ProductGlobalExceptionHandler]: handle JpaSystemException, message: {}", errorMsg);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponse(
                         List.of("Database error: " + errorMsg),
@@ -155,7 +162,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
-        log.warn("Malformed request: {}", ex.getMessage());
+        log.warn("[ProductGlobalExceptionHandler]: handle HttpMessageNotReadableException, message: {}", ex.getMessage());
         return ResponseEntity.badRequest()
                 .body(new ErrorResponse(
                         List.of("Invalid request body"),
@@ -166,7 +173,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<ErrorResponse> handleNullPointer(NullPointerException ex) {
-        log.error("NullPointer exception: {}", ex.getMessage(), ex);
+        log.warn("[ProductGlobalExceptionHandler]: handle NullPointerException, message: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponse(
                         List.of("Internal server error (NPE)"),
@@ -177,6 +184,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e) {
+        log.warn("[ProductGlobalExceptionHandler]: handle Exception, message: {}", e.getMessage());
         ErrorResponse error = new ErrorResponse();
         error.setMessage(e.getMessage());
         error.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);

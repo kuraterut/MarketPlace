@@ -67,7 +67,7 @@ public class CategoryController {
     })
     public void deleteCategoryById(
             @Parameter(description = "Category ID") @PathVariable("id") Long id) {
-        deleteCategoryUseCase.deleteCategory(id);
+        deleteCategoryUseCase.deleteCategoryById(id);
     }
 
     @DeleteMapping
@@ -83,7 +83,7 @@ public class CategoryController {
     })
     public void deleteCategoryByName(
             @Parameter(description = "Category Name") @RequestParam("name") String name) {
-        deleteCategoryUseCase.deleteCategory(name);
+        deleteCategoryUseCase.deleteCategoryByName(name);
     }
 
     @PutMapping("/{id}")
@@ -152,7 +152,7 @@ public class CategoryController {
     })
     public CategoryResponse getCategoryById(
             @Parameter(description = "Category ID") @PathVariable("id") Long id) {
-        return getCategoryUseCase.getCategory(id);
+        return getCategoryUseCase.getCategoryById(id);
     }
 
     @GetMapping("/name")
@@ -167,6 +167,6 @@ public class CategoryController {
     })
     public CategoryResponse getCategoryByName(
             @Parameter(description = "Category name") @RequestParam("name") String name) {
-        return getCategoryUseCase.getCategory(name);
+        return getCategoryUseCase.getCategoryByName(name);
     }
 }

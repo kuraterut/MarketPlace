@@ -13,7 +13,7 @@ public interface GetOrderUseCase {
     OrderResponse getOrderById(Long orderId);
     OrderListResponse getAllOrdersByUserId(Long userId, Pageable pageable);
     OrderListResponse getAllOrdersByOrderStatus(OrderStatus orderStatus, Pageable pageable);
-    OrderListResponse getAllOrdersByOrderStatus(OrderStatus orderStatus, Long userId, Pageable pageable);
+    OrderListResponse getAllOrdersByOrderStatusAndUserId(OrderStatus orderStatus, Long userId, Pageable pageable);
     OrderListResponse getAllOrdersByCreatedAtAfter(OffsetDateTime afterCreatedAt, Pageable pageable);
-    OrderListResponse getAllOrdersByCreatedAtAfter(OffsetDateTime afterCreatedAt, Long userId, Pageable pageable);
+    OrderListResponse getAllOrdersByCreatedAtAfterAndUserId(OffsetDateTime afterCreatedAt, Long userId, Pageable pageable);
 }

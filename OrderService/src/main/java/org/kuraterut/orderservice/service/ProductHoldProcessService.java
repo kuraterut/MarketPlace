@@ -41,9 +41,15 @@ public class ProductHoldProcessService implements ProductHoldProcessUseCase {
     @CacheEvict(allEntries = true)
     public void listenProductHoldFailed(String message, Acknowledgment ack){
         try{
+            log.info("[ProductHoldProcessService:listenProductHoldFailed] Start listenProductHoldFailed");
             ProductHoldFailedEvent event = objectMapper.readValue(message, ProductHoldFailedEvent.class);
+            log.info("[ProductHoldProcessService:listenProductHoldFailed] Event received: {}", event);
             Order order = orderRepository.findById(event.getOrderId())
-                    .orElseThrow(() -> new OrderNotFoundException("Order not found by id: " + event.getOrderId()));
+                    .orElseThrow(() -> {
+                        log.warn("[ProductHoldProcessService:listenProductHoldFailed] Order not found with id: {}", event.getOrderId());
+                        return new OrderNotFoundException("Order not found by id: " + event.getOrderId());
+                    });
+            log.info("[ProductHoldProcessService:listenProductHoldFailed] Order found: {}", order);
             List<String> details = new ArrayList<>();
             for(ProductHoldItemFailed item : event.getItems()){
                 details.add(objectMapper.writeValueAsString(item));
@@ -52,7 +58,9 @@ public class ProductHoldProcessService implements ProductHoldProcessUseCase {
             order.setStatus(OrderStatus.PRODUCT_RESERVATION_FAILED);
 
             orderRepository.save(order);
+            log.info("[ProductHoldProcessService:listenProductHoldFailed] Product Reservation Failed details saved: {}", order);
             ack.acknowledge();
+            log.info("[ProductHoldProcessService:listenProductHoldFailed] Acknowledge");
         } catch (JsonProcessingException e) {
             log.error(e.getMessage());
         }
@@ -64,9 +72,14 @@ public class ProductHoldProcessService implements ProductHoldProcessUseCase {
     @CacheEvict(allEntries = true)
     public void listenProductHoldSuccess(String message, Acknowledgment ack){
         try{
+            log.info("[ProductHoldProcessService:listenProductHoldSuccess] Start listenProductHoldSuccess");
             ProductHoldSuccessEvent event = objectMapper.readValue(message, ProductHoldSuccessEvent.class);
+            log.info("[ProductHoldProcessService:listenProductHoldSuccess] Event received: {}", event);
             Order order = orderRepository.findById(event.getOrderId())
-                    .orElseThrow(() -> new OrderNotFoundException("Order not found by id: " + event.getOrderId()));
+                    .orElseThrow(() -> {
+                        log.warn("[ProductHoldProcessService:listenProductHoldSuccess] Order not found with id: {}", event.getOrderId());
+                        return new OrderNotFoundException("Order not found by id: " + event.getOrderId());
+                    });
 
             PaymentEventOutbox outbox = new PaymentEventOutbox();
             outbox.setOrderId(event.getOrderId());
@@ -75,13 +88,17 @@ public class ProductHoldProcessService implements ProductHoldProcessUseCase {
             for(ProductHoldItemSuccess item : event.getItems()){
                 totalAmount = totalAmount.add(item.getTotalPrice());
             }
+            log.info("[ProductHoldProcessService:listenProductHoldSuccess] Total Amount calculated: {}", totalAmount);
             outbox.setAmount(totalAmount);
             outbox.setProcessed(false);
             paymentEventOutboxRepository.save(outbox);
+            log.info("[ProductHoldProcessService:listenProductHoldSuccess] Outbox saved: {}", outbox);
 
             order.setStatus(OrderStatus.PENDING_PAYMENT);
             orderRepository.save(order);
+
             ack.acknowledge();
+            log.info("[ProductHoldProcessService:listenProductHoldSuccess] Acknowledge");
 
         } catch (JsonProcessingException e) {
             log.error(e.getMessage());

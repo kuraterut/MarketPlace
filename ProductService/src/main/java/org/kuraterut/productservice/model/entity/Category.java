@@ -14,8 +14,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "categories")
-@Getter
-@Setter
+@Data
 @Builder
 public class Category {
     @Id

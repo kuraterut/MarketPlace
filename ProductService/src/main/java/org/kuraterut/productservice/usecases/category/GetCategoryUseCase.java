@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface GetCategoryUseCase {
     CategoryListResponse getAllCategories(Pageable pageable);
-    CategoryResponse getCategory(String name);
-    CategoryResponse getCategory(Long id);
+    CategoryResponse getCategoryByName(String name);
+    CategoryResponse getCategoryById(Long id);
 }

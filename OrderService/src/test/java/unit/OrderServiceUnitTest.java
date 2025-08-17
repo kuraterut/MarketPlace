@@ -145,7 +145,7 @@ public class OrderServiceUnitTest {
         when(orderRepository.findAllByStatusAndUserId(OrderStatus.CREATED, 100L, pageable)).thenReturn(orders);
         when(orderMapper.toResponses(orders)).thenReturn(expectedResponse);
 
-        OrderListResponse result = orderService.getAllOrdersByOrderStatus(OrderStatus.CREATED, 100L, pageable);
+        OrderListResponse result = orderService.getAllOrdersByOrderStatusAndUserId(OrderStatus.CREATED, 100L, pageable);
 
         assertThat(result).isEqualTo(expectedResponse);
     }
@@ -175,7 +175,7 @@ public class OrderServiceUnitTest {
         when(orderRepository.findAllByCreatedAtAfterAndUserId(after, 100L, pageable)).thenReturn(orders);
         when(orderMapper.toResponses(orders)).thenReturn(expectedResponse);
 
-        OrderListResponse result = orderService.getAllOrdersByCreatedAtAfter(after, 100L, pageable);
+        OrderListResponse result = orderService.getAllOrdersByCreatedAtAfterAndUserId(after, 100L, pageable);
 
         assertThat(result).isEqualTo(expectedResponse);
     }

@@ -96,7 +96,7 @@ public class TransactionServiceUnitTest {
         when(transactionRepository.findById(10L)).thenReturn(Optional.of(transaction));
         when(transactionMapper.toResponse(transaction)).thenReturn(transactionResponse);
 
-        TransactionResponse result = transactionService.getTransactionById(10L, 100L);
+        TransactionResponse result = transactionService.getTransactionByIdAndUserId(10L, 100L);
 
         assertThat(result).isEqualTo(transactionResponse);
     }
@@ -107,7 +107,7 @@ public class TransactionServiceUnitTest {
         when(transactionRepository.findByIdAndAccountId(10L, 1L)).thenReturn(Optional.empty());
         when(transactionRepository.findById(10L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> transactionService.getTransactionById(10L, 100L))
+        assertThatThrownBy(() -> transactionService.getTransactionByIdAndUserId(10L, 100L))
                 .isInstanceOf(TransactionNotFoundException.class);
     }
 
@@ -121,7 +121,7 @@ public class TransactionServiceUnitTest {
         when(transactionRepository.findAllByAccountId(1L, pageable)).thenReturn(page);
         when(transactionMapper.toResponses(page)).thenReturn(listResponse);
 
-        TransactionListResponse result = transactionService.getAllTransactions(100L, pageable);
+        TransactionListResponse result = transactionService.getAllTransactionsAndUserId(100L, pageable);
 
         assertThat(result).isEqualTo(listResponse);
     }

@@ -40,41 +40,56 @@ public class TransactionService implements GetTransactionUseCase, CreateTransact
     @Transactional
     @CacheEvict(allEntries = true)
     public TransactionResponse createTransaction(CreateTransactionRequest request, Long userId) {
-        log.info("Start method createTransaction");
+        log.info("[TransactionService:createTransaction] Start createTransaction");
         PaymentAccount paymentAccount = paymentAccountRepository.findByUserId(userId)
                 .orElseThrow(() -> {
-                    log.warn("Payment account not found by userId: {}", userId);
+                    log.warn("[TransactionService:createTransaction] Payment account not found by userId: {}", userId);
                     return new PaymentAccountNotFoundException("Account not found by user ID: " + userId);
                 });
-        log.info("payment account found: {}", paymentAccount.getId());
+        log.info("[TransactionService:createTransaction] Payment account found: {}", paymentAccount);
         Transaction transaction = transactionMapper.toEntity(request);
         transaction.setAccount(paymentAccount);
         transaction = transactionRepository.saveAndFlush(transaction);
-        log.info("Transaction created and saved: {}", transaction.getId());
+        log.info("[TransactionService:createTransaction] Transaction created and saved: {}", transaction);
         return transactionMapper.toResponse(transaction);
     }
 
     @Override
     @Transactional(readOnly = true)
     @Cacheable(key = "'all_transactions_user_' + #userId + '_page_' + #pageable.pageNumber + '_size_' + #pageable.pageSize")
-    public TransactionListResponse getAllTransactions(Long userId, Pageable pageable) {
+    public TransactionListResponse getAllTransactionsAndUserId(Long userId, Pageable pageable) {
+        log.info("[TransactionService:getAllTransactionsAndUserId] Start getAllTransactionsAndUserId");
         PaymentAccount paymentAccount = paymentAccountRepository.findByUserId(userId)
-                .orElseThrow(() -> new PaymentAccountNotFoundException("Account not found by ID: " + userId));
+                .orElseThrow(() -> {
+                    log.warn("[TransactionService:getAllTransactionsAndUserId] Payment account not found by userId: {}", userId);
+                    return new PaymentAccountNotFoundException("Account not found by ID: " + userId);
+                });
+        log.info("[TransactionService:getAllTransactionsAndUserId] Payment account found: {}", paymentAccount);
         Page<Transaction> transactions = transactionRepository.findAllByAccountId(paymentAccount.getId(), pageable);
+        log.info("[TransactionService:getAllTransactionsAndUserId] Transactions found: {}", transactions);
         return transactionMapper.toResponses(transactions);
     }
 
     @Override
     @Transactional(readOnly = true)
     @Cacheable(key = "'transaction_by_id_and_user_' + #id + '_' + #userId")
-    public TransactionResponse getTransactionById(Long id, Long userId) {
+    public TransactionResponse getTransactionByIdAndUserId(Long id, Long userId) {
+        log.info("[TransactionService:getTransactionByIdAndUserId] Start getTransactionByIdAndUserId");
         PaymentAccount paymentAccount = paymentAccountRepository.findByUserId(userId)
-                .orElseThrow(() -> new PaymentAccountNotFoundException("Account not found by ID: " + userId));
+                .orElseThrow(() -> {
+                    log.warn("[TransactionService:getTransactionByIdAndUserId] Payment account not found by userId: {}", userId);
+                    return new PaymentAccountNotFoundException("Account not found by ID: " + userId);
+                });
+        log.info("[TransactionService:getTransactionByIdAndUserId] Payment account found: {}", paymentAccount);
+        log.info("[TransactionService:getTransactionByIdAndUserId] Try find Transaction by Id #{} and Account ID #{}", id, paymentAccount.getId());
         Optional<Transaction> transactionByAccountId = transactionRepository.findByIdAndAccountId(id, paymentAccount.getId());
+        log.info("[TransactionService:getTransactionByIdAndUserId] Try find Transaction by Id #{}", id);
         Optional<Transaction> transactionById = transactionRepository.findById(id);
         if(transactionById.isPresent() && transactionByAccountId.isPresent()) {
+            log.info("[TransactionService:getTransactionByIdAndUserId] Transaction found: {}", transactionById.get());
             return transactionMapper.toResponse(transactionById.get());
         } else {
+            log.warn("[TransactionService:getTransactionByIdAndUserId] Transaction not found by ID: {}", id);
             throw new TransactionNotFoundException("Transaction not found by ID: " + id);
         }
     }
@@ -82,40 +97,64 @@ public class TransactionService implements GetTransactionUseCase, CreateTransact
     @Override
     @Transactional(readOnly = true)
     @Cacheable(key = "'transactions_amount_between_' + #min + '_' + #max + '_user_' + #userId + '_page_' + #pageable.pageNumber")
-    public TransactionListResponse getTransactionsByAmountBetween(BigDecimal min, BigDecimal max, Long userId, Pageable pageable) {
+    public TransactionListResponse getTransactionsByAmountBetweenAndUserId(BigDecimal min, BigDecimal max, Long userId, Pageable pageable) {
+        log.info("[TransactionService:getTransactionsByAmountBetweenAndUserId] Start getTransactionsByAmountBetweenAndUserId");
         PaymentAccount paymentAccount = paymentAccountRepository.findByUserId(userId)
-                .orElseThrow(() -> new PaymentAccountNotFoundException("Account not found by ID: " + userId));
+                .orElseThrow(() -> {
+                    log.warn("[TransactionService:getTransactionsByAmountBetweenAndUserId] Payment account not found by userId: {}", userId);
+                    return new PaymentAccountNotFoundException("Account not found by ID: " + userId);
+                });
+        log.info("[TransactionService:getTransactionsByAmountBetweenAndUserId] payment account found: {}", paymentAccount);
         Page<Transaction> transactions = transactionRepository.findAllByAccountIdAndAmountBetween(paymentAccount.getId(), min, max, pageable);
+        log.info("[TransactionService:getTransactionsByAmountBetweenAndUserId] Transactions found: {}", transactions);
         return transactionMapper.toResponses(transactions);
     }
 
     @Override
     @Transactional(readOnly = true)
     @Cacheable(key = "'transactions_type_' + #type.name() + '_user_' + #userId + '_page_' + #pageable.pageNumber")
-    public TransactionListResponse getTransactionsByTransactionType(TransactionType type, Long userId, Pageable pageable) {
+    public TransactionListResponse getTransactionsByTransactionTypeAndUserId(TransactionType type, Long userId, Pageable pageable) {
+        log.info("[TransactionService:getTransactionsByTransactionTypeAndUserId] Start getTransactionsByTransactionTypeAndUserId");
         PaymentAccount paymentAccount = paymentAccountRepository.findByUserId(userId)
-                .orElseThrow(() -> new PaymentAccountNotFoundException("Account not found by ID: " + userId));
+                .orElseThrow(() -> {
+                    log.warn("[TransactionService:getTransactionsByTransactionTypeAndUserId] Payment account not found by userId: {}", userId);
+                    return new PaymentAccountNotFoundException("Account not found by ID: " + userId);
+                });
+        log.info("[TransactionService:getTransactionsByTransactionTypeAndUserId] Payment account found: {}", paymentAccount);
         Page<Transaction> transactions = transactionRepository.findAllByAccountIdAndType(paymentAccount.getId(), type, pageable);
+        log.info("[TransactionService:getTransactionsByTransactionTypeAndUserId] Transactions found: {}", transactions);
         return transactionMapper.toResponses(transactions);
     }
 
     @Override
     @Transactional(readOnly = true)
     @Cacheable(key = "'transactions_status_' + #status.name() + '_user_' + #userId + '_page_' + #pageable.pageNumber")
-    public TransactionListResponse getTransactionsByTransactionStatus(TransactionStatus status, Long userId, Pageable pageable) {
+    public TransactionListResponse getTransactionsByTransactionStatusAndUserId(TransactionStatus status, Long userId, Pageable pageable) {
+        log.info("[TransactionService:getTransactionsByTransactionStatusAndUserId] Start getTransactionsByTransactionStatusAndUserId");
         PaymentAccount paymentAccount = paymentAccountRepository.findByUserId(userId)
-                .orElseThrow(() -> new PaymentAccountNotFoundException("Account not found by ID: " + userId));
+                .orElseThrow(() -> {
+                    log.warn("[TransactionService:getTransactionsByTransactionStatusAndUserId] Payment account not found by userId: {}", userId);
+                    return new PaymentAccountNotFoundException("Account not found by ID: " + userId);
+                });
+        log.info("[TransactionService:getTransactionsByTransactionStatusAndUserId] Payment account found: {}", paymentAccount);
         Page<Transaction> transactions = transactionRepository.findAllByAccountIdAndStatus(paymentAccount.getId(), status, pageable);
+        log.info("[TransactionService:getTransactionsByTransactionStatusAndUserId] Transactions found: {}", transactions);
         return transactionMapper.toResponses(transactions);
     }
 
     @Override
     @Transactional(readOnly = true)
     @Cacheable(key = "'transactions_order_' + #orderId + '_user_' + #userId + '_page_' + #pageable.pageNumber")
-    public TransactionListResponse getTransactionsByOrderId(Long orderId, Long userId, Pageable pageable) {
+    public TransactionListResponse getTransactionsByOrderIdAndUserId(Long orderId, Long userId, Pageable pageable) {
+        log.info("[TransactionService:getTransactionsByOrderIdAndUserId] Start getTransactionsByOrderIdAndUserId");
         PaymentAccount paymentAccount = paymentAccountRepository.findByUserId(userId)
-                .orElseThrow(() -> new PaymentAccountNotFoundException("Account not found by ID: " + userId));
+                .orElseThrow(() -> {
+                    log.warn("[TransactionService:getTransactionsByOrderIdAndUserId] Payment account not found by userId: {}", userId);
+                    return new PaymentAccountNotFoundException("Account not found by ID: " + userId);
+                });
+        log.info("[TransactionService:getTransactionsByOrderIdAndUserId] Payment account found: {}", paymentAccount);
         Page<Transaction> transactions = transactionRepository.findAllByAccountIdAndOrderId(paymentAccount.getId(), orderId, pageable);
+        log.info("[TransactionService:getTransactionsByOrderIdAndUserId] Transactions found: {}", transactions);
         return transactionMapper.toResponses(transactions);
     }
 
@@ -123,49 +162,73 @@ public class TransactionService implements GetTransactionUseCase, CreateTransact
     @Transactional(readOnly = true)
     @Cacheable(key = "'transaction_by_id_' + #id")
     public TransactionResponse getTransactionById(Long id) {
-        return transactionMapper.toResponse(transactionRepository.findById(id)
-                .orElseThrow(() -> new TransactionNotFoundException("Transaction not found by ID: " + id)));
+        log.info("[TransactionService:getTransactionById] Start getTransactionById");
+        Transaction transaction = transactionRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("[TransactionService:getTransactionById] Payment account not found by ID: {}", id);
+                    return new TransactionNotFoundException("Transaction not found by ID: " + id);
+                });
+        log.info("[TransactionService:getTransactionById] Payment account found: {}", transaction);
+        return transactionMapper.toResponse(transaction);
     }
 
     @Override
     @Transactional(readOnly = true)
     @Cacheable(key = "'all_transactions_page_' + #pageable.pageNumber + '_size_' + #pageable.pageSize")
     public TransactionListResponse getAllTransactions(Pageable pageable) {
-        return transactionMapper.toResponses(transactionRepository.findAll(pageable));
+        log.info("[TransactionService:getAllTransactions] Start getAllTransactions");
+        Page<Transaction> transactions = transactionRepository.findAll(pageable);
+        log.info("[TransactionService:getAllTransactions] Transactions found: {}", transactions);
+        return transactionMapper.toResponses(transactions);
     }
 
     @Override
     @Transactional(readOnly = true)
     @Cacheable(key = "'transactions_account_' + #paymentAccountId + '_page_' + #pageable.pageNumber")
     public TransactionListResponse getTransactionsByPaymentAccountId(Long paymentAccountId, Pageable pageable) {
-        return transactionMapper.toResponses(transactionRepository.findAllByAccountId(paymentAccountId, pageable));
+        log.info("[TransactionService:getTransactionsByPaymentAccountId] Start getTransactionsByPaymentAccountId");
+        Page<Transaction> transactions = transactionRepository.findAllByAccountId(paymentAccountId, pageable);
+        log.info("[TransactionService:getTransactionsByPaymentAccountId] Transactions found: {}", transactions);
+        return transactionMapper.toResponses(transactions);
     }
 
     @Override
     @Transactional(readOnly = true)
     @Cacheable(key = "'transactions_amount_between_' + #min + '_' + #max + '_page_' + #pageable.pageNumber")
     public TransactionListResponse getTransactionsByAmountBetween(BigDecimal min, BigDecimal max, Pageable pageable) {
-        return transactionMapper.toResponses(transactionRepository.findAllByAmountBetween(min, max, pageable));
+        log.info("[TransactionService:getTransactionsByAmountBetween] Start getTransactionsByAmountBetween");
+        Page<Transaction> transactions = transactionRepository.findAllByAmountBetween(min, max, pageable);
+        log.info("[TransactionService:getTransactionsByAmountBetween] Transactions found: {}", transactions);
+        return transactionMapper.toResponses(transactions);
     }
 
     @Override
     @Transactional(readOnly = true)
     @Cacheable(key = "'transactions_type_' + #type.name() + '_page_' + #pageable.pageNumber")
     public TransactionListResponse getTransactionsByTransactionType(TransactionType type, Pageable pageable) {
-        return transactionMapper.toResponses(transactionRepository.findAllByType(type, pageable));
+        log.info("[TransactionService:getTransactionsByTransactionType] Start getTransactionsByTransactionType");
+        Page<Transaction> transactions = transactionRepository.findAllByType(type, pageable);
+        log.info("[TransactionService:getTransactionsByTransactionType] Transactions found: {}", transactions);
+        return transactionMapper.toResponses(transactions);
     }
 
     @Override
     @Transactional(readOnly = true)
     @Cacheable(key = "'transactions_status_' + #status.name() + '_page_' + #pageable.pageNumber")
     public TransactionListResponse getTransactionsByTransactionStatus(TransactionStatus status, Pageable pageable) {
-        return transactionMapper.toResponses(transactionRepository.findAllByStatus(status, pageable));
+        log.info("[TransactionService:getTransactionsByTransactionStatus] Start getTransactionsByTransactionStatus");
+        Page<Transaction> transactions = transactionRepository.findAllByStatus(status, pageable);
+        log.info("[TransactionService:getTransactionsByTransactionStatus] Transactions found: {}", transactions);
+        return transactionMapper.toResponses(transactions);
     }
 
     @Override
     @Transactional(readOnly = true)
     @Cacheable(key = "'transactions_order_' + #orderId + '_page_' + #pageable.pageNumber")
     public TransactionListResponse getTransactionsByOrderId(Long orderId, Pageable pageable) {
-        return transactionMapper.toResponses(transactionRepository.findAllByOrderId(orderId, pageable));
+        log.info("[TransactionService:getTransactionsByOrderId] Start getTransactionsByOrderId");
+        Page<Transaction> transactions = transactionRepository.findAllByOrderId(orderId, pageable);
+        log.info("[TransactionService:getTransactionsByOrderId] Transactions found: {}", transactions);
+        return transactionMapper.toResponses(transactions);
     }
 }

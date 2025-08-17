@@ -51,7 +51,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
-        log.info("PATH: {}, {}", path, WHITELIST.stream().anyMatch(pattern -> pathMatcher.match(pattern, path)));
+        log.info("[JwtAuthenticationFilter:shouldNotFilter] PATH: {}, isFound: {}", path, WHITELIST.stream().anyMatch(pattern -> pathMatcher.match(pattern, path)));
         return WHITELIST.stream().anyMatch(pattern -> pathMatcher.match(pattern, path));
     }
 
@@ -64,15 +64,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            log.warn("[JwtAuthenticationFilter:doFilterInternal] Auth Header is not valid: {}", authHeader);
             filterChain.doFilter(request, response);
             return;
         }
 
         String token = authHeader.substring(7);
+        log.info("[JwtAuthenticationFilter:doFilterInternal] TOKEN: {}", token);
+        log.info("[JwtAuthenticationFilter:doFilterInternal] Is token Valid: {}", jwtService.isTokenValid(token));
+
         if (jwtService.isTokenValid(token)) {
             String email = jwtService.extractUsername(token);
             Long userId = jwtService.extractUserId(token);
             List<String> roles = jwtService.extractRoles(token);
+
+            log.info("[JwtAuthenticationFilter:doFilterInternal] Email: {},\n User ID: {},\n roles: {}", email, userId, roles);
 
             List<SimpleGrantedAuthority> authorities = roles.stream()
                     .map(SimpleGrantedAuthority::new)
@@ -82,8 +88,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     new UsernamePasswordAuthenticationToken(new AuthPrincipal(email, userId, roles), null, authorities);
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            log.info("[JwtAuthenticationFilter:doFilterInternal] Authentication set: {}", authentication);
         }
-
+        log.info("[JwtAuthenticationFilter:doFilterInternal] Do Filter");
         filterChain.doFilter(request, response);
     }
 }

@@ -72,7 +72,7 @@ public class TransactionController {
             @AuthenticationPrincipal AuthPrincipal authPrincipal) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sortBy));
         Long userId = authPrincipal.getUserId();
-        return getTransactionUseCase.getAllTransactions(userId, pageable);
+        return getTransactionUseCase.getAllTransactionsAndUserId(userId, pageable);
     }
 
     @GetMapping("/{id}")
@@ -90,7 +90,7 @@ public class TransactionController {
     public TransactionResponse getTransaction(
             @Parameter(description = "Transaction ID") @PathVariable("id") Long id,
             @AuthenticationPrincipal AuthPrincipal authPrincipal) {
-        return getTransactionUseCase.getTransactionById(id, authPrincipal.getUserId());
+        return getTransactionUseCase.getTransactionByIdAndUserId(id, authPrincipal.getUserId());
     }
 
     @GetMapping("/filter/amount")
@@ -114,7 +114,7 @@ public class TransactionController {
             @AuthenticationPrincipal AuthPrincipal authPrincipal){
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sortBy));
         Long userId = authPrincipal.getUserId();
-        return getTransactionUseCase.getTransactionsByAmountBetween(min, max, userId, pageable);
+        return getTransactionUseCase.getTransactionsByAmountBetweenAndUserId(min, max, userId, pageable);
     }
 
     @GetMapping("/filter/type")
@@ -137,7 +137,7 @@ public class TransactionController {
             @AuthenticationPrincipal AuthPrincipal authPrincipal){
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sortBy));
         Long userId = authPrincipal.getUserId();
-        return getTransactionUseCase.getTransactionsByTransactionType(type, userId, pageable);
+        return getTransactionUseCase.getTransactionsByTransactionTypeAndUserId(type, userId, pageable);
     }
 
     @GetMapping("/filter/status")
@@ -160,7 +160,7 @@ public class TransactionController {
             @AuthenticationPrincipal AuthPrincipal authPrincipal){
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sortBy));
         Long userId = authPrincipal.getUserId();
-        return getTransactionUseCase.getTransactionsByTransactionStatus(status, userId, pageable);
+        return getTransactionUseCase.getTransactionsByTransactionStatusAndUserId(status, userId, pageable);
     }
 
     @GetMapping("/filter/order")
@@ -183,7 +183,7 @@ public class TransactionController {
             @AuthenticationPrincipal AuthPrincipal authPrincipal){
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sortBy));
         Long userId = authPrincipal.getUserId();
-        return getTransactionUseCase.getTransactionsByOrderId(orderId, userId, pageable);
+        return getTransactionUseCase.getTransactionsByOrderIdAndUserId(orderId, userId, pageable);
     }
 
     @GetMapping("/admin/{id}")
