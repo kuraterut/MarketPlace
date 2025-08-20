@@ -10,6 +10,7 @@
         <module name="EurekaServer" />
         <module name="ProductService" />
         <module name="AuthService" />
+        <module name="gRPC-Proto" />
         <module name="OrderService" />
         <module name="ApiGateway" />
         <module name="PaymentService" />

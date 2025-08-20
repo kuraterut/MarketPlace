@@ -129,6 +129,27 @@
             <artifactId>JwtSecurityLib</artifactId>
             <version>1.0</version>
         </dependency>
+
+        <!-- gRPC server -->
+        <dependency>
+            <groupId>net.devh</groupId>
+            <artifactId>grpc-server-spring-boot-starter</artifactId>
+            <version>3.1.0.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.devh</groupId>
+            <artifactId>grpc-client-spring-boot-starter</artifactId>
+            <version>3.1.0.RELEASE</version>
+            <scope>test</scope> <!-- or runtime if needed -->
+        </dependency>
+
+        <!-- proto модуль -->
+        <dependency>
+            <groupId>org.kuraterut</groupId>
+            <artifactId>gRPC-Proto</artifactId>
+            <version>1.0</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

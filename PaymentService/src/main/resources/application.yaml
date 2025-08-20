@@ -1,6 +1,11 @@
 server:
   port: 8083
 
+grpc:
+  server:
+    port: 9090
+
+
 spring:
   cache:
     type: redis
@@ -89,6 +94,8 @@ logging:
   level:
     org.springframework.security: DEBUG
     org.springframework.boot.actuate: DEBUG
+
+
 
 #logging:
 #  level:

@@ -16,3 +16,6 @@ spring:
   task:
     scheduling:
       enabled: false
+
+  main:
+    allow-bean-definition-overriding: true
