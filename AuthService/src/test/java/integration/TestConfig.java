@@ -1,9 +1,13 @@
 package integration;
 
 import org.kuraterut.authservice.model.event.UserRegistrationEvent;
+import org.kuraterut.paymentservice.grpc.CreateAccountRequest;
+import org.kuraterut.paymentservice.grpc.CreateAccountResponse;
+import org.kuraterut.paymentservice.grpc.PaymentServiceGrpc;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.core.KafkaTemplate;
 
 import java.util.concurrent.CompletableFuture;
@@ -14,6 +18,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @TestConfiguration
+@Profile("test")
 public class TestConfig {
 
     @Bean
@@ -24,5 +29,28 @@ public class TestConfig {
                 .thenReturn(CompletableFuture.completedFuture(null));
         return template;
     }
+
+    @Bean
+    @Primary
+    public PaymentServiceGrpc.PaymentServiceBlockingStub paymentServiceBlockingStub() {
+        // мок, который будет использован вместо реального gRPC канала
+        PaymentServiceGrpc.PaymentServiceBlockingStub stub = mock(PaymentServiceGrpc.PaymentServiceBlockingStub.class);
+
+        CreateAccountResponse fakeResponse = CreateAccountResponse.newBuilder()
+                .setAccountId(1L)
+                .setSuccess(true)
+                .build();
+
+        when(stub.createAccount(any(CreateAccountRequest.class)))
+                .thenReturn(fakeResponse);
+
+        return stub;
+    }
+    @Bean
+    @Primary
+    public io.grpc.Channel grpcChannel() {
+        return mock(io.grpc.Channel.class);
+    }
+
 }
 

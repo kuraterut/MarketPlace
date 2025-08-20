@@ -16,3 +16,21 @@ spring:
   task:
     scheduling:
       enabled: false
+
+# Disable gRPC server in tests
+grpc:
+  server:
+    enabled: false
+    port: 0  # Use random port
+
+# Disable actuator health checks
+management:
+  health:
+    grpc:
+      enabled: false
+    defaults:
+      enabled: false
+  endpoint:
+    health:
+      enabled: false
+      show-details: never

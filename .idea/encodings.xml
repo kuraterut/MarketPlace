@@ -15,5 +15,7 @@
     <file url="file://$PROJECT_DIR$/PaymentService/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ProductService/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ProductService/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/gRPC-Proto/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/gRPC-Proto/src/main/resources" charset="UTF-8" />
   </component>
 </project>
