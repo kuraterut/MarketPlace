@@ -12,6 +12,7 @@
 
     <properties>
         <testcontainers.version>1.19.3</testcontainers.version>
+        <grpc.version>1.63.0</grpc.version>
     </properties>
 
     <dependencies>
@@ -139,6 +140,43 @@
             <artifactId>JwtSecurityLib</artifactId>
             <version>1.0</version>
         </dependency>
+
+
+        <!-- gRPC dependencies - ДОБАВЬТЕ ЭТОТ БЛОК -->
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-netty</artifactId>
+            <version>${grpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-protobuf</artifactId>
+            <version>${grpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-stub</artifactId>
+            <version>${grpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-core</artifactId>
+            <version>${grpc.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.devh</groupId>
+            <artifactId>grpc-client-spring-boot-starter</artifactId>
+            <version>3.1.0.RELEASE</version>
+        </dependency>
+
+        <!-- proto модуль -->
+        <dependency>
+            <groupId>org.kuraterut</groupId>
+            <artifactId>gRPC-Proto</artifactId>
+            <version>1.0</version>
+        </dependency>
+
     </dependencies>
     <build>
         <plugins>

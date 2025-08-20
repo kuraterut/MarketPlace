@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package payment;
+
+option java_multiple_files = true;
+option java_package = "org.kuraterut.paymentservice.grpc";
+option java_outer_classname = "PaymentProto";
+
+service PaymentService {
+  rpc CreateAccount (CreateAccountRequest) returns (CreateAccountResponse);
+}
+
+message CreateAccountRequest {
+  int64 userId = 1;
+  string email = 2;
+}
+
+message CreateAccountResponse {
+  int64 accountId = 1;
+  bool success = 2;
+}

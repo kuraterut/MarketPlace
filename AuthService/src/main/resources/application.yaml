@@ -2,6 +2,8 @@ server:
   port: 8081
 
 spring:
+  main:
+    allow-bean-definition-overriding: true
   application:
     name: marketplace-app-auth-service
   datasource:
@@ -61,3 +63,10 @@ kafka-topics:
 
 jwt:
   expiration: 86400000
+
+grpc:
+  client:
+    payment-service:
+      address: static://marketplace-app-payment-service:9090
+      negotiationType: plaintext
+

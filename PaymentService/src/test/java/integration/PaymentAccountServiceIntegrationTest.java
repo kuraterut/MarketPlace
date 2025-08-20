@@ -1,5 +1,8 @@
 package integration;
 
+import net.devh.boot.grpc.server.autoconfigure.GrpcServerAutoConfiguration;
+import net.devh.boot.grpc.server.autoconfigure.GrpcServerFactoryAutoConfiguration;
+import net.devh.boot.grpc.server.autoconfigure.GrpcServerMetricAutoConfiguration;
 import org.junit.jupiter.api.*;
 import org.kuraterut.paymentservice.PaymentServiceApplication;
 import org.kuraterut.paymentservice.dto.response.PaymentAccountResponse;
@@ -10,15 +13,14 @@ import org.kuraterut.paymentservice.model.entity.PaymentAccount;
 import org.kuraterut.paymentservice.repository.PaymentAccountRepository;
 import org.kuraterut.paymentservice.service.PaymentAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.*;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -36,6 +38,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @Testcontainers
 @EnableCaching
 @TestPropertySource(locations = "classpath:application-test.yaml")
+@Import(TestConfig.class)
+@ActiveProfiles("test")
+@ImportAutoConfiguration(exclude = {
+        GrpcServerAutoConfiguration.class,          // Exclude gRPC server auto-configuration
+        GrpcServerFactoryAutoConfiguration.class,   // Exclude gRPC server factory auto-configuration
+//        GrpcServerHealthAutoConfiguration.class,    // Exclude gRPC server health auto-configuration
+        GrpcServerMetricAutoConfiguration.class,
+        net.devh.boot.grpc.server.autoconfigure.GrpcMetadataEurekaConfiguration.class
+})
 class PaymentAccountServiceIntegrationTest {
 
     @Container
@@ -62,6 +73,12 @@ class PaymentAccountServiceIntegrationTest {
         registry.add("spring.kafka.consumer.auto-offset-reset", () -> "earliest");
         registry.add("spring.kafka.bootstrap-servers", () -> "localhost:9092");
         registry.add("spring.kafka.properties.enable.auto.commit", () -> false);
+
+        // Completely disable gRPC and actuator
+        registry.add("grpc.server.enabled", () -> false);
+        registry.add("management.endpoints.enabled-by-default", () -> false);
+        registry.add("management.endpoint.health.enabled", () -> false);
+        registry.add("management.endpoint.info.enabled", () -> false);
     }
 
     public static class Initializer

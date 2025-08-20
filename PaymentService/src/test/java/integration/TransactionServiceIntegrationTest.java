@@ -1,6 +1,9 @@
 package integration;
 
 
+import net.devh.boot.grpc.server.autoconfigure.GrpcServerAutoConfiguration;
+import net.devh.boot.grpc.server.autoconfigure.GrpcServerFactoryAutoConfiguration;
+import net.devh.boot.grpc.server.autoconfigure.GrpcServerMetricAutoConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kuraterut.paymentservice.PaymentServiceApplication;
@@ -11,10 +14,13 @@ import org.kuraterut.paymentservice.model.utils.TransactionType;
 import org.kuraterut.paymentservice.service.PaymentAccountService;
 import org.kuraterut.paymentservice.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
@@ -34,6 +40,15 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 @Testcontainers
 @EnableCaching
 @TestPropertySource(locations = "classpath:application-test.yaml")
+@Import(TestConfig.class)
+@ActiveProfiles("test")
+@ImportAutoConfiguration(exclude = {
+        GrpcServerAutoConfiguration.class,          // Exclude gRPC server auto-configuration
+        GrpcServerFactoryAutoConfiguration.class,   // Exclude gRPC server factory auto-configuration
+//        GrpcServerHealthAutoConfiguration.class,    // Exclude gRPC server health auto-configuration
+        GrpcServerMetricAutoConfiguration.class,
+        net.devh.boot.grpc.server.autoconfigure.GrpcMetadataEurekaConfiguration.class
+})
 class TransactionServiceIntegrationTest {
 
     @Container
@@ -61,6 +76,12 @@ class TransactionServiceIntegrationTest {
         registry.add("spring.kafka.consumer.auto-offset-reset", () -> "earliest");
         registry.add("spring.kafka.bootstrap-servers", () -> "localhost:9092");
         registry.add("spring.kafka.properties.enable.auto.commit", () -> false);
+
+        // Completely disable gRPC and actuator
+        registry.add("grpc.server.enabled", () -> false);
+        registry.add("management.endpoints.enabled-by-default", () -> false);
+        registry.add("management.endpoint.health.enabled", () -> false);
+        registry.add("management.endpoint.info.enabled", () -> false);
     }
     //TODO Убрать все var
     @Autowired

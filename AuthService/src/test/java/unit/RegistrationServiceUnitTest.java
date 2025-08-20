@@ -12,6 +12,9 @@ import org.kuraterut.authservice.model.utils.Role;
 import org.kuraterut.authservice.repository.UserRepository;
 import org.kuraterut.authservice.service.JwtGeneratorService;
 import org.kuraterut.authservice.service.RegisterService;
+import org.kuraterut.paymentservice.grpc.CreateAccountRequest;
+import org.kuraterut.paymentservice.grpc.CreateAccountResponse;
+import org.kuraterut.paymentservice.grpc.PaymentServiceGrpc;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -49,34 +52,45 @@ class RegistrationServiceUnitTest {
     @Mock
     private KafkaTemplate<String, UserRegistrationEvent> kafkaTemplate;
 
+    @Mock
+    private PaymentServiceGrpc.PaymentServiceBlockingStub paymentServiceStub;
+
     @InjectMocks
     private RegisterService registerService;
 
 
-    @BeforeEach
-    void setup() {
-        // подставляем имя топика, чтобы не было null
-        ReflectionTestUtils.setField(registerService, "userRegistrationTopic", "test-topic");
-    }
-
     @Test
     void register_success_nonAdmin() throws Exception {
+        // given
         RegisterRequest request = new RegisterRequest("test@example.com", "pass", Role.CUSTOMER);
-        User user = User.builder().id(1L).email("test@example.com").password("encoded").role(Role.CUSTOMER).build();
+        User user = User.builder()
+                .id(1L)
+                .email("test@example.com")
+                .password("encoded")
+                .role(Role.CUSTOMER)
+                .build();
+
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("pass")).thenReturn("encoded");
         when(userRepository.save(any())).thenReturn(user);
         when(jwtGeneratorService.generateToken(any())).thenReturn("jwt-token");
 
-        when(kafkaTemplate.send(anyString(), any(UserRegistrationEvent.class)))
-                .thenReturn(CompletableFuture.completedFuture(null));
+        // gRPC mock
+        CreateAccountResponse grpcResponse = CreateAccountResponse.newBuilder()
+                .setAccountId(1L)
+                .setSuccess(true)
+                .build();
 
+        when(paymentServiceStub.createAccount(any(CreateAccountRequest.class)))
+                .thenReturn(grpcResponse);
 
-
+        // when
         RegisterResponse response = registerService.register(request);
 
+        // then
         assertThat(response.getToken()).isEqualTo("jwt-token");
-        verify(kafkaTemplate).send(anyString(), any(UserRegistrationEvent.class));
+        verify(paymentServiceStub).createAccount(any(CreateAccountRequest.class));
+        verify(userRepository).save(any(User.class));
     }
 
     @Test

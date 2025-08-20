@@ -1,5 +1,7 @@
 package integration;
 
+import net.devh.boot.grpc.client.autoconfigure.GrpcClientAutoConfiguration;
+import net.devh.boot.grpc.client.autoconfigure.GrpcClientHealthAutoConfiguration;
 import org.junit.jupiter.api.Test;
 import org.kuraterut.authservice.AuthServiceApplication;
 import org.kuraterut.authservice.dto.requests.LoginRequest;
@@ -12,9 +14,12 @@ import org.kuraterut.authservice.repository.UserRepository;
 import org.kuraterut.authservice.service.LoginService;
 import org.kuraterut.authservice.service.RegisterService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
@@ -31,6 +36,12 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 @EnableCaching
 @TestPropertySource(locations = "classpath:application-test.yaml")
 @Import(TestConfig.class)
+@ImportAutoConfiguration(exclude = {
+        GrpcClientAutoConfiguration.class,  // Exclude gRPC auto-configuration
+        GrpcClientHealthAutoConfiguration.class,
+        org.kuraterut.authservice.config.GrpcConfig.class  // Exclude your GrpcConfig
+})
+@ActiveProfiles("test")
 class LoginRegistrationIntegrationTest {
 
     @Container
