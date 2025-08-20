@@ -1,24 +1,24 @@
 dependencies:
-- name: api-gateway
+- name: marketplace-app-api-gateway
   repository: file://charts/api-gateway
   version: 0.1.0
-- name: auth-service
+- name: marketplace-app-auth-service
   repository: file://charts/auth-service
   version: 0.1.0
-- name: eureka-server
+- name: marketplace-app-eureka-server
   repository: file://charts/eureka-server
   version: 0.1.0
-- name: kafka
+- name: marketplace-app-kafka
   repository: file://charts/kafka
   version: 0.1.0
-- name: order-service
+- name: marketplace-app-order-service
   repository: file://charts/order-service
   version: 0.1.0
-- name: payment-service
+- name: marketplace-app-payment-service
   repository: file://charts/payment-service
   version: 0.1.0
-- name: product-service
+- name: marketplace-app-product-service
   repository: file://charts/product-service
   version: 0.1.0
-digest: sha256:2e78187436257ddcd9c585351afcab4bf0c109e550b2ec6065c757f0f6c91ebe
-generated: "2025-08-11T12:41:54.2932207+03:00"
+digest: sha256:bbc15f140ca12cdc1b40015bf728794c30721739a03529437f4c0e398db24af4
+generated: "2025-08-20T15:40:42.6290166+03:00"

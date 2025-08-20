@@ -157,7 +157,11 @@ public class OrderService implements CreateOrderUseCase, GetOrderUseCase{
 
                 orderOutboxRepository.markAsProcessed(createOrderEventOutbox.getId());
                 log.info("[OrderService:processCreateOrderEvent] mark order event outbox as processed");
-            } catch (InterruptedException | ExecutionException e) {
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                log.error("[OrderService:processCreateOrderEvent] Thread was interrupted while processing outbox with id: {}", createOrderEventOutbox.getId(), e);
+                break;
+            } catch (ExecutionException e) {
                 log.error("[OrderService:processCreateOrderEvent] Failed to process outbox with id: {}", createOrderEventOutbox.getId(), e);
             }
         }

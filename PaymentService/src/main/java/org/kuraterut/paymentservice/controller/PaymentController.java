@@ -14,7 +14,6 @@ import org.kuraterut.paymentservice.usecases.paymentaccount.DeletePaymentAccount
 import org.kuraterut.paymentservice.usecases.paymentaccount.GetPaymentAccountUseCase;
 import org.kuraterut.paymentservice.usecases.paymentaccount.UpdatePaymentAccountUseCase;
 import org.kuraterut.jwtsecuritylib.model.AuthPrincipal;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -23,7 +22,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/payments")
@@ -83,26 +81,11 @@ public class PaymentController {
             @ApiResponse(responseCode = "404", description = "Payment Account not found"),
             @ApiResponse(responseCode = "500", description = "Server error")
     })
-    public PaymentAccountResponse adminGetPaymentAccountById(
+    public PaymentAccountResponse adminGetPaymentAccount(
             @Parameter(description = "Account ID") @PathVariable("id") Long id) {
-        return getPaymentAccountUseCase.getPaymentAccountById(id);
+        return getPaymentAccountUseCase.getPaymentAccountByUserId(id);
     }
 
-    @GetMapping("/admin/user/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
-    @Operation(summary = "Getting payment account by User ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Payment Account found"),
-            @ApiResponse(responseCode = "400", description = "Invalid input"),
-            @ApiResponse(responseCode = "403", description = "Access denied"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "404", description = "Payment Account not found"),
-            @ApiResponse(responseCode = "500", description = "Server error")
-    })
-    public PaymentAccountResponse adminGetPaymentAccountByUserId(
-            @Parameter(description = "User ID") @PathVariable("id") Long userId) {
-        return getPaymentAccountUseCase.getPaymentAccountByUserId(userId);
-    }
 
     @GetMapping
     @PreAuthorize("hasAuthority('SELLER') or hasAuthority('CUSTOMER')")
@@ -173,7 +156,7 @@ public class PaymentController {
             @ApiResponse(responseCode = "409", description = "Payment Account has non zero balance"),
             @ApiResponse(responseCode = "500", description = "Server error")
     })
-    public void deletePaymentAccountByUserId(@AuthenticationPrincipal AuthPrincipal authPrincipal) {
+    public void deletePaymentAccount(@AuthenticationPrincipal AuthPrincipal authPrincipal) {
         Long userId = authPrincipal.getUserId();
         deletePaymentAccountUseCase.deletePaymentAccountByUserId(userId);
     }
@@ -192,24 +175,7 @@ public class PaymentController {
     })
     public void adminDeletePaymentAccount(
             @Parameter(description = "Account ID") @PathVariable("id") Long id) {
-        deletePaymentAccountUseCase.deletePaymentAccountById(id);
-    }
-
-    @DeleteMapping("/admin/user/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
-    @Operation(summary = "Delete payment account")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Payment Account deleted"),
-            @ApiResponse(responseCode = "400", description = "Invalid input"),
-            @ApiResponse(responseCode = "403", description = "Access denied"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "404", description = "Payment Account Not Found"),
-            @ApiResponse(responseCode = "409", description = "Payment Account has non zero balance"),
-            @ApiResponse(responseCode = "500", description = "Server error")
-    })
-    public void adminDeletePaymentAccountByUserId(
-            @Parameter(description = "User ID") @PathVariable("id") Long userId) {
-        deletePaymentAccountUseCase.deletePaymentAccountByUserId(userId);
+        deletePaymentAccountUseCase.deletePaymentAccountByUserId(id);
     }
 
     //TODO Сделать User ID - первичным ключом
@@ -227,7 +193,7 @@ public class PaymentController {
             @ApiResponse(responseCode = "304", description = "Payment Account Not Modified"),
             @ApiResponse(responseCode = "500", description = "Server error")
     })
-    public PaymentAccountResponse depositPaymentAccountByUserId(
+    public PaymentAccountResponse depositPaymentAccount(
             @Parameter(description = "Amount to deposit") @RequestParam("amount") BigDecimal amount,
             @AuthenticationPrincipal AuthPrincipal authPrincipal) {
         return updatePaymentAccountUseCase.depositPaymentAccountByUserId(authPrincipal.getUserId(), amount);
@@ -245,7 +211,7 @@ public class PaymentController {
             @ApiResponse(responseCode = "304", description = "Payment Account Not Modified"),
             @ApiResponse(responseCode = "500", description = "Server error")
     })
-    public PaymentAccountResponse withdrawPaymentAccountByUserId(
+    public PaymentAccountResponse withdrawPaymentAccount(
             @Parameter(description = "Amount to withdraw") @RequestParam("amount") BigDecimal amount,
             @AuthenticationPrincipal AuthPrincipal authPrincipal) {
         return updatePaymentAccountUseCase.withdrawPaymentAccountByUserId(authPrincipal.getUserId(), amount);
@@ -283,23 +249,7 @@ public class PaymentController {
             @ApiResponse(responseCode = "500", description = "Server error")
     })
     public PaymentAccountResponse adminActivatePaymentAccount(@PathVariable("id") Long id) {
-        return updatePaymentAccountUseCase.activatePaymentAccountById(id);
-    }
-
-    @PutMapping("/activate/admin/user/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
-    @Operation(summary = "Activate payment account")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Payment Account activated "),
-            @ApiResponse(responseCode = "400", description = "Invalid input"),
-            @ApiResponse(responseCode = "403", description = "Access denied"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "404", description = "Payment Account Not Found"),
-            @ApiResponse(responseCode = "304", description = "Payment Account Not Modified"),
-            @ApiResponse(responseCode = "500", description = "Server error")
-    })
-    public PaymentAccountResponse adminActivatePaymentAccountByUserId(@PathVariable("id") Long userId) {
-        return updatePaymentAccountUseCase.activatePaymentAccountByUserId(userId);
+        return updatePaymentAccountUseCase.activatePaymentAccountByUserId(id);
     }
 
     @PutMapping("/deactivate")
@@ -331,23 +281,6 @@ public class PaymentController {
             @ApiResponse(responseCode = "500", description = "Server error")
     })
     public PaymentAccountResponse adminDeactivatePaymentAccount(@PathVariable("id") Long id) {
-        return updatePaymentAccountUseCase.deactivatePaymentAccountById(id);
+        return updatePaymentAccountUseCase.deactivatePaymentAccountByUserId(id);
     }
-
-    @PutMapping("/deactivate/admin/user/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
-    @Operation(summary = "Deactivate payment account")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Payment Account deactivated"),
-            @ApiResponse(responseCode = "400", description = "Invalid input"),
-            @ApiResponse(responseCode = "403", description = "Access denied"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "404", description = "Payment Account Not Found"),
-            @ApiResponse(responseCode = "304", description = "Payment Account Not Modified"),
-            @ApiResponse(responseCode = "500", description = "Server error")
-    })
-    public PaymentAccountResponse adminDeactivatePaymentAccountByUserId(@PathVariable("id") Long userId) {
-        return updatePaymentAccountUseCase.deactivatePaymentAccountByUserId(userId);
-    }
-
 }

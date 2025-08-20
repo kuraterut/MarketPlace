@@ -2,7 +2,7 @@
    {{- if .Values.ingress.enabled }}
    http://{{ .Values.ingress.host }}
    {{- else }}
-   ClusterIP Service: {{ include "auth-service.fullname" . }}:{{ .Values.service.port }}
+   ClusterIP Service: {{ include "auth-service.name" . }}:{{ .Values.service.port }}
    {{- end }}
 
 2. Postgres Secret:

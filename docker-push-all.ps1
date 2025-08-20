@@ -28,7 +28,7 @@ cd ../ProductService
 docker build -t $DOCKER_IMAGE_PRODUCT_SERVICE .
 cd ..
 
-echo "H541xm76_2005" | docker login -u "kuraterut" --password-stdin
+echo "$env:DOCKERHUB_PASSWORD" | docker login -u "$env:DOCKERHUB_USERNAME" --password-stdin
 docker push $DOCKER_IMAGE_GATEWAY_SERVICE
 docker push $DOCKER_IMAGE_AUTH_SERVICE
 docker push $DOCKER_IMAGE_EUREKA_SERVER

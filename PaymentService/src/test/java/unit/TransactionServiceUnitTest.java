@@ -28,10 +28,11 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class TransactionServiceUnitTest {
+class TransactionServiceUnitTest {
 
     @Mock
     private TransactionRepository transactionRepository;
@@ -54,14 +55,13 @@ public class TransactionServiceUnitTest {
     @BeforeEach
     void setUp() {
         paymentAccount = new PaymentAccount();
-        paymentAccount.setId(1L);
-        paymentAccount.setUserId(100L);
+        paymentAccount.setId(100L);
 
         transaction = new Transaction();
         transaction.setId(10L);
         transaction.setAccount(paymentAccount);
 
-        transactionResponse = new TransactionResponse(1L, 1L, BigDecimal.TEN,
+        transactionResponse = new TransactionResponse(1L, 100L, BigDecimal.TEN,
                 TransactionType.PAYMENT, "testDescription", TransactionStatus.COMPLETED,
                 1L, testCreatedAtDateTime.toString(), testUpdatedAtDateTime.toString());
     }
@@ -70,7 +70,7 @@ public class TransactionServiceUnitTest {
     void createTransaction_success() {
         CreateTransactionRequest request = new CreateTransactionRequest(BigDecimal.TEN, TransactionType.PAYMENT, "testDescription", 1L);
 
-        when(paymentAccountRepository.findByUserId(100L)).thenReturn(Optional.of(paymentAccount));
+        when(paymentAccountRepository.findById(100L)).thenReturn(Optional.of(paymentAccount));
         when(transactionMapper.toEntity(request)).thenReturn(transaction);
         when(transactionRepository.saveAndFlush(transaction)).thenReturn(transaction);
         when(transactionMapper.toResponse(transaction)).thenReturn(transactionResponse);
@@ -83,16 +83,18 @@ public class TransactionServiceUnitTest {
 
     @Test
     void createTransaction_accountNotFound() {
-        when(paymentAccountRepository.findByUserId(200L)).thenReturn(Optional.empty());
+        when(paymentAccountRepository.findById(200L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> transactionService.createTransaction(new CreateTransactionRequest(), 200L))
-                .isInstanceOf(PaymentAccountNotFoundException.class);
+
+        CreateTransactionRequest request = new CreateTransactionRequest();
+        assertThrows(PaymentAccountNotFoundException.class,
+                () -> transactionService.createTransaction(request, 200L));
     }
 
     @Test
     void getTransactionByIdAndUser_success() {
-        when(paymentAccountRepository.findByUserId(100L)).thenReturn(Optional.of(paymentAccount));
-        when(transactionRepository.findByIdAndAccountId(10L, 1L)).thenReturn(Optional.of(transaction));
+        when(paymentAccountRepository.findById(100L)).thenReturn(Optional.of(paymentAccount));
+        when(transactionRepository.findByIdAndAccountId(10L, 100L)).thenReturn(Optional.of(transaction));
         when(transactionRepository.findById(10L)).thenReturn(Optional.of(transaction));
         when(transactionMapper.toResponse(transaction)).thenReturn(transactionResponse);
 
@@ -103,12 +105,12 @@ public class TransactionServiceUnitTest {
 
     @Test
     void getTransactionByIdAndUser_notFound() {
-        when(paymentAccountRepository.findByUserId(100L)).thenReturn(Optional.of(paymentAccount));
-        when(transactionRepository.findByIdAndAccountId(10L, 1L)).thenReturn(Optional.empty());
+        when(paymentAccountRepository.findById(100L)).thenReturn(Optional.of(paymentAccount));
+        when(transactionRepository.findByIdAndAccountId(10L, 100L)).thenReturn(Optional.empty());
         when(transactionRepository.findById(10L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> transactionService.getTransactionByIdAndUserId(10L, 100L))
-                .isInstanceOf(TransactionNotFoundException.class);
+        assertThrows(TransactionNotFoundException.class,
+                () -> transactionService.getTransactionByIdAndUserId(10L, 100L));
     }
 
     @Test
@@ -117,11 +119,11 @@ public class TransactionServiceUnitTest {
         Page<Transaction> page = new PageImpl<>(List.of(transaction));
         TransactionListResponse listResponse = new TransactionListResponse(List.of(transactionResponse));
 
-        when(paymentAccountRepository.findByUserId(100L)).thenReturn(Optional.of(paymentAccount));
-        when(transactionRepository.findAllByAccountId(1L, pageable)).thenReturn(page);
+        when(paymentAccountRepository.findById(100L)).thenReturn(Optional.of(paymentAccount));
+        when(transactionRepository.findAllByAccountId(100L, pageable)).thenReturn(page);
         when(transactionMapper.toResponses(page)).thenReturn(listResponse);
 
-        TransactionListResponse result = transactionService.getAllTransactionsAndUserId(100L, pageable);
+        TransactionListResponse result = transactionService.getAllTransactionsByUserId(100L, pageable);
 
         assertThat(result).isEqualTo(listResponse);
     }

@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "product-service.fullname" . }}
+  name: {{ include "product-service.name" . }}
   labels:
     app: {{ include "product-service.name" . }}
     release: {{ .Release.Name }}
@@ -25,7 +25,7 @@ spec:
             - containerPort: {{ .Values.service.port }}
           envFrom:
             - configMapRef:
-                name: {{ include "product-service.fullname" . }}-config
+                name: {{ include "product-service.name" . }}-config
           resources:
             requests:
               cpu: {{ .Values.resources.requests.cpu }}

@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "auth-service.fullname" . }}
+  name: {{ include "auth-service.name" . }}
   labels:
     app.kubernetes.io/name: {{ include "auth-service.name" . | quote }}
     helm.sh/chart: {{ include "auth-service.chart" . | quote }}
@@ -35,7 +35,7 @@ spec:
             - containerPort: {{ .Values.service.containerPort }}
           envFrom:
             - configMapRef:
-                name: {{ include "auth-service.fullname" . }}-config
+                name: {{ include "auth-service.name" . }}-config
 
           resources:
 {{ toYaml .Values.resources | indent 12 }}

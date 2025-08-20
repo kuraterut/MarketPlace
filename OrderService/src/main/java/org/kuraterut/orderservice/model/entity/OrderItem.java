@@ -1,10 +1,7 @@
 package org.kuraterut.orderservice.model.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "order_items")
@@ -24,6 +21,7 @@ public class OrderItem {
     @Column(nullable = false)
     private Long quantity;
 
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;

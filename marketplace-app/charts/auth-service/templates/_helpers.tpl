@@ -7,15 +7,9 @@
 Return chart name (or override)
 */ -}}
 {{- define "auth-service.name" -}}
-auth-service
+{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- /*
-Return the full name of the release (например, имя Helm релиза + chart name)
-*/ -}}
-{{- define "auth-service.fullname" -}}
-{{- printf "%s-%s" .Release.Name (include "auth-service.name" .) | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
 
 {{- /*
 Return chart@version - handy for labels
@@ -48,19 +42,19 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 Secret name for Postgres credentials.
 */ -}}
 {{- define "auth-service.postgresSecretName" -}}
-{{ include "auth-service.fullname" . }}-postgres
+{{ include "auth-service.name" . }}-postgres
 {{- end -}}
 
 {{/*
 Имя секрета для KeyDB
 */}}
 {{- define "auth-service.keydbSecretName" -}}
-{{ include "auth-service.fullname" . }}-keydb
+{{ include "auth-service.name" . }}-keydb
 {{- end }}
 
 
 {{- define "auth-service.postgresConfig" -}}
-{{ include "auth-service.fullname" . }}-postgres
+{{ include "auth-service.name" . }}-postgres
 {{- end }}
 
 

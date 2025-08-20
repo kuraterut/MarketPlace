@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "order-service.fullname" . }}
+  name: {{ include "order-service.name" . }}
   labels:
     {{- include "order-service.labels" . | nindent 4 }}
 spec:
@@ -29,7 +29,7 @@ spec:
               name: http
           envFrom:
             - configMapRef:
-                name: {{ include "order-service.fullname" . }}-config
+                name: {{ include "order-service.name" . }}-config
           readinessProbe:
             {{- if .Values.readinessProbe.enabled }}
             httpGet:

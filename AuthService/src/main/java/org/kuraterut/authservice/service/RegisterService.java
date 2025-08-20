@@ -41,7 +41,7 @@ public class RegisterService implements RegisterUseCase {
 
     @Override
     @Transactional
-    @Retryable(value = OptimisticLockingFailureException.class, maxAttempts = 3, backoff = @Backoff(delay = 100))
+    @Retryable(retryFor = OptimisticLockingFailureException.class, maxAttempts = 3, backoff = @Backoff(delay = 100))
     public RegisterResponse register(RegisterRequest registerRequest) throws ExecutionException, InterruptedException {
         log.info("[RegisterService:register] Start registration");
         if(userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {

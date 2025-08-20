@@ -1,10 +1,7 @@
 {{- define "payment-service.name" -}}
-payment-service
+{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end }}
 
-{{- define "payment-service.fullname" -}}
-{{ .Release.Name }}-{{ include "payment-service.name" . }}
-{{- end }}
 
 {{- /*
 Helper for kafka bootstrap server string.

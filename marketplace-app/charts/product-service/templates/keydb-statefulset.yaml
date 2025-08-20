@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "product-service.fullname" . }}-keydb
+  name: {{ include "product-service.name" . }}-keydb
   labels:
     app: keydb
     release: {{ .Release.Name }}
@@ -10,7 +10,7 @@ spec:
     matchLabels:
       app: keydb
       release: {{ .Release.Name }}
-  serviceName: {{ include "product-service.fullname" . }}-keydb
+  serviceName: {{ include "product-service.name" . }}-keydb
   replicas: 1
   template:
     metadata:

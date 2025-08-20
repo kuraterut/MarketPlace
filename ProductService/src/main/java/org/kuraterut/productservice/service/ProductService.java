@@ -3,6 +3,7 @@ package org.kuraterut.productservice.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kuraterut.productservice.dto.requests.CreateProductRequest;
+import org.kuraterut.productservice.dto.requests.ProductSearchCriteria;
 import org.kuraterut.productservice.dto.requests.UpdateProductRequest;
 import org.kuraterut.productservice.dto.responses.ProductListResponse;
 import org.kuraterut.productservice.dto.responses.ProductResponse;
@@ -14,6 +15,7 @@ import org.kuraterut.productservice.model.entity.Category;
 import org.kuraterut.productservice.model.entity.Product;
 import org.kuraterut.productservice.repository.CategoryRepository;
 import org.kuraterut.productservice.repository.ProductRepository;
+import org.kuraterut.productservice.specifications.ProductSpecifications;
 import org.kuraterut.productservice.usecases.product.CreateProductUseCase;
 import org.kuraterut.productservice.usecases.product.DeleteProductUseCase;
 import org.kuraterut.productservice.usecases.product.GetProductUseCase;
@@ -22,7 +24,10 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -196,5 +201,24 @@ public class ProductService implements CreateProductUseCase, DeleteProductUseCas
         Product updatedProduct = productRepository.saveAndFlush(product);
         log.info("[ProductService:updateProduct] Product updated");
         return productMapper.toResponse(updatedProduct);
+    }
+
+    @Override
+    @Transactional
+    public ProductListResponse getAllProductsFiltered(ProductSearchCriteria criteria) {
+        Pageable pageable = PageRequest.of(
+                criteria.getPage(),
+                criteria.getPageSize(),
+                Sort.by(Sort.Direction.fromString(criteria.getDirection()),
+                criteria.getSortBy()));
+
+        Specification<Product> spec = Specification.where(ProductSpecifications.nameContains(criteria.getName()))
+                .and(ProductSpecifications.inStockOnly(criteria.isInStockOnly()))
+                .and(ProductSpecifications.hasCategory(criteria.getCategoryIds()))
+                .and(ProductSpecifications.maxPrice(criteria.getMaxPrice()))
+                .and(ProductSpecifications.minPrice(criteria.getMinPrice()));
+
+        Page<Product> products = productRepository.findAll(spec, pageable);
+        return productMapper.toResponses(products);
     }
 }

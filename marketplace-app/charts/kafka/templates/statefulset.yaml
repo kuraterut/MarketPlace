@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "kafka.fullname" . }}
+  name: {{ include "kafka.name" . }}
   labels:
     app: {{ .Chart.Name }}
 spec:
@@ -33,11 +33,11 @@ spec:
             - name: KAFKA_CFG_LISTENERS
               value: "PLAINTEXT://:{{ .Values.service.port }},CONTROLLER://:{{ .Values.service.controllerPort }}"
             - name: KAFKA_CFG_ADVERTISED_LISTENERS
-              value: "PLAINTEXT://{{ include "kafka.fullname" . }}-0.{{ include "kafka.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}"
+              value: "PLAINTEXT://{{ include "kafka.name" . }}-0.{{ include "kafka.name" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}"
             - name: KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP
               value: "PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT"
             - name: KAFKA_CFG_CONTROLLER_QUORUM_VOTERS
-              value: "0@{{ include "kafka.fullname" . }}-0.{{ include "kafka.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.controllerPort }}"
+              value: "0@{{ include "kafka.name" . }}-0.{{ include "kafka.name" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.controllerPort }}"
             - name: KAFKA_CFG_LOG_DIRS
               value: "/bitnami/kafka/data-logs"
           volumeMounts:

@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.kuraterut.paymentservice.dto.response.PaymentAccountListResponse;
 import org.kuraterut.paymentservice.dto.response.PaymentAccountResponse;
 import org.kuraterut.paymentservice.exception.model.*;
+import org.kuraterut.paymentservice.logger.PaymentAccountLogs;
 import org.kuraterut.paymentservice.mapper.PaymentAccountMapper;
 import org.kuraterut.paymentservice.model.entity.PaymentAccount;
 import org.kuraterut.paymentservice.model.entity.Transaction;
@@ -43,71 +44,60 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
     private final TransactionRepository transactionRepository;
     private final EntityManager entityManager;
 
-    @Override
-    @Transactional
-    @CacheEvict(allEntries = true)
-    public PaymentAccountResponse createPaymentAccount(Long userId) {
-        try {
-            log.info("[PaymentAccountService:createPaymentAccount] Start createPaymentAccount");
-            PaymentAccount paymentAccount = paymentAccountMapper.toEntity(userId);
-            paymentAccount = paymentAccountRepository.saveAndFlush(paymentAccount);
-            log.info("[PaymentAccountService:createPaymentAccount] Payment Account created and saved");
-            return paymentAccountMapper.toResponse(paymentAccount);
-        } catch (DataIntegrityViolationException | ConstraintViolationException e){
-            log.warn("[PaymentAccountService:createPaymentAccount] Payment Account Already Exists with userId: {}", userId);
-            throw new PaymentAccountAlreadyExistsException("Payment Account is already exists with userId: " + userId);
-        }
+
+    private PaymentAccount findPaymentAccount(Long userId, String logPrefix){
+        return paymentAccountRepository.findById(userId)
+                .orElseThrow(() -> {
+                    log.warn(PaymentAccountLogs.NOT_FOUND, logPrefix, userId);
+                    return new PaymentAccountNotFoundException("%s Payment account not found by id: %d", logPrefix, userId);
+                });
     }
+
+
 
     @Override
     @Transactional
     @CacheEvict(allEntries = true)
-    public void deletePaymentAccountById(Long id) {
-        log.info("[PaymentAccountService:deletePaymentAccountById] Start deletePaymentAccountById");
-        PaymentAccount paymentAccount = paymentAccountRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.warn("[PaymentAccountService:deletePaymentAccountById] Payment Account Not Found with id: {}", id);
-                    return new PaymentAccountNotFoundException("Payment account not found by id: " + id);
-                });
-        log.info("[PaymentAccountService:deletePaymentAccountById] Payment Account Found");
-        BigDecimal balance = paymentAccount.getBalance();
-        if (balance.compareTo(BigDecimal.ZERO) != 0) {
-            String message = String.format("Can't delete payment account with id: %d, because balance is not zero: %f", id, balance);
-            log.warn("[PaymentAccountService:deletePaymentAccountById] {}", message);
-            throw new PaymentAccountIsNotEmptyException(message);
+    public PaymentAccountResponse createPaymentAccount(Long userId) {
+        String logPrefix = "[PaymentAccountService:createPaymentAccount]";
+        try {
+            log.info("{} Start createPaymentAccount", logPrefix);
+            PaymentAccount paymentAccount = paymentAccountMapper.toEntity(userId);
+            paymentAccount = paymentAccountRepository.saveAndFlush(paymentAccount);
+            log.info("{} Payment Account created and saved", logPrefix);
+            return paymentAccountMapper.toResponse(paymentAccount);
+        } catch (DataIntegrityViolationException | ConstraintViolationException e){
+            log.warn("{} Payment Account Already Exists with id: {}", logPrefix, userId);
+            throw new PaymentAccountAlreadyExistsException("%s Payment Account is already exists with id: %d", logPrefix, userId);
         }
-        paymentAccountRepository.deleteById(id);
-        log.info("[PaymentAccountService:deletePaymentAccountById] Payment Account Deleted");
     }
 
     @Override
     @Transactional
     @CacheEvict(allEntries = true)
     public void deletePaymentAccountByUserId(Long userId) {
-        log.info("[PaymentAccountService:deletePaymentAccountByUserId] Start deletePaymentAccountByUserId");
-        PaymentAccount paymentAccount = paymentAccountRepository.findByUserId(userId)
-                .orElseThrow(() -> {
-                    log.warn("[PaymentAccountService:deletePaymentAccountByUserId] Payment Account Not Found with id: {}", userId);
-                    return new PaymentAccountNotFoundException("Payment account not found by userId: " + userId);
-                });
-        log.info("[PaymentAccountService:deletePaymentAccountByUserId] Payment Account Found");
+        String logPrefix = "[PaymentAccountService:deletePaymentAccountByUserId]";
+        log.info("{} Start deletePaymentAccountByUserId", logPrefix);
+        PaymentAccount paymentAccount = findPaymentAccount(userId, logPrefix);
+        log.info(PaymentAccountLogs.FOUND, logPrefix, paymentAccount);
         BigDecimal balance = paymentAccount.getBalance();
         if (balance.compareTo(BigDecimal.ZERO) != 0) {
-            String message = String.format("Can't delete payment account with userId: %d, because balance is not zero: %f", userId, balance);
-            log.warn("[PaymentAccountService:deletePaymentAccountByUserId] {}", message);
-            throw new PaymentAccountIsNotEmptyException(message);
+            String message = String.format("%s Can't delete payment account with id: %d, because balance is not zero: %f", logPrefix, userId, balance);
+            log.warn("{} {}", logPrefix, message);
+            throw new PaymentAccountIsNotEmptyException("%s %s", logPrefix, message);
         }
         paymentAccountRepository.deleteById(paymentAccount.getId());
-        log.info("[PaymentAccountService:deletePaymentAccountByUserId] Payment Account Deleted");
+        log.info("{} Payment Account Deleted", logPrefix);
     }
 
     @Override
     @Transactional(readOnly = true)
     @Cacheable(key = "'all_' + #pageable.pageNumber + '_' + #pageable.pageSize")
     public PaymentAccountListResponse getAllPaymentAccounts(Pageable pageable) {
-        log.info("[PaymentAccountService:getAllPaymentAccounts] Start getAllPaymentAccounts");
+        String logPrefix = "[PaymentAccountService:getAllPaymentAccounts]";
+        log.info("{} Start getAllPaymentAccounts", logPrefix);
         Page<PaymentAccount> page = paymentAccountRepository.findAll(pageable);
-        log.info("[PaymentAccountService:getAllPaymentAccounts] Payment Accounts Found: {}", page);
+        log.info(PaymentAccountLogs.FOUND_LIST, logPrefix, page);
         return paymentAccountMapper.toResponses(page);
     }
 
@@ -115,27 +105,10 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
     @Transactional(readOnly = true)
     @Cacheable(key = "'user_' + #userId")
     public PaymentAccountResponse getPaymentAccountByUserId(Long userId) {
-        log.info("[PaymentAccountService:getPaymentAccountByUserId] Start getPaymentAccountByUserId");
-        PaymentAccount paymentAccount = paymentAccountRepository.findByUserId(userId)
-                .orElseThrow(() -> {
-                    log.warn("[PaymentAccountService:getPaymentAccountByUserId] Payment Account Not Found with id: {}", userId);
-                    return new PaymentAccountNotFoundException("Payment account not found by user id: " + userId);
-                });
-        log.info("[PaymentAccountService:getPaymentAccountByUserId] Payment Account Found");
-        return paymentAccountMapper.toResponse(paymentAccount);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    @Cacheable(key = "#id")
-    public PaymentAccountResponse getPaymentAccountById(Long id){
-        log.info("[PaymentAccountService:getPaymentAccountById] Start getPaymentAccountById");
-        PaymentAccount paymentAccount = paymentAccountRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.warn("[PaymentAccountService:getPaymentAccountById] Payment Account Not Found with id: {}", id);
-                    return new PaymentAccountNotFoundException("Payment account not found by id: " + id);
-                });
-        log.info("[PaymentAccountService:getPaymentAccountById] Payment Account Found");
+        String logPrefix = "[PaymentAccountService:getPaymentAccountByUserId]";
+        log.info("{} Start getPaymentAccountByUserId", logPrefix);
+        PaymentAccount paymentAccount = findPaymentAccount(userId, logPrefix);
+        log.info(PaymentAccountLogs.FOUND, logPrefix, paymentAccount);
         return paymentAccountMapper.toResponse(paymentAccount);
     }
 
@@ -144,9 +117,10 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
     @Transactional(readOnly = true)
     @Cacheable(key = "'active_' + #isActive + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
     public PaymentAccountListResponse getPaymentAccountsByIsActive(boolean isActive, Pageable pageable) {
-        log.info("[PaymentAccountService:getPaymentAccountsByIsActive] Start getPaymentAccountsByIsActive");
+        String logPrefix = "[PaymentAccountService:getPaymentAccountsByIsActive]";
+        log.info("{} Start getPaymentAccountsByIsActive", logPrefix);
         Page<PaymentAccount> paymentAccounts = paymentAccountRepository.findAllPaymentAccountByActive(isActive, pageable);
-        log.info("[PaymentAccountService:getPaymentAccountsByIsActive] Payment Accounts Found: {}", paymentAccounts);
+        log.info(PaymentAccountLogs.FOUND_LIST, logPrefix, paymentAccounts);
         return paymentAccountMapper.toResponses(paymentAccounts);
     }
 
@@ -154,9 +128,10 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
     @Transactional(readOnly = true)
     @Cacheable(key = "'balance_' + #min + '_' + #max + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
     public PaymentAccountListResponse getPaymentAccountsByBalanceBetween(BigDecimal min, BigDecimal max, Pageable pageable) {
-        log.info("[PaymentAccountService:getPaymentAccountsByBalanceBetween] Start getPaymentAccountsByBalanceBetween");
+        String logPrefix = "[PaymentAccountService:getPaymentAccountsByBalanceBetween]";
+        log.info("{} Start getPaymentAccountsByBalanceBetween", logPrefix);
         Page<PaymentAccount> paymentAccounts = paymentAccountRepository.findAllPaymentAccountByBalanceBetween(min, max, pageable);
-        log.info("[PaymentAccountService:getPaymentAccountsByBalanceBetween] Payment Accounts Found: {}", paymentAccounts);
+        log.info(PaymentAccountLogs.FOUND_LIST, logPrefix, paymentAccounts);
         return paymentAccountMapper.toResponses(paymentAccounts);
     }
 //TODO После внедрения userId как первичного ключа исправить кэширование
@@ -164,159 +139,112 @@ public class PaymentAccountService implements CreatePaymentAccountUseCase, Updat
     @Transactional
     @CacheEvict(allEntries = true)
     public PaymentAccountResponse depositPaymentAccountByUserId(Long userId, BigDecimal amount) {
-        log.info("[PaymentAccountService:depositPaymentAccountByUserId] Start depositPaymentAccountByUserId");
-        PaymentAccount account = paymentAccountRepository.findByUserId(userId)
-                .orElseThrow(() -> {
-                    log.warn("[PaymentAccountService:depositPaymentAccountByUserId] Payment Account Not Found with userId: {}", userId);
-                    return new PaymentAccountNotFoundException("Payment account not found by user id: " + userId);
-                });
+        String logPrefix = "[PaymentAccountService:depositPaymentAccountByUserId]";
+        log.info("{} Start depositPaymentAccountByUserId", logPrefix);
+        PaymentAccount account = findPaymentAccount(userId, logPrefix);
 
         Transaction transaction = new Transaction();
         transaction.setAmount(amount);
         transaction.setAccount(account);
         transaction.setType(TransactionType.DEPOSIT);
 
-        log.info("[PaymentAccountService:depositPaymentAccountByUserId] Try Deposit Payment Account");
-        int rows = paymentAccountRepository.depositPaymentAccountByUserId(userId, amount);
+        log.info("{} Try Deposit Payment Account", logPrefix);
+        int rows = paymentAccountRepository.depositPaymentAccount(userId, amount);
         if (rows == 0){
-            log.warn("[PaymentAccountService:depositPaymentAccountByUserId] Can't Deposit Payment Account");
+            log.warn("{} Can't Deposit Payment Account", logPrefix);
             transaction.setStatus(TransactionStatus.FAILED);
             transactionRepository.save(transaction);
-            throw new UpdatePaymentAccountException("Can't deposit account");
+            throw new UpdatePaymentAccountException("%s Can't deposit account", logPrefix);
         }
         entityManager.flush();
         entityManager.clear();
-        log.info("[PaymentAccountService:depositPaymentAccountByUserId] Deposit Payment Account Successfully");
+        log.info("{} Deposit Payment Account Successfully", logPrefix);
 
         transaction.setStatus(TransactionStatus.COMPLETED);
         transactionRepository.save(transaction);
-        log.info("[PaymentAccountService:depositPaymentAccountByUserId] Transaction Saved Successfully");
-        return paymentAccountMapper.toResponse(paymentAccountRepository.findByUserId(userId)
-                .orElseThrow(() -> new PaymentAccountNotFoundException("Bank account not found by userId: " + userId)));
+        log.info(PaymentAccountLogs.TRANSACTION_SAVED, logPrefix, transaction);
+        return paymentAccountMapper.toResponse(paymentAccountRepository.findById(userId)
+                .orElseThrow(() -> new PaymentAccountNotFoundException(PaymentAccountLogs.NOT_FOUND_FORMAT, logPrefix, userId)));
     }
 
     @Override
     @Transactional
     @CacheEvict(allEntries = true)
     public PaymentAccountResponse withdrawPaymentAccountByUserId(Long userId, BigDecimal amount) {
-        log.info("[PaymentAccountService:withdrawPaymentAccountByUserId] Start withdrawPaymentAccountByUserId");
-        PaymentAccount account = paymentAccountRepository.findByUserId(userId)
-                .orElseThrow(() -> {
-                    log.warn("[PaymentAccountService:withdrawPaymentAccountByUserId] Payment Account Not Found with userId: {}", userId);
-                    return new PaymentAccountNotFoundException("Payment account not found by user id: " + userId);
-                });
+        String logPrefix = "[PaymentAccountService:withdrawPaymentAccountByUserId]";
+        log.info("{} Start withdrawPaymentAccountByUserId", logPrefix);
+        PaymentAccount account = findPaymentAccount(userId, logPrefix);
         Transaction transaction = new Transaction();
         transaction.setAmount(amount);
         transaction.setAccount(account);
         transaction.setType(TransactionType.WITHDRAW);
 
-        log.info("[PaymentAccountService:withdrawPaymentAccountByUserId] Try Withdraw Payment Account");
-        int rows = paymentAccountRepository.withdrawPaymentAccountByUserId(userId, amount);
+        log.info("{} Try Withdraw Payment Account", logPrefix);
+        int rows = paymentAccountRepository.withdrawPaymentAccount(userId, amount);
         if (rows == 0){
-            log.warn("[PaymentAccountService:withdrawPaymentAccountByUserId] Can't Withdraw Payment Account");
+            log.warn("{} Can't Withdraw Payment Account", logPrefix);
             transaction.setStatus(TransactionStatus.FAILED);
             transactionRepository.save(transaction);
-            throw new UpdatePaymentAccountException("Can't withdraw account");
+            throw new UpdatePaymentAccountException("%s Can't withdraw account", logPrefix);
         }
         entityManager.flush();
         entityManager.clear();
-        log.info("[PaymentAccountService:withdrawPaymentAccountByUserId] Withdraw Payment Account Successfully");
+        log.info("{} Withdraw Payment Account Successfully", logPrefix);
 
         transaction.setStatus(TransactionStatus.COMPLETED);
         transactionRepository.save(transaction);
-        log.info("[PaymentAccountService:withdrawPaymentAccountByUserId] Transaction Saved Successfully");
-        return paymentAccountMapper.toResponse(paymentAccountRepository.findByUserId(userId)
-                .orElseThrow(() -> new PaymentAccountNotFoundException("Bank account not found by user id: " + userId)));
+        log.info(PaymentAccountLogs.TRANSACTION_SAVED, logPrefix);
+        return paymentAccountMapper.toResponse(paymentAccountRepository.findById(userId)
+                .orElseThrow(() -> new PaymentAccountNotFoundException(PaymentAccountLogs.NOT_FOUND_FORMAT, logPrefix, userId)));
     }
 
-    @Override
-    @Transactional
-    @CacheEvict(allEntries = true)
-    public PaymentAccountResponse activatePaymentAccountById(Long id) {
-        log.info("[PaymentAccountService:activatePaymentAccountById] Start activatePaymentAccountById");
-        if(!paymentAccountRepository.existsById(id)) {
-            log.warn("[PaymentAccountService:activatePaymentAccountById] Payment Account Not Found with id: {}", id);
-            throw new PaymentAccountNotFoundException("Bank account not found by id: " + id);
-        }
-        log.info("[PaymentAccountService:activatePaymentAccountById] Try Activate Payment Account");
-        int rows = paymentAccountRepository.activatePaymentAccountById(id);
-        if (rows == 0){
-            log.warn("[PaymentAccountService:activatePaymentAccountById] Can't Activate Payment Account");
-            throw new UpdatePaymentAccountException("Can't activate account");
-        }
-        entityManager.flush();
-        entityManager.clear();
-        log.info("[PaymentAccountService:activatePaymentAccountById] Payment Account Successfully Activated");
-        return paymentAccountMapper.toResponse(paymentAccountRepository.findById(id)
-                .orElseThrow(() -> new PaymentAccountNotFoundException("Bank account not found by id: " + id)));
-    }
+
 
     @Override
     @Transactional
     @CacheEvict(allEntries = true)
     public PaymentAccountResponse activatePaymentAccountByUserId(Long userId) {
-        log.info("[PaymentAccountService:activatePaymentAccountByUserId] Start activatePaymentAccountByUserId");
-        if(!paymentAccountRepository.existsByUserId(userId)) {
-            log.warn("[PaymentAccountService:activatePaymentAccountByUserId] Payment Account Not Found with userId: {}", userId);
-            throw new PaymentAccountNotFoundException("Bank account not found by user id: " + userId);
+        String logPrefix = "[PaymentAccountService:activatePaymentAccountByUserId]";
+        log.info("{} Start activatePaymentAccountByUserId", logPrefix);
+        if(!paymentAccountRepository.existsById(userId)) {
+            log.warn(PaymentAccountLogs.NOT_FOUND, logPrefix, userId);
+            throw new PaymentAccountNotFoundException(PaymentAccountLogs.NOT_FOUND_FORMAT, logPrefix, userId);
         }
-        log.info("[PaymentAccountService:activatePaymentAccountByUserId] Try Activate Payment Account");
-        int rows = paymentAccountRepository.activatePaymentAccountByUserId(userId);
+        log.info("{} Try Activate Payment Account", logPrefix);
+        int rows = paymentAccountRepository.activatePaymentAccount(userId);
         if (rows == 0){
-            log.warn("[PaymentAccountService:activatePaymentAccountByUserId] Can't Activate Payment Account");
-            throw new UpdatePaymentAccountException("Can't activate account");
+            log.warn("{} Can't Activate Payment Account", logPrefix);
+            throw new UpdatePaymentAccountException("%s Can't activate account", logPrefix);
         }
         entityManager.flush();
         entityManager.clear();
-        log.info("[PaymentAccountService:activatePaymentAccountByUserId] Payment Account Successfully Activated");
+        log.info("{} Payment Account Successfully Activated", logPrefix);
 
-        return paymentAccountMapper.toResponse(paymentAccountRepository.findByUserId(userId)
-                .orElseThrow(() -> new PaymentAccountNotFoundException("Bank account not found by user id: " + userId)));
-    }
-
-    @Override
-    @Transactional
-    @CacheEvict(allEntries = true)
-    public PaymentAccountResponse deactivatePaymentAccountById(Long id) {
-        log.info("[PaymentAccountService:deactivatePaymentAccountById] Start deactivatePaymentAccountById");
-        if(!paymentAccountRepository.existsById(id)) {
-            log.warn("[PaymentAccountService:deactivatePaymentAccountById] Payment Account Not Found with id: {}", id);
-            throw new PaymentAccountNotFoundException("Bank account not found by id: " + id);
-        }
-        log.info("[PaymentAccountService:deactivatePaymentAccountById] Try Deactivate Payment Account");
-        int rows = paymentAccountRepository.deactivatePaymentAccountById(id);
-        if (rows == 0){
-            log.warn("[PaymentAccountService:deactivatePaymentAccountById] Can't Deactivate Payment Account");
-            throw new UpdatePaymentAccountException("Can't deactivate account");
-        }
-        entityManager.flush();
-        entityManager.clear();
-        log.info("[PaymentAccountService:deactivatePaymentAccountById] Payment Account Successfully Deactivated");
-
-        return paymentAccountMapper.toResponse(paymentAccountRepository.findById(id)
-                .orElseThrow(() -> new PaymentAccountNotFoundException("Bank account not found by id: " + id)));
+        return paymentAccountMapper.toResponse(paymentAccountRepository.findById(userId)
+                .orElseThrow(() -> new PaymentAccountNotFoundException(PaymentAccountLogs.NOT_FOUND_FORMAT, logPrefix, userId)));
     }
 
     @Override
     @Transactional
     @CacheEvict(allEntries = true)
     public PaymentAccountResponse deactivatePaymentAccountByUserId(Long userId) {
-        log.info("[PaymentAccountService:deactivatePaymentAccountByUserId] Start deactivatePaymentAccountByUserId");
-        if(!paymentAccountRepository.existsByUserId(userId)) {
-            log.warn("[PaymentAccountService:deactivatePaymentAccountByUserId] Payment Account Not Found with userId: {}", userId);
-            throw new PaymentAccountNotFoundException("Bank account not found by user id: " + userId);
+        String logPrefix = "[PaymentAccountService:deactivatePaymentAccountByUserId]";
+        log.info("{} Start deactivatePaymentAccountByUserId", logPrefix);
+        if(!paymentAccountRepository.existsById(userId)) {
+            log.warn(PaymentAccountLogs.NOT_FOUND, logPrefix, userId);
+            throw new PaymentAccountNotFoundException(PaymentAccountLogs.NOT_FOUND_FORMAT, logPrefix, userId);
         }
-        log.info("[PaymentAccountService:deactivatePaymentAccountByUserId] Try Deactivate Payment Account");
-        int rows = paymentAccountRepository.deactivatePaymentAccountByUserId(userId);
+        log.info("{} Try Deactivate Payment Account", logPrefix);
+        int rows = paymentAccountRepository.deactivatePaymentAccount(userId);
         if (rows == 0){
-            log.warn("[PaymentAccountService:deactivatePaymentAccountByUserId] Can't Deactivate Payment Account");
-            throw new UpdatePaymentAccountException("Can't deactivate account");
+            log.warn("{} Can't Deactivate Payment Account", logPrefix);
+            throw new UpdatePaymentAccountException("%s Can't deactivate account", logPrefix);
         }
         entityManager.flush();
         entityManager.clear();
-        log.info("[PaymentAccountService:deactivatePaymentAccountByUserId] Payment Account Successfully Deactivated");
+        log.info("{} Payment Account Successfully Deactivated", logPrefix);
 
-        return paymentAccountMapper.toResponse(paymentAccountRepository.findByUserId(userId)
-                .orElseThrow(() -> new PaymentAccountNotFoundException("Bank account not found by user id: " + userId)));
+        return paymentAccountMapper.toResponse(paymentAccountRepository.findById(userId)
+                .orElseThrow(() -> new PaymentAccountNotFoundException(PaymentAccountLogs.NOT_FOUND_FORMAT, logPrefix, userId)));
     }
 }

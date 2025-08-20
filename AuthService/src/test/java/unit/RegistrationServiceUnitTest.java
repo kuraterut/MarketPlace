@@ -12,19 +12,16 @@ import org.kuraterut.authservice.model.utils.Role;
 import org.kuraterut.authservice.repository.UserRepository;
 import org.kuraterut.authservice.service.JwtGeneratorService;
 import org.kuraterut.authservice.service.RegisterService;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.util.concurrent.ListenableFuture;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -37,7 +34,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class RegistrationServiceUnitTest {
+class RegistrationServiceUnitTest {
 
     @Mock
     private UserRepository userRepository;

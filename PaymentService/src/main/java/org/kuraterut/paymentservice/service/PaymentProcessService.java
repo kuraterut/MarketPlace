@@ -83,7 +83,7 @@ public class PaymentProcessService implements PaymentProcessUseCase {
             Long userId = inbox.getUserId();
 
             log.info("[PaymentProcessService:processPaymentEvent] Try find Payment Account By User ID: {}", userId);
-            Optional<PaymentAccount> accountOpt = paymentAccountRepository.findByUserId(userId);
+            Optional<PaymentAccount> accountOpt = paymentAccountRepository.findById(userId);
 
             if(accountOpt.isEmpty()){
                 log.warn("[PaymentProcessService:processPaymentEvent] Account not found By User ID: {}", userId);
@@ -100,7 +100,7 @@ public class PaymentProcessService implements PaymentProcessUseCase {
             PaymentAccount account = accountOpt.get();
             log.info("[PaymentProcessService:processPaymentEvent] Account found By User ID: {}", userId);
             log.info("[PaymentProcessService:processPaymentEvent] Try withdraw Payment Account If Available");
-            int updatedRows = paymentAccountRepository.withdrawPaymentAccountIfAvailableByUserId(userId, amount);
+            int updatedRows = paymentAccountRepository.withdrawPaymentAccountIfAvailable(userId, amount);
             PaymentResultEventOutbox outbox = new PaymentResultEventOutbox();
             outbox.setProcessed(false);
             outbox.setOrderId(inbox.getOrderId());

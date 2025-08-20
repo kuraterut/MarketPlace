@@ -12,10 +12,8 @@ import org.kuraterut.jwtsecuritylib.model.AuthPrincipal;
 import org.kuraterut.paymentservice.dto.request.CreateTransactionRequest;
 import org.kuraterut.paymentservice.dto.response.TransactionListResponse;
 import org.kuraterut.paymentservice.dto.response.TransactionResponse;
-import org.kuraterut.paymentservice.model.entity.Transaction;
 import org.kuraterut.paymentservice.model.utils.TransactionStatus;
 import org.kuraterut.paymentservice.model.utils.TransactionType;
-import org.kuraterut.paymentservice.repository.TransactionRepository;
 import org.kuraterut.paymentservice.usecases.transaction.CreateTransactionUseCase;
 import org.kuraterut.paymentservice.usecases.transaction.GetTransactionUseCase;
 import org.springframework.data.domain.PageRequest;
@@ -72,7 +70,7 @@ public class TransactionController {
             @AuthenticationPrincipal AuthPrincipal authPrincipal) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sortBy));
         Long userId = authPrincipal.getUserId();
-        return getTransactionUseCase.getAllTransactionsAndUserId(userId, pageable);
+        return getTransactionUseCase.getAllTransactionsByUserId(userId, pageable);
     }
 
     @GetMapping("/{id}")

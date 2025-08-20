@@ -21,7 +21,7 @@ spring:
       port: 6379
       timeout: 5000
   application:
-    name: payment-service
+    name: marketplace-app-payment-service
   datasource:
     url: jdbc:postgresql://postgres-payment:5432/payment_db
     username: postgres
@@ -35,7 +35,7 @@ spring:
     change-log: classpath:db/migration/changelog-master.xml
     enabled: true
   kafka:
-    bootstrap-servers: kafka:9092
+    bootstrap-servers: marketplace-app-kafka:9092
     consumer:
       group-id: payment-consuming-group
       auto-offset-reset: earliest
@@ -74,7 +74,7 @@ management:
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka-server:8761/eureka
+      defaultZone: http://marketplace-app-eureka-server:8761/eureka
 
 kafka-topics:
   payment-request: payment-request

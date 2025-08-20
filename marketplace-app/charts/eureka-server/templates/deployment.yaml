@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "eureka-server.fullname" . }}
+  name: {{ include "eureka-server.name" . }}
   labels:
     {{- include "eureka-server.labels" . | nindent 4 }}
 spec:

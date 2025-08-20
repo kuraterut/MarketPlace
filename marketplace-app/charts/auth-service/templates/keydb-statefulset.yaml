@@ -2,19 +2,19 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "auth-service.fullname" . }}-keydb
+  name: {{ include "auth-service.name" . }}-keydb
   labels:
     {{- include "auth-service.labels" . | nindent 4 }}
 spec:
-  serviceName: {{ include "auth-service.fullname" . }}-keydb
+  serviceName: {{ include "auth-service.name" . }}-keydb
   replicas: 1
   selector:
     matchLabels:
-      app: {{ include "auth-service.fullname" . }}-keydb
+      app: {{ include "auth-service.name" . }}-keydb
   template:
     metadata:
       labels:
-        app: {{ include "auth-service.fullname" . }}-keydb
+        app: {{ include "auth-service.name" . }}-keydb
     spec:
       containers:
         - name: keydb

@@ -59,7 +59,7 @@ public class OrderMapper {
                     ProductHoldItemFailed productHoldItemFailed = mapper.readValue(detail, ProductHoldItemFailed.class);
                     details.add(productHoldItemFailed);
                 } catch (JsonProcessingException e) {
-                    throw new RuntimeException("Json Processing Exception", e);
+                    throw new IllegalArgumentException("Json Processing Exception", e);
                 }
             }
         }
@@ -78,9 +78,6 @@ public class OrderMapper {
     }
 
 
-//    public List<OrderResponse> toResponses(List<Order> orders) {
-//        return orders.stream().map(this::toResponse).toList();
-//    }
 
     public OrderListResponse toResponses(Page<Order> orders)  {
         return new OrderListResponse(orders.map(this::toResponse).stream().toList());

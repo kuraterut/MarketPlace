@@ -3,6 +3,7 @@ package org.kuraterut.orderservice.exception;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.kuraterut.orderservice.dto.response.ErrorResponse;
 import org.kuraterut.orderservice.exception.model.OrderNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -19,7 +20,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @ControllerAdvice
 @Slf4j
@@ -54,7 +54,7 @@ public class GlobalExceptionHandler {
         Set<ConstraintViolation<?>> violations = ex.getConstraintViolations();
         List<String> errors = violations.stream()
                 .map(v -> v.getPropertyPath() + ": " + v.getMessage())
-                .collect(Collectors.toList());
+                .toList();
 
         log.warn("Validation error: {}", errors);
         return ResponseEntity.badRequest()
@@ -65,7 +65,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleBindException(BindException ex) {
         List<String> errors = ex.getBindingResult().getFieldErrors().stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .collect(Collectors.toList());
+                .toList();
 
         log.warn("Data binding error: {}", errors);
         return ResponseEntity.badRequest()

@@ -3,6 +3,7 @@ package org.kuraterut.paymentservice.exception;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.kuraterut.paymentservice.dto.response.ErrorResponse;
 import org.kuraterut.paymentservice.exception.model.*;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -94,7 +95,7 @@ public class GlobalExceptionHandler {
         Set<ConstraintViolation<?>> violations = ex.getConstraintViolations();
         List<String> errors = violations.stream()
                 .map(v -> v.getPropertyPath() + ": " + v.getMessage())
-                .collect(Collectors.toList());
+                .toList();
 
         log.warn("Validation error: {}", errors);
         return ResponseEntity.badRequest()
@@ -105,7 +106,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleBindException(BindException ex) {
         List<String> errors = ex.getBindingResult().getFieldErrors().stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .collect(Collectors.toList());
+                .toList();
 
         log.warn("Data binding error: {}", errors);
         return ResponseEntity.badRequest()

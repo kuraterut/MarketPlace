@@ -4,4 +4,7 @@ public class ProductAlreadyExistsException extends RuntimeException {
     public ProductAlreadyExistsException(String message) {
         super(message);
     }
+    public ProductAlreadyExistsException(String format, Object... args) {
+        super(String.format(format, args));
+    }
 }
