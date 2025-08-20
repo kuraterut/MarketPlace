@@ -7,7 +7,6 @@ import org.kuraterut.authservice.dto.requests.RegisterRequest;
 import org.kuraterut.authservice.dto.responses.LoginResponse;
 import org.kuraterut.authservice.dto.responses.RegisterResponse;
 import org.kuraterut.authservice.exception.model.UserNotFoundException;
-import org.kuraterut.authservice.model.event.UserRegistrationEvent;
 import org.kuraterut.authservice.model.utils.Role;
 import org.kuraterut.authservice.repository.UserRepository;
 import org.kuraterut.authservice.service.LoginService;
@@ -16,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Import;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
@@ -33,7 +31,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 @EnableCaching
 @TestPropertySource(locations = "classpath:application-test.yaml")
 @Import(TestConfig.class)
-public class LoginRegistrationIntegrationTest {
+class LoginRegistrationIntegrationTest {
 
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15");

@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: auth-service
+    name: marketplace-app-auth-service
   datasource:
     url: jdbc:postgresql://postgres-auth:5432/auth_db
     username: postgres
@@ -17,7 +17,7 @@ spring:
     change-log: classpath:db/migration/changelog-master.xml
     enabled: true
   kafka:
-    bootstrap-servers: kafka:9092
+    bootstrap-servers: marketplace-app-kafka:9092
     consumer:
       group-id: auth-consuming-group
       auto-offset-reset: earliest
@@ -54,7 +54,7 @@ management:
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka-server:8761/eureka
+      defaultZone: http://marketplace-app-eureka-server:8761/eureka
 
 kafka-topics:
   user-registration: user-registration-topic

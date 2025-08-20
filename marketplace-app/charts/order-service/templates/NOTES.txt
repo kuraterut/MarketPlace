@@ -6,6 +6,6 @@ You can access it via:
    http://{{ .Values.ingress.host }}
 
 2) Or via port-forwarding:
-   kubectl port-forward svc/{{ include "order-service.fullname" . }} {{ .Values.service.port }}:{{ .Values.service.port }}
+   kubectl port-forward svc/{{ include "order-service.name" . }} {{ .Values.service.port }}:{{ .Values.service.port }}
 
 Remember to check pod logs for status.

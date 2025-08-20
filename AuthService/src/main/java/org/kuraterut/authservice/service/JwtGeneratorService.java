@@ -34,7 +34,7 @@ public class JwtGeneratorService {
         claims.put("email", userDetails.getUsername());
         claims.put("roles", userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList()));
+                .toList());
 
         String token = Jwts.builder()
                 .setSubject(userDetails.getUsername())

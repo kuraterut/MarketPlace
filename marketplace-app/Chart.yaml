@@ -4,30 +4,30 @@ description: Marketplace Microservices Application
 version: 0.1.0
 appVersion: "1.0.0"
 dependencies:
-  - name: api-gateway
+  - name: marketplace-app-api-gateway
     version: 0.1.0
     repository: "file://charts/api-gateway"
 
-  - name: auth-service
+  - name: marketplace-app-auth-service
     version: 0.1.0
     repository: "file://charts/auth-service"
 
-  - name: eureka-server
+  - name: marketplace-app-eureka-server
     version: 0.1.0
     repository: "file://charts/eureka-server"
 
-  - name: kafka
+  - name: marketplace-app-kafka
     version: 0.1.0
     repository: "file://charts/kafka"
 
-  - name: order-service
+  - name: marketplace-app-order-service
     version: 0.1.0
     repository: "file://charts/order-service"
 
-  - name: payment-service
+  - name: marketplace-app-payment-service
     version: 0.1.0
     repository: "file://charts/payment-service"
 
-  - name: product-service
+  - name: marketplace-app-product-service
     version: 0.1.0
     repository: "file://charts/product-service"

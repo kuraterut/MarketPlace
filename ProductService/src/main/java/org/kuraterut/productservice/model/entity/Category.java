@@ -33,6 +33,7 @@ public class Category {
     @UpdateTimestamp
     private OffsetDateTime updatedAt;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "category")
     @JsonIgnore
     private Set<Product> products = new HashSet<>();

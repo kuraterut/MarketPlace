@@ -1,11 +1,11 @@
 services:
 #SERVICES
-  eureka-server:
+  marketplace-app-eureka-server:
     build:
       context: ./EurekaServer
       dockerfile: Dockerfile
-    container_name: eureka-server
-    hostname: eureka-server
+    container_name: marketplace-app-eureka-server
+    hostname: marketplace-app-eureka-server
     ports:
       - "8761:8761"
     networks:
@@ -16,12 +16,12 @@ services:
       timeout: 5s
       retries: 5
 
-  api-gateway:
+  marketplace-app-api-gateway:
     build:
       context: ./ApiGateway
       dockerfile: Dockerfile
-    container_name: api-gateway
-    hostname: api-gateway
+    container_name: marketplace-app-api-gateway
+    hostname: marketplace-app-api-gateway
     ports:
       - "8080:8080"
     depends_on:
@@ -32,37 +32,37 @@ services:
     environment:
       - JWT_SECRET=${JWT_SECRET}
 
-  auth-service:
+  marketplace-app-auth-service:
     build:
       context: ./AuthService
       dockerfile: Dockerfile
-    container_name: auth-service
-    hostname: auth-service
+    container_name: marketplace-app-auth-service
+    hostname: marketplace-app-auth-service
     ports:
       - "8081:8081"
     depends_on:
-      - eureka-server
+      - marketplace-app-eureka-server
       - postgres-auth
-      - kafka
+      - marketplace-app-kafka
     networks:
       - marketplace-net
     environment:
       - JWT_SECRET=${JWT_SECRET}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://${POSTGRES_NAME_AUTH}:5432/${POSTGRES_DB_AUTH}
 
-  product-service:
+  marketplace-app-product-service:
     build:
       context: ./ProductService
       dockerfile: Dockerfile
-    container_name: product-service
-    hostname: product-service
+    container_name: marketplace-app-product-service
+    hostname: marketplace-app-product-service
     ports:
       - "8082:8082"
     depends_on:
-      - eureka-server
+      - marketplace-app-eureka-server
       - postgres-product
-      - auth-service
-      - kafka
+      - marketplace-app-auth-service
+      - marketplace-app-kafka
       - keydb-product
     networks:
       - marketplace-net
@@ -70,19 +70,19 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://${POSTGRES_NAME_PRODUCT}:5432/${POSTGRES_DB_PRODUCT}
 
-  payment-service:
+  marketplace-app-payment-service:
     build:
       context: ./PaymentService
       dockerfile: Dockerfile
-    container_name: payment-service
-    hostname: payment-service
+    container_name: marketplace-app-payment-service
+    hostname: marketplace-app-payment-service
     ports:
       - "8083:8083"
     depends_on:
-      - eureka-server
+      - marketplace-app-eureka-server
       - postgres-payment
-      - auth-service
-      - kafka
+      - marketplace-app-auth-service
+      - marketplace-app-kafka
       - keydb-payment
     networks:
       - marketplace-net
@@ -90,19 +90,19 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://${POSTGRES_NAME_PAYMENT}:5432/${POSTGRES_DB_PAYMENT}
 
-  order-service:
+  marketplace-app-order-service:
     build:
       context: ./OrderService
       dockerfile: Dockerfile
-    container_name: order-service
-    hostname: order-service
+    container_name: marketplace-app-order-service
+    hostname: marketplace-app-order-service
     ports:
       - "8084:8084"
     depends_on:
-      - eureka-server
+      - marketplace-app-eureka-server
       - postgres-order
-      - auth-service
-      - kafka
+      - marketplace-app-auth-service
+      - marketplace-app-kafka
       - keydb-order
     networks:
       - marketplace-net
@@ -210,9 +210,9 @@ services:
     ports:
       - "2181:2181"
 
-  kafka:
+  marketplace-app-kafka:
     image: confluentinc/cp-kafka:7.3.0
-    container_name: kafka
+    container_name: marketplace-app-kafka
     depends_on:
       - zookeeper
     ports:
@@ -223,7 +223,7 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_EXT://localhost:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://marketplace-app-kafka:9092,PLAINTEXT_EXT://localhost:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_EXT:PLAINTEXT
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_EXT://0.0.0.0:29092
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
@@ -239,12 +239,12 @@ services:
     ports:
       - "7071:8080"
     depends_on:
-      - kafka
+      - marketplace-app-kafka
     networks:
       - marketplace-net
     environment:
       - KAFKA_CLUSTERS_0_NAME=local
-      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=marketplace-app-kafka:9092
       - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
 
 

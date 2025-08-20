@@ -1,5 +1,5 @@
 apiVersion: v2
-name: product-service
+name: marketplace-app-product-service
 description: Product Service for marketplace
 type: application
 version: 0.1.0

@@ -1,5 +1,5 @@
 apiVersion: v2
-name: auth-service
+name: marketplace-app-auth-service
 description: A Helm chart for Authentication Service in Marketplace
 
 # A chart can be either an 'application' or a 'library' chart.

@@ -9,7 +9,6 @@ import org.kuraterut.paymentservice.model.utils.TransactionStatus;
 import org.kuraterut.paymentservice.model.utils.TransactionType;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
 
 @Data
 @AllArgsConstructor

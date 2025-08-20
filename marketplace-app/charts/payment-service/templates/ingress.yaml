@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "payment-service.fullname" . }}-ingress
+  name: {{ include "payment-service.name" . }}-ingress
   annotations:
 {{ toYaml .Values.ingress.annotations | indent 4 }}
 spec:
@@ -15,7 +15,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ include "payment-service.fullname" . }}
+                name: {{ include "payment-service.name" . }}
                 port:
                   number: {{ .Values.service.port }}
   {{- if .Values.ingress.tls.enabled }}

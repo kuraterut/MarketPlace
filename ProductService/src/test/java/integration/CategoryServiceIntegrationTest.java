@@ -9,14 +9,12 @@ import org.kuraterut.productservice.model.entity.Category;
 import org.kuraterut.productservice.repository.CategoryRepository;
 import org.kuraterut.productservice.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -31,7 +29,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @Testcontainers
 @EnableCaching
 @TestPropertySource(locations = "classpath:application-test.yaml")
-public class CategoryServiceIntegrationTest {
+class CategoryServiceIntegrationTest {
 
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16")

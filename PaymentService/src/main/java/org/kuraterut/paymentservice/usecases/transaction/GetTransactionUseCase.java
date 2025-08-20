@@ -7,10 +7,9 @@ import org.kuraterut.paymentservice.model.utils.TransactionType;
 import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 public interface GetTransactionUseCase {
-    TransactionListResponse getAllTransactionsAndUserId(Long userId, Pageable pageable);
+    TransactionListResponse getAllTransactionsByUserId(Long userId, Pageable pageable);
     TransactionResponse getTransactionByIdAndUserId(Long id, Long userId);
     TransactionListResponse getTransactionsByAmountBetweenAndUserId(BigDecimal min, BigDecimal max, Long userId, Pageable pageable);
     TransactionListResponse getTransactionsByTransactionTypeAndUserId(TransactionType type, Long userId, Pageable pageable);

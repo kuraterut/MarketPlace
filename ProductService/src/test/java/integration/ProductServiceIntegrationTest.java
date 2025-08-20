@@ -1,6 +1,5 @@
 package integration;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.kuraterut.productservice.ProductServiceApplication;
 import org.kuraterut.productservice.dto.requests.CreateCategoryRequest;
@@ -9,11 +8,9 @@ import org.kuraterut.productservice.service.CategoryService;
 import org.kuraterut.productservice.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.redis.cache.RedisCache;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -21,14 +18,12 @@ import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.containers.wait.strategy.WaitStrategy;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import java.math.BigDecimal;
 import java.time.Duration;
-import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,7 +33,7 @@ import static org.awaitility.Awaitility.await;
 @Testcontainers
 @EnableCaching
 @TestPropertySource(locations = "classpath:application-test.yaml")
-public class ProductServiceIntegrationTest {
+class ProductServiceIntegrationTest {
 
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16")

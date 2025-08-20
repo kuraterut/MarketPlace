@@ -14,10 +14,7 @@
         </preConditions>
         <createTable tableName="payment_accounts">
             <column name="id" type="BIGINT">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="user_id" type="BIGINT">
-                <constraints nullable="false" unique="true"/>
+                <constraints primaryKey="true" nullable="false" unique="true"/>
             </column>
             <column name="balance" type="DECIMAL(19,4)">
                 <constraints nullable="false"/>
@@ -29,13 +26,5 @@
             <column name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="version" type="BIGINT"/>
         </createTable>
-        <createSequence
-                sequenceName="payment_account_seq"
-                startValue="1"
-                incrementBy="1"/>
-        <addDefaultValue
-                tableName="payment_accounts"
-                columnName="id"
-                defaultValueComputed="nextval('payment_account_seq')"/>
     </changeSet>
 </databaseChangeLog>

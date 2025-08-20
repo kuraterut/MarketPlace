@@ -53,8 +53,6 @@ resources:
 
 imagePullSecrets: []
 
-eureka:
-  uri: http://eureka-server:8761/eureka
 
 auth:
   url: http://auth-service:8081
