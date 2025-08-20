@@ -3,6 +3,7 @@ package org.kuraterut.productservice.exception;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.kuraterut.productservice.dto.responses.ErrorResponse;
 import org.kuraterut.productservice.exception.model.*;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -95,7 +96,7 @@ public class ProductGlobalExceptionHandler {
         Set<ConstraintViolation<?>> violations = ex.getConstraintViolations();
         List<String> errors = violations.stream()
                 .map(v -> v.getPropertyPath() + ": " + v.getMessage())
-                .collect(Collectors.toList());
+                .toList();
         log.warn("[ProductGlobalExceptionHandler]: handle ConstraintViolationException, message: {}", errors);
 
         return ResponseEntity.badRequest()
@@ -106,7 +107,7 @@ public class ProductGlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleBindException(BindException ex) {
         List<String> errors = ex.getBindingResult().getFieldErrors().stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .collect(Collectors.toList());
+                .toList();
 
         log.warn("[ProductGlobalExceptionHandler]: handle BindException, message: {}", errors);
         return ResponseEntity.badRequest()
@@ -191,6 +192,4 @@ public class ProductGlobalExceptionHandler {
         error.setTimestamp(OffsetDateTime.now());
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
-
 }

@@ -1,12 +1,12 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "order-service.fullname" . }}-postgres
+  name: {{ include "order-service.name" . }}-postgres
   labels:
     app: {{ include "order-service.name" . }}-postgres
     release: {{ .Release.Name }}
 spec:
-  serviceName: {{ include "order-service.fullname" . }}-postgres
+  serviceName: {{ include "order-service.name" . }}-postgres
   replicas: 1
   selector:
     matchLabels:
@@ -31,7 +31,7 @@ spec:
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "order-service.fullname" . }}-secret
+                  name: {{ include "order-service.name" . }}-secret
                   key: postgres-password
           volumeMounts:
             - name: postgres-data

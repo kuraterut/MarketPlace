@@ -3,6 +3,7 @@ package org.kuraterut.authservice.exception;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.kuraterut.authservice.dto.responses.ErrorResponse;
 import org.kuraterut.authservice.exception.model.UserAlreadyExistsException;
 import org.kuraterut.authservice.exception.model.UserNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -62,7 +63,7 @@ public class GlobalExceptionHandler {
         Set<ConstraintViolation<?>> violations = ex.getConstraintViolations();
         List<String> errors = violations.stream()
                 .map(v -> v.getPropertyPath() + ": " + v.getMessage())
-                .collect(Collectors.toList());
+                .toList();
 
         log.warn("Validation error: {}", errors);
         return ResponseEntity.badRequest()
@@ -73,7 +74,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleBindException(BindException ex) {
         List<String> errors = ex.getBindingResult().getFieldErrors().stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .collect(Collectors.toList());
+                .toList();
 
         log.warn("Data binding error: {}", errors);
         return ResponseEntity.badRequest()

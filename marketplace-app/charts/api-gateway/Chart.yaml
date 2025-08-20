@@ -1,5 +1,5 @@
 apiVersion: v2
-name: api-gateway
+name: marketplace-app-api-gateway
 description: API Gateway for marketplace (routes, auth, eureka client)
 type: application
 version: 0.1.0

@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kuraterut.jwtsecuritylib.model.AuthPrincipal;
 import org.kuraterut.productservice.dto.requests.CreateProductRequest;
+import org.kuraterut.productservice.dto.requests.ProductSearchCriteria;
 import org.kuraterut.productservice.dto.requests.UpdateProductRequest;
 import org.kuraterut.productservice.dto.responses.ProductListResponse;
 import org.kuraterut.productservice.dto.responses.ProductResponse;
@@ -18,18 +19,14 @@ import org.kuraterut.productservice.usecases.product.CreateProductUseCase;
 import org.kuraterut.productservice.usecases.product.DeleteProductUseCase;
 import org.kuraterut.productservice.usecases.product.GetProductUseCase;
 import org.kuraterut.productservice.usecases.product.UpdateProductUseCase;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
@@ -242,5 +239,11 @@ public class ProductController {
             @Parameter(description = "Page sorting direction") @RequestParam(defaultValue = "asc") String direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sortBy));
         return getProductUseCase.getProductsByPriceBetween(min, max, pageable);
+    }
+
+    //TODO Добавить в Swagger
+    @GetMapping("/filter")
+    public ProductListResponse getProductsFilter(@ModelAttribute ProductSearchCriteria criteria) {
+        return getProductUseCase.getAllProductsFiltered(criteria);
     }
 }

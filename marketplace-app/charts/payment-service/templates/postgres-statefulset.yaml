@@ -1,12 +1,12 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "payment-service.fullname" . }}-postgres
+  name: {{ include "payment-service.name" . }}-postgres
   labels:
     app: {{ include "payment-service.name" . }}-postgres
     release: {{ .Release.Name }}
 spec:
-  serviceName: {{ include "payment-service.fullname" . }}-postgres
+  serviceName: {{ include "payment-service.name" . }}-postgres
   replicas: 1
   selector:
     matchLabels:
@@ -31,7 +31,7 @@ spec:
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "payment-service.fullname" . }}-secret
+                  name: {{ include "payment-service.name" . }}-secret
                   key: postgres-password
           volumeMounts:
             - name: postgres-data

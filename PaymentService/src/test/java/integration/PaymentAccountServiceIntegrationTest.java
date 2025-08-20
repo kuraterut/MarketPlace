@@ -28,6 +28,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest(classes = PaymentServiceApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ContextConfiguration(initializers = PaymentAccountServiceIntegrationTest.Initializer.class)
@@ -35,7 +36,7 @@ import static org.assertj.core.api.Assertions.*;
 @Testcontainers
 @EnableCaching
 @TestPropertySource(locations = "classpath:application-test.yaml")
-public class PaymentAccountServiceIntegrationTest {
+class PaymentAccountServiceIntegrationTest {
 
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
@@ -84,52 +85,52 @@ public class PaymentAccountServiceIntegrationTest {
     void createPaymentAccount_success() {
         PaymentAccountResponse response = service.createPaymentAccount(100L);
         assertThat(response).isNotNull();
-        assertThat(response.getUserId()).isEqualTo(100L);
+        assertThat(response.getId()).isEqualTo(100L);
     }
 
     @Test
     void createPaymentAccount_duplicate_throwsException() {
         service.createPaymentAccount(200L);
-        assertThatThrownBy(() -> service.createPaymentAccount(200L))
-                .isInstanceOf(PaymentAccountAlreadyExistsException.class);
+        assertThrows(PaymentAccountAlreadyExistsException.class,
+                () -> service.createPaymentAccount(200L));
     }
 
     @Test
     void getPaymentAccountById_success() {
         PaymentAccountResponse created = service.createPaymentAccount(300L);
-        PaymentAccountResponse found = service.getPaymentAccountById(created.getId());
-        assertThat(found.getUserId()).isEqualTo(300L);
+        PaymentAccountResponse found = service.getPaymentAccountByUserId(created.getId());
+        assertThat(found.getId()).isEqualTo(300L);
     }
 
     @Test
     void deletePaymentAccount_success() {
         PaymentAccountResponse created = service.createPaymentAccount(400L);
-        service.deletePaymentAccountById(created.getId());
+        service.deletePaymentAccountByUserId(created.getId());
         assertThat(repository.findById(created.getId())).isEmpty();
     }
 
     @Test
     void deletePaymentAccount_withBalance_throwsException() {
         PaymentAccountResponse created = service.createPaymentAccount(500L);
-        // вручную увеличиваем баланс
         PaymentAccount acc = repository.findById(created.getId()).get();
         acc.setBalance(BigDecimal.TEN);
         repository.save(acc);
 
-        assertThatThrownBy(() -> service.deletePaymentAccountById(created.getId()))
-                .isInstanceOf(PaymentAccountIsNotEmptyException.class);
+        Long createdId = created.getId();
+        assertThrows(PaymentAccountIsNotEmptyException.class,
+                () -> service.deletePaymentAccountByUserId(createdId));
     }
 
     @Test
     void depositPaymentAccount_success() {
-        PaymentAccountResponse created = service.createPaymentAccount(600L);
+        service.createPaymentAccount(600L);
         PaymentAccountResponse updated = service.depositPaymentAccountByUserId(600L, BigDecimal.valueOf(100));
         assertThat(updated.getBalance()).isEqualByComparingTo(BigDecimal.valueOf(100));
     }
 
     @Test
     void withdrawPaymentAccount_success() {
-        PaymentAccountResponse created = service.createPaymentAccount(700L);
+        service.createPaymentAccount(700L);
         service.depositPaymentAccountByUserId(700L, BigDecimal.valueOf(200));
         PaymentAccountResponse updated = service.withdrawPaymentAccountByUserId(700L, BigDecimal.valueOf(50));
         assertThat(updated.getBalance()).isEqualByComparingTo(BigDecimal.valueOf(150));
@@ -137,7 +138,7 @@ public class PaymentAccountServiceIntegrationTest {
 
     @Test
     void getPaymentAccountByUserId_notFound_throwsException() {
-        assertThatThrownBy(() -> service.getPaymentAccountByUserId(9999L))
-                .isInstanceOf(PaymentAccountNotFoundException.class);
+        assertThrows(PaymentAccountNotFoundException.class,
+                () -> service.getPaymentAccountByUserId(9999L));
     }
 }

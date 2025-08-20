@@ -2,15 +2,9 @@
 Return the chart name
 */ -}}
 {{- define "product-service.name" -}}
-product-service
+{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- /*
-Return the full name of the release (например, имя Helm релиза + chart name)
-*/ -}}
-{{- define "product-service.fullname" -}}
-{{- printf "%s-%s" .Release.Name (include "product-service.name" .) | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
 
 {{- /*
 Return the chart version

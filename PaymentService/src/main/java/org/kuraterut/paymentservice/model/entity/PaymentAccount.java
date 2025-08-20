@@ -19,12 +19,8 @@ import java.util.List;
 @Builder
 public class PaymentAccount {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "payment_account_seq")
-    @SequenceGenerator(name = "payment_account_seq", sequenceName = "payment_account_seq", allocationSize = 1)
-    private Long id;
-
     @Column(nullable = false, unique = true)
-    private Long userId;
+    private Long id;
 
     @Column(nullable = false, precision = 19, scale = 4)
     private BigDecimal balance;
@@ -32,6 +28,7 @@ public class PaymentAccount {
     @Column(nullable = false)
     private boolean active;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Transaction> transactions = new ArrayList<>();
 

@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "api-gateway.fullname" . }}
+  name: {{ include "api-gateway.name" . }}
   labels:
     {{- include "api-gateway.labels" . | nindent 4 }}
 spec:
@@ -27,31 +27,9 @@ spec:
           ports:
             - name: http
               containerPort: {{ .Values.service.containerPort }}
-          env:
-            - name: SPRING_PROFILES_ACTIVE
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ include "api-gateway.fullname" . }}-config
-                  key: SPRING_PROFILES_ACTIVE
-            - name: EUREKA_URI
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ include "api-gateway.fullname" . }}-config
-                  key: EUREKA_URI
-            - name: AUTH_SERVICE_URL
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ include "api-gateway.fullname" . }}-config
-                  key: AUTH_SERVICE_URL
-            - name: JWT_SECRET
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ include "api-gateway.fullname" . }}-config
-                  key: JWT_SECRET
-            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
-              value: {{ .Values.global.kafka.bootstrapServers | default (printf "%s-kafka-headless.%s.svc.cluster.local:9092" .Release.Name .Release.Namespace) | quote }}
-            - name: JWT_PUBLIC_KEY_SECRET
-              value: {{ include "api-gateway.jwtSecretName" . | quote }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "api-gateway.name" . }}-config
           readinessProbe:
             httpGet:
               path: {{ .Values.probes.readiness.path | quote }}

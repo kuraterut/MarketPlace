@@ -8,10 +8,8 @@ import org.kuraterut.orderservice.model.event.dto.OrderItemDto;
 import org.kuraterut.orderservice.model.utils.OrderStatus;
 import org.kuraterut.orderservice.model.event.dto.ProductHoldItemFailed;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 
-import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
 @Data
 @AllArgsConstructor

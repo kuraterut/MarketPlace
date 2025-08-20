@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "payment-service.fullname" . }}
+  name: {{ include "payment-service.name" . }}
   labels:
     app: {{ include "payment-service.name" . }}
     release: {{ .Release.Name }}

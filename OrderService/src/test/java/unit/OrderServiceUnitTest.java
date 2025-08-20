@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class OrderServiceUnitTest {
+class OrderServiceUnitTest {
 
     @Mock
     private OrderRepository orderRepository;

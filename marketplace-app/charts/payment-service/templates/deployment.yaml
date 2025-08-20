@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "payment-service.fullname" . }}
+  name: {{ include "payment-service.name" . }}
   labels:
     app: {{ include "payment-service.name" . }}
     release: {{ .Release.Name }}
@@ -25,7 +25,7 @@ spec:
             - containerPort: {{ .Values.service.port }}
           envFrom:
             - configMapRef:
-                name: {{ include "payment-service.fullname" . }}-config
+                name: {{ include "payment-service.name" . }}-config
           resources:
             requests:
               cpu: {{ .Values.resources.requests.cpu }}

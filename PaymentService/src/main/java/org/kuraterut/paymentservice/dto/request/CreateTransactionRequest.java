@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.kuraterut.paymentservice.model.utils.TransactionStatus;
 import org.kuraterut.paymentservice.model.utils.TransactionType;
 
 import java.math.BigDecimal;

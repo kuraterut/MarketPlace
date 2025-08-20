@@ -1,6 +1,7 @@
 package org.kuraterut.apigateway.config;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.kuraterut.apigateway.service.JwtService;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -16,46 +17,50 @@ import org.springframework.http.HttpHeaders;
 
 import java.nio.charset.StandardCharsets;
 
-@Component
-@RequiredArgsConstructor
-public class JwtAuthFilter implements GlobalFilter, Ordered {
-
-    private final JwtService jwtService;
-    private final SecurityProperties securityProperties;
-    private final AntPathMatcher pathMatcher = new AntPathMatcher();
-
-    @Override
-    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        String path = exchange.getRequest().getURI().getPath();
-
-        if (securityProperties.getOpenEndpoints().stream()
-                .anyMatch(pattern -> pathMatcher.match(pattern, path))) {
-            return chain.filter(exchange);
-        }
-
-        String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return onError(exchange, "Missing or invalid Authorization header", HttpStatus.UNAUTHORIZED);
-        }
-
-        String token = authHeader.substring(7);
-        if (!jwtService.isTokenValid(token)) {
-            return onError(exchange, "Invalid or expired JWT token", HttpStatus.UNAUTHORIZED);
-        }
-
-        return chain.filter(exchange);
-    }
-
-    private Mono<Void> onError(ServerWebExchange exchange, String message, HttpStatus status) {
-        exchange.getResponse().setStatusCode(status);
-        byte[] bytes = message.getBytes(StandardCharsets.UTF_8);
-        DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(bytes);
-        exchange.getResponse().getHeaders().setContentType(MediaType.TEXT_PLAIN);
-        return exchange.getResponse().writeWith(Mono.just(buffer));
-    }
-
-    @Override
-    public int getOrder() {
-        return -1;
-    }
-}
+//@Component
+//@RequiredArgsConstructor
+//@Slf4j
+//public class JwtAuthFilter implements GlobalFilter, Ordered {
+//
+//    private final JwtService jwtService;
+//    private final SecurityProperties securityProperties;
+//    private final AntPathMatcher pathMatcher = new AntPathMatcher();
+//
+//    @Override
+//    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+//        String path = exchange.getRequest().getURI().getPath();
+//        log.info("PATH: {}" , path);
+//        log.info("WHITE LIST: {}", securityProperties.getOpenEndpoints());
+//        log.info("MATCH PATH IN WHITE LIST: {}", securityProperties.getOpenEndpoints().stream()
+//                .anyMatch(pattern -> pathMatcher.match(pattern, path)));
+//        if (securityProperties.getOpenEndpoints().stream()
+//                .anyMatch(pattern -> pathMatcher.match(pattern, path))) {
+//            return chain.filter(exchange);
+//        }
+//
+//        String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+//        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+//            return onError(exchange, "Missing or invalid Authorization header", HttpStatus.UNAUTHORIZED);
+//        }
+//
+//        String token = authHeader.substring(7);
+//        if (!jwtService.isTokenValid(token)) {
+//            return onError(exchange, "Invalid or expired JWT token", HttpStatus.UNAUTHORIZED);
+//        }
+//
+//        return chain.filter(exchange);
+//    }
+//
+//    private Mono<Void> onError(ServerWebExchange exchange, String message, HttpStatus status) {
+//        exchange.getResponse().setStatusCode(status);
+//        byte[] bytes = message.getBytes(StandardCharsets.UTF_8);
+//        DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(bytes);
+//        exchange.getResponse().getHeaders().setContentType(MediaType.TEXT_PLAIN);
+//        return exchange.getResponse().writeWith(Mono.just(buffer));
+//    }
+//
+//    @Override
+//    public int getOrder() {
+//        return -1;
+//    }
+//}

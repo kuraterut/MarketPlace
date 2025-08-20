@@ -1,12 +1,12 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "payment-service.fullname" . }}-keydb
+  name: {{ include "payment-service.name" . }}-keydb
   labels:
     app: {{ include "payment-service.name" . }}-keydb
     release: {{ .Release.Name }}
 spec:
-  serviceName: {{ include "payment-service.fullname" . }}-keydb
+  serviceName: {{ include "payment-service.name" . }}-keydb
   replicas: 1
   selector:
     matchLabels:

@@ -1,20 +1,27 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "auth-service.fullname" . }}-config
+  name: {{ include "auth-service.name" . }}-config
   labels:
     {{- include "auth-service.labels" . | nindent 4 }}
 data:
   SPRING_PROFILES_ACTIVE: "{{ .Values.global.springProfile }}"
   JWT_SECRET: "{{ .Values.global.jwt.secret }}"
   SPRING_DATASOURCE_URL: >-
-    jdbc:postgresql://{{ include "auth-service.fullname" . }}-postgres:{{ .Values.postgresql.port }}/{{ .Values.postgresql.database }}
+    jdbc:postgresql://{{ include "auth-service.name" . }}-postgres:{{ .Values.postgresql.port }}/{{ .Values.postgresql.database }}
   SPRING_DATASOURCE_USERNAME: "{{ .Values.postgresql.username }}"
   SPRING_DATASOURCE_PASSWORD: "{{ .Values.postgresql.password }}"
-  SPRING_DATA_REDIS_HOST: {{ include "auth-service.fullname" . }}-keydb
+  SPRING_DATA_REDIS_HOST: {{ include "auth-service.name" . }}-keydb
   SPRING_DATA_REDIS_PORT: "{{ .Values.keydb.port }}"
   SPRING_KAFKA_BOOTSTRAP_SERVERS: "{{ include "auth-service.kafkaBootstrap" . }}"
   SERVER_PORT: "{{ .Values.service.port}}"
   KAFKA_CONSUMER_GROUP_ID: "{{ .Values.kafka.consumerGroupId}}"
   EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "{{ .Values.global.eureka.serviceUrl}}"
+
+  LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB: "DEBUG"
+  LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB_SERVLET: "DEBUG"
+
+  SPRING_APPLICATION_NAME: {{ include "auth-service.name" . | quote}}
+  EUREKA_INSTANCE_HOSTNAME: {{ include "auth-service.name" . | quote}}
+  EUREKA_INSTANCE_PREFER_IP_ADDRESS: "false"
 

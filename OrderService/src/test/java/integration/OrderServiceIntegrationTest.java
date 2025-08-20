@@ -13,7 +13,6 @@ import org.kuraterut.orderservice.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.data.domain.PageRequest;
@@ -41,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         org.springframework.kafka.annotation.KafkaBootstrapConfiguration.class
 })
 @TestPropertySource(locations = "classpath:application-test.yaml")
-public class OrderServiceIntegrationTest {
+class OrderServiceIntegrationTest {
 
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")

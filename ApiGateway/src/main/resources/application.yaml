@@ -13,8 +13,8 @@ spring:
           enabled: true
           lower-case-service-id: true
       routes:
-        - id: auth-service
-          uri: lb://auth-service
+        - id: marketplace-app-auth-service
+          uri: lb://marketplace-app-auth-service
           predicates:
             - Path=/api/auth/**
           filters:
@@ -23,8 +23,8 @@ spring:
                 name: authServiceCircuitBreaker
                 fallbackUri: forward:/fallback/auth
 
-        - id: product-service
-          uri: lb://product-service
+        - id: marketplace-app-product-service
+          uri: lb://marketplace-app-product-service
           predicates:
             - Path=/api/products/**
           filters:
@@ -33,8 +33,8 @@ spring:
                 name: productServiceCircuitBreaker
                 fallbackUri: forward:/fallback/product
 
-        - id: order-service
-          uri: lb://order-service
+        - id: marketplace-app-order-service
+          uri: lb://marketplace-app-order-service
           predicates:
             - Path=/api/orders/**
           filters:
@@ -43,8 +43,8 @@ spring:
                 name: orderServiceCircuitBreaker
                 fallbackUri: forward:/fallback/order
 
-        - id: payment-service
-          uri: lb://payment-service
+        - id: marketplace-app-payment-service
+          uri: lb://marketplace-app-payment-service
           predicates:
             - Path=/api/payments/**
           filters:
@@ -53,37 +53,37 @@ spring:
                 name: paymentCircuitBreaker
                 fallbackUri: forward:/fallback/payment
 
-        - id: product-service-docs
-          uri: lb://product-service
+        - id: marketplace-app-product-service-docs
+          uri: lb://marketplace-app-product-service
           predicates:
-            - Path=/product-service/v3/api-docs
+            - Path=/marketplace-app-product-service/v3/api-docs
           filters:
             - name: StripPrefix
               args:
                 parts: 1
 
-        - id: order-service-docs
-          uri: lb://order-service
+        - id: marketplace-app-order-service-docs
+          uri: lb:/marketplace-app-/order-service
           predicates:
-            - Path=/order-service/v3/api-docs
+            - Path=/marketplace-app-order-service/v3/api-docs
           filters:
             - name: StripPrefix
               args:
                 parts: 1
 
-        - id: payment-service-docs
-          uri: lb://payment-service
+        - id: marketplace-app-payment-service-docs
+          uri: lb://marketplace-app-payment-service
           predicates:
-            - Path=/payment-service/v3/api-docs
+            - Path=/marketplace-app-payment-service/v3/api-docs
           filters:
             - name: StripPrefix
               args:
                 parts: 1
 
-        - id: auth-service-docs
-          uri: lb://auth-service
+        - id: marketplace-app-auth-service-docs
+          uri: lb://marketplace-app-auth-service
           predicates:
-            - Path=/auth-service/v3/api-docs
+            - Path=/marketplace-app-auth-service/v3/api-docs
           filters:
             - name: StripPrefix
               args:
@@ -110,7 +110,7 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka-server:8761/eureka
+      defaultZone: http://marketplace-app-eureka-server:8761/eureka
     healthcheck:
       enabled: true
     fetch-registry: true
@@ -137,23 +137,23 @@ management:
 springdoc:
   swagger-ui:
     urls:
-      - name: payment-service
-        url: /payment-service/v3/api-docs
-      - name: order-service
-        url: /order-service/v3/api-docs
-      - name: product-service
-        url: /product-service/v3/api-docs
-      - name: auth-service
-        url: /auth-service/v3/api-docs
+      - name: marketplace-app-payment-service
+        url: /marketplace-app-payment-service/v3/api-docs
+      - name: marketplace-app-order-service
+        url: /marketplace-app-order-service/v3/api-docs
+      - name: marketplace-app-product-service
+        url: /marketplace-app-product-service/v3/api-docs
+      - name: marketplace-app-auth-service
+        url: /marketplace-app-auth-service/v3/api-docs
 
     path: /swagger-ui.html
 
 security:
   open-endpoints:
-    - /product-service/v3/api-docs
-    - /order-service/v3/api-docs
-    - /payment-service/v3/api-docs
-    - /auth-service/v3/api-docs
+    - /marketplace-app-product-service/v3/api-docs
+    - /marketplace-app-order-service/v3/api-docs
+    - /marketplace-app-payment-service/v3/api-docs
+    - /marketplace-app-auth-service/v3/api-docs
     - /swagger-ui.html
     - /swagger-ui/**
     - /v3/api-docs/**
