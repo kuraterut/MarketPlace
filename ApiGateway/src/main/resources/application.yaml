@@ -23,6 +23,16 @@ spring:
                 name: authServiceCircuitBreaker
                 fallbackUri: forward:/fallback/auth
 
+        - id: marketplace-app-analytics-service
+          uri: lb://marketplace-app-analytics-service
+          predicates:
+            - Path=/api/analytics/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: analyticsServiceCircuitBreaker
+                fallbackUri: forward:/fallback/analytics
+
         - id: marketplace-app-product-service
           uri: lb://marketplace-app-product-service
           predicates:
@@ -106,6 +116,10 @@ spring:
           bankAccountCircuitBreaker:
             failure-rate-threshold: 50
             wait-duration-in-open-state: 5000
+          analyticsServiceCircuitBreaker:
+            failure-rate-threshold: 50
+            wait-duration-in-open-state: 5000
+
 
 eureka:
   client:
@@ -145,6 +159,8 @@ springdoc:
         url: /marketplace-app-product-service/v3/api-docs
       - name: marketplace-app-auth-service
         url: /marketplace-app-auth-service/v3/api-docs
+      - name: marketplace-app-analytics-service
+        url: /marketplace-app-analytics-service/v3/api-docs
 
     path: /swagger-ui.html
 
@@ -154,16 +170,18 @@ security:
     - /marketplace-app-order-service/v3/api-docs
     - /marketplace-app-payment-service/v3/api-docs
     - /marketplace-app-auth-service/v3/api-docs
+    - /marketplace-app-analytics-service/v3/api/docs
     - /swagger-ui.html
     - /swagger-ui/**
     - /v3/api-docs/**
     - /api/auth/login
     - /api/auth/register
+    - /api/analytics/stats
     - /actuator/health
 
 
 
-#logging:
-#  level:
-#    org.springframework.cloud.gateway: DEBUG
-#    io.github.resilience4j: DEBUG
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    io.github.resilience4j: DEBUG

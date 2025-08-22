@@ -141,8 +141,6 @@
             <version>1.0</version>
         </dependency>
 
-
-        <!-- gRPC dependencies - ДОБАВЬТЕ ЭТОТ БЛОК -->
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-netty</artifactId>

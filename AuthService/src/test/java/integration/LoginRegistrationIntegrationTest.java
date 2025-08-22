@@ -36,11 +36,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 @EnableCaching
 @TestPropertySource(locations = "classpath:application-test.yaml")
 @Import(TestConfig.class)
-@ImportAutoConfiguration(exclude = {
-        GrpcClientAutoConfiguration.class,  // Exclude gRPC auto-configuration
-        GrpcClientHealthAutoConfiguration.class,
-        org.kuraterut.authservice.config.GrpcConfig.class  // Exclude your GrpcConfig
-})
+@ImportAutoConfiguration(exclude = GrpcClientHealthAutoConfiguration.class)
 @ActiveProfiles("test")
 class LoginRegistrationIntegrationTest {
 

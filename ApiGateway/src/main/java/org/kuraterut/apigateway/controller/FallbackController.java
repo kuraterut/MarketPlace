@@ -17,6 +17,11 @@ import java.nio.charset.StandardCharsets;
 @RequestMapping("/fallback")
 public class FallbackController {
 
+    @GetMapping("/analytics")
+    public Mono<Void> analyticsServiceFallback(ServerWebExchange exchange) {
+        return build503(exchange, "Analytics Service is unavailable. Please try again later.");
+    }
+
     @GetMapping("/auth")
     public Mono<Void> authServiceFallback(ServerWebExchange exchange) {
         return build503(exchange, "Auth Service is unavailable. Please try again later.");
