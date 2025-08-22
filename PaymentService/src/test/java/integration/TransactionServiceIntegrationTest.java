@@ -43,11 +43,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 @Import(TestConfig.class)
 @ActiveProfiles("test")
 @ImportAutoConfiguration(exclude = {
-        GrpcServerAutoConfiguration.class,          // Exclude gRPC server auto-configuration
-        GrpcServerFactoryAutoConfiguration.class,   // Exclude gRPC server factory auto-configuration
-//        GrpcServerHealthAutoConfiguration.class,    // Exclude gRPC server health auto-configuration
-        GrpcServerMetricAutoConfiguration.class,
-        net.devh.boot.grpc.server.autoconfigure.GrpcMetadataEurekaConfiguration.class
+        GrpcServerAutoConfiguration.class,
+        GrpcServerFactoryAutoConfiguration.class,
 })
 class TransactionServiceIntegrationTest {
 

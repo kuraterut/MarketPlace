@@ -12,6 +12,7 @@
         <module name="AuthService" />
         <module name="gRPC-Proto" />
         <module name="OrderService" />
+        <module name="AnalyticsService" />
         <module name="ApiGateway" />
         <module name="PaymentService" />
         <module name="JwtSecurityLib" />
