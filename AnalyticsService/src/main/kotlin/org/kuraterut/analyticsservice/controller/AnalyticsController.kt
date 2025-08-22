@@ -21,6 +21,8 @@ class AnalyticsController(
      *   "FAILED_NO_FUNDS": 3
      * }
      */
+    //TODO Security
+    //TODO Swagger
     @GetMapping("/stats")
     fun getOrdersStats(): Map<String, Long> {
         return orderAnalyticsService.getOrdersStatsByStatus()

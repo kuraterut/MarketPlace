@@ -184,6 +184,7 @@ services:
     networks:
       - marketplace-net
 
+#TODO Добавить кликхаус и сервис аналитики в Helm
   clickhouse-analytics:
     image: clickhouse/clickhouse-server:latest
     container_name: clickhouse-analytics
@@ -198,7 +199,7 @@ services:
     environment:
       CLICKHOUSE_USER: kuraterut
       CLICKHOUSE_PASSWORD: kuraterut
-      CLICKHOUSE_DB: analytics        # создаст базу данных mydb
+      CLICKHOUSE_DB: analytics
     volumes:
       - clickhouse_analytics_data:/var/lib/clickhouse
       - ./AnalyticsService/clickhouse-init.sql:/docker-entrypoint-initdb.d/clickhouse-init.sql

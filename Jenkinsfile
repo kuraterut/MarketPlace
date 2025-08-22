@@ -8,6 +8,7 @@ pipeline {
         DOCKER_IMAGE_ORDER_SERVICE = 'kuraterut/marketplace-order-service'
         DOCKER_IMAGE_PAYMENT_SERVICE = 'kuraterut/marketplace-payment-service'
         DOCKER_IMAGE_PRODUCT_SERVICE = 'kuraterut/marketplace-product-service'
+        DOCKER_IMAGE_ANALYTICS_SERVICE = 'kuraterut/marketplace-analytics-service'
         DOCKER_CREDENTIALS_ID = 'docker-hub'
     }
 
@@ -48,6 +49,8 @@ pipeline {
                     docker build -t $DOCKER_IMAGE_PAYMENT_SERVICE .
                     cd ../ProductService
                     docker build -t $DOCKER_IMAGE_PRODUCT_SERVICE .
+                    cd ../AnalyticsService
+                    docker build -t $DOCKER_IMAGE_ANALYTICS_SERVICE .
                     cd ..
                     '''
                 }
@@ -68,6 +71,7 @@ pipeline {
                         docker push $DOCKER_IMAGE_ORDER_SERVICE
                         docker push $DOCKER_IMAGE_PAYMENT_SERVICE
                         docker push $DOCKER_IMAGE_PRODUCT_SERVICE
+                        docker push $DOCKER_IMAGE_ANALYTICS_SERVICE
                     '''
                 }
             }
