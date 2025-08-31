@@ -14,7 +14,6 @@
         <module>ProductService</module>
         <module>OrderService</module>
         <module>PaymentService</module>
-        <module>EurekaServer</module>
         <module>JwtSecurityLib</module>
         <module>gRPC-Proto</module>
         <module>AnalyticsService</module>

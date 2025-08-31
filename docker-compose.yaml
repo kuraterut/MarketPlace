@@ -1,21 +1,4 @@
 services:
-#SERVICES
-  marketplace-app-eureka-server:
-    build:
-      context: ./EurekaServer
-      dockerfile: Dockerfile
-    container_name: marketplace-app-eureka-server
-    hostname: marketplace-app-eureka-server
-    ports:
-      - "8761:8761"
-    networks:
-      - marketplace-net
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-
   marketplace-app-api-gateway:
     build:
       context: ./ApiGateway

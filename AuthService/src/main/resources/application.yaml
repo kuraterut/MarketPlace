@@ -67,11 +67,6 @@ management:
       include-parameter-values: true
 
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://marketplace-app-eureka-server:8761/eureka
-
 kafka-topics:
   user-registration: user-registration-topic
 

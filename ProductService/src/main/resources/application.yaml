@@ -50,7 +50,6 @@ spring:
         spring.json.trusted.packages: "*"
       isolation-level: read_committed
 
-
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -58,7 +57,6 @@ spring:
       retries: 2147483647
       properties:
         spring.json.add.type.headers=false:
-
 
 management:
   endpoints:
@@ -84,24 +82,15 @@ management:
     jdbc:
       include-parameter-values: true
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://marketplace-app-eureka-server:8761/eureka
-
-
 kafka-topics:
   order-created: order-created
   product-hold-failed: product-hold-failed
   product-hold-success: product-hold-success
   product-hold-remove: product-hold-remove
 
-
 scheduling:
   process-order-created-rate: 3000
   process-remove-product-hold-rate: 3000
-
-
 
 logging:
   level:

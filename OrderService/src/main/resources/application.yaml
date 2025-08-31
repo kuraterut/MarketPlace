@@ -85,11 +85,6 @@ management:
       include-parameter-values: true
 
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://marketplace-app-eureka-server:8761/eureka
-
 kafka-topics:
   order-created: order-created
   product-hold-failed: product-hold-failed

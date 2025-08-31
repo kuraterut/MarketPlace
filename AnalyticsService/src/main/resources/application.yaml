@@ -36,13 +36,6 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://marketplace-app-eureka-server:8761/eureka
-
-
-
 management:
   tracing:
     sampling:
