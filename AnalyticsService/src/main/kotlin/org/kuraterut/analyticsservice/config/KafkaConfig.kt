@@ -30,12 +30,15 @@ class KafkaConfig(
     }
 
     @Bean
-    fun kafkaTemplate(): KafkaTemplate<String, Any> = KafkaTemplate(producerFactory())
+    fun kafkaTemplate(): KafkaTemplate<String, Any> {
+        val template: KafkaTemplate<String, Any> = KafkaTemplate(producerFactory())
+        template.setObservationEnabled(true)
+        return template
+    }
 
     // ✅ ConsumerFactory (для OrderCreatedEvent)
     @Bean
     fun consumerFactory(): ConsumerFactory<String, String> {
-
         val props = HashMap<String, Any>()
         props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = kafkaProperties.bootstrapServers
         props[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
@@ -48,6 +51,7 @@ class KafkaConfig(
     fun kafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, String> {
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
         factory.consumerFactory = consumerFactory()
+        factory.containerProperties.isObservationEnabled = true
         return factory
     }
 }

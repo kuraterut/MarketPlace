@@ -2,6 +2,12 @@ server:
   port: 8085
 
 spring:
+  zipkin:
+    base-url: http://zipkin:9411
+    sleuth:
+      sampler:
+        probability: 1.0
+
   application:
     name: marketplace-app-analytics-service
 
@@ -34,3 +40,16 @@ eureka:
   client:
     service-url:
       defaultZone: http://marketplace-app-eureka-server:8761/eureka
+
+
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://zipkin:9411/api/v2/spans
+  observations:
+    jdbc:
+      include-parameter-values: true

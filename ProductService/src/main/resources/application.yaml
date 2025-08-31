@@ -2,6 +2,11 @@ server:
   port: 8082
 
 spring:
+  zipkin:
+    base-url: http://zipkin:9411
+    sleuth:
+      sampler:
+        probability: 1.0
   cache:
     type: redis
     redis:
@@ -69,8 +74,15 @@ management:
       tomcat: true
     tags:
       application: ${spring.application.name}
-
-
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://zipkin:9411/api/v2/spans
+  observations:
+    jdbc:
+      include-parameter-values: true
 
 eureka:
   client:
@@ -89,6 +101,10 @@ scheduling:
   process-order-created-rate: 3000
   process-remove-product-hold-rate: 3000
 
+
+
 logging:
   level:
-    org.springframework.data.redis: DEBUG
+    net.ttddyy.dsproxy.listener: DEBUG
+    io.micrometer.observation: DEBUG
+

@@ -2,6 +2,11 @@ server:
   port: 8080
 
 spring:
+  zipkin:
+    base-url: http://zipkin:9411
+    sleuth:
+      sampler:
+        probability: 1.0
   main:
     web-application-type: reactive
   application:
@@ -147,6 +152,15 @@ management:
       tomcat: true
     tags:
       application: ${spring.application.name}
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://zipkin:9411/api/v2/spans
+  observations:
+    jdbc:
+      include-parameter-values: true
 
 springdoc:
   swagger-ui:

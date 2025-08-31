@@ -2,6 +2,11 @@ server:
   port: 8081
 
 spring:
+  zipkin:
+    base-url: http://zipkin:9411
+    sleuth:
+      sampler:
+        probability: 1.0
   main:
     allow-bean-definition-overriding: true
   application:
@@ -51,6 +56,15 @@ management:
       tomcat: true
     tags:
       application: ${spring.application.name}
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://zipkin:9411/api/v2/spans
+  observations:
+    jdbc:
+      include-parameter-values: true
 
 
 eureka:
@@ -69,4 +83,6 @@ grpc:
     payment-service:
       address: static://marketplace-app-payment-service:9090
       negotiationType: plaintext
+
+
 

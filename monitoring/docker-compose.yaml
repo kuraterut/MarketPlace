@@ -5,7 +5,7 @@ services:
     volumes:
       - ./prometheus.yaml:/etc/prometheus/prometheus.yml
     ports:
-      - "9090:9090"
+      - "9091:9090"
     networks:
       - marketplace-net
 
@@ -19,9 +19,18 @@ services:
     networks:
       - marketplace-net
 
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: marketplace-zipkin
+    ports:
+      - "9411:9411"
+    environment:
+      - STORAGE_TYPE=mem # Хранить трейсы в памяти (для разработки). Для prod смотрите другие опции (elasticsearch, cassandra)
+    networks:
+      - marketplace-net
+
 volumes:
   grafana-data:
-
 
 networks:
   marketplace-net:
