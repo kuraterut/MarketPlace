@@ -16,7 +16,6 @@ data:
   SPRING_KAFKA_BOOTSTRAP_SERVERS: "{{ include "product-service.kafkaBootstrap" . }}"
   SERVER_PORT: "{{ .Values.service.port}}"
   KAFKA_CONSUMER_GROUP_ID: "{{ .Values.kafka.consumerGroupId}}"
-  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "{{ .Values.global.eureka.serviceUrl}}"
 
   SPRING_APPLICATION_NAME: {{ include "product-service.name" . | quote}}
   EUREKA_INSTANCE_HOSTNAME: {{ include "product-service.name" . | quote}}
