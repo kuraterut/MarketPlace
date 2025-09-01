@@ -16,7 +16,6 @@ data:
   SPRING_KAFKA_BOOTSTRAP_SERVERS: "{{ include "auth-service.kafkaBootstrap" . }}"
   SERVER_PORT: "{{ .Values.service.port}}"
   KAFKA_CONSUMER_GROUP_ID: "{{ .Values.kafka.consumerGroupId}}"
-  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "{{ .Values.global.eureka.serviceUrl}}"
 
   LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB: "DEBUG"
   LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB_SERVLET: "DEBUG"

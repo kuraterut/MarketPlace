@@ -8,7 +8,6 @@ To access:
    kubectl port-forward svc/{{ include "api-gateway.name" . }} {{ .Values.service.port }}:{{ .Values.service.port }}
 
 Environment variables:
-  EUREKA_URI - {{ .Values.global.eureka.serviceUrl }}
   AUTH_SERVICE_URL - {{ include "api-gateway.authUrl" . }}
   JWT secret name - {{ include "api-gateway.jwtSecretName" . }}
 

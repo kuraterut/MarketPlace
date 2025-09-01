@@ -5,9 +5,6 @@ dependencies:
 - name: marketplace-app-auth-service
   repository: file://charts/auth-service
   version: 0.1.0
-- name: marketplace-app-eureka-server
-  repository: file://charts/eureka-server
-  version: 0.1.0
 - name: marketplace-app-kafka
   repository: file://charts/kafka
   version: 0.1.0
@@ -20,5 +17,5 @@ dependencies:
 - name: marketplace-app-product-service
   repository: file://charts/product-service
   version: 0.1.0
-digest: sha256:bbc15f140ca12cdc1b40015bf728794c30721739a03529437f4c0e398db24af4
-generated: "2025-08-20T15:40:42.6290166+03:00"
+digest: sha256:3036af1251ae94e4c1cc79c11b7bb88004fc98648b0c132e1c3fcd06d36e0f98
+generated: "2025-09-01T16:53:48.7066151+03:00"

@@ -44,6 +44,7 @@ public class KafkaConfig {
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
+        factory.getContainerProperties().setObservationEnabled(true);
         return factory;
     }
 
@@ -63,6 +64,8 @@ public class KafkaConfig {
 
     @Bean
     public KafkaTemplate<String, PaymentResultEvent> paymentResultEventKafkaTemplate() {
-        return new KafkaTemplate<>(paymentResultEventProducerFactory());
+        KafkaTemplate<String, PaymentResultEvent> template = new KafkaTemplate<>(paymentResultEventProducerFactory());
+        template.setObservationEnabled(true);
+        return template;
     }
 }

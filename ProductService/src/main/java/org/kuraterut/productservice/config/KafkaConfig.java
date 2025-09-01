@@ -44,6 +44,7 @@ public class KafkaConfig {
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
+        factory.getContainerProperties().setObservationEnabled(true);
         return factory;
     }
 
@@ -63,7 +64,9 @@ public class KafkaConfig {
 
     @Bean
     public KafkaTemplate<String, ProductHoldFailedEvent> productHoldFailedEventKafkaTemplate() {
-        return new KafkaTemplate<>(productHoldFailedEventProducerFactory());
+        KafkaTemplate<String, ProductHoldFailedEvent> template = new KafkaTemplate<>(productHoldFailedEventProducerFactory());
+        template.setObservationEnabled(true);
+        return template;
     }
 
     @Bean
@@ -82,6 +85,8 @@ public class KafkaConfig {
 
     @Bean
     public KafkaTemplate<String, ProductHoldSuccessEvent> productHoldSuccessEventKafkaTemplate() {
-        return new KafkaTemplate<>(productHoldSuccessEventProducerFactory());
+        KafkaTemplate<String, ProductHoldSuccessEvent> template = new KafkaTemplate<>(productHoldSuccessEventProducerFactory());
+        template.setObservationEnabled(true);
+        return template;
     }
 }
