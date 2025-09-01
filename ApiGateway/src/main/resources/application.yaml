@@ -104,8 +104,8 @@ spring:
                 parts: 1
 
 
-    circuitbreaker:
-      resilience4j:
+    resilience4j:
+      circuitbreaker:
         instances:
           authServiceCircuitBreaker:
             failure-rate-threshold: 50
@@ -123,6 +123,7 @@ spring:
           analyticsServiceCircuitBreaker:
             failure-rate-threshold: 50
             wait-duration-in-open-state: 5000
+
 
 
 
