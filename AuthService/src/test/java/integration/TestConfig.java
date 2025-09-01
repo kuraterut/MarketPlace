@@ -33,7 +33,6 @@ public class TestConfig {
     @Bean
     @Primary
     public PaymentServiceGrpc.PaymentServiceBlockingStub paymentServiceBlockingStub() {
-        // мок, который будет использован вместо реального gRPC канала
         PaymentServiceGrpc.PaymentServiceBlockingStub stub = mock(PaymentServiceGrpc.PaymentServiceBlockingStub.class);
 
         CreateAccountResponse fakeResponse = CreateAccountResponse.newBuilder()
@@ -46,11 +45,5 @@ public class TestConfig {
 
         return stub;
     }
-    @Bean
-    @Primary
-    public io.grpc.Channel grpcChannel() {
-        return mock(io.grpc.Channel.class);
-    }
-
 }
 

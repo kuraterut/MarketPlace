@@ -2,6 +2,11 @@ server:
   port: 8080
 
 spring:
+  zipkin:
+    base-url: http://zipkin:9411
+    sleuth:
+      sampler:
+        probability: 1.0
   main:
     web-application-type: reactive
   application:
@@ -10,11 +15,10 @@ spring:
     gateway:
       discovery:
         locator:
-          enabled: true
-          lower-case-service-id: true
+          enabled: false
       routes:
         - id: marketplace-app-auth-service
-          uri: lb://marketplace-app-auth-service
+          uri: http://marketplace-app-auth-service:8081
           predicates:
             - Path=/api/auth/**
           filters:
@@ -23,8 +27,18 @@ spring:
                 name: authServiceCircuitBreaker
                 fallbackUri: forward:/fallback/auth
 
+        - id: marketplace-app-analytics-service
+          uri: http://marketplace-app-analytics-service:8085
+          predicates:
+            - Path=/api/analytics/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: analyticsServiceCircuitBreaker
+                fallbackUri: forward:/fallback/analytics
+
         - id: marketplace-app-product-service
-          uri: lb://marketplace-app-product-service
+          uri: http://marketplace-app-product-service:8082
           predicates:
             - Path=/api/products/**
           filters:
@@ -34,7 +48,7 @@ spring:
                 fallbackUri: forward:/fallback/product
 
         - id: marketplace-app-order-service
-          uri: lb://marketplace-app-order-service
+          uri: http://marketplace-app-order-service:8084
           predicates:
             - Path=/api/orders/**
           filters:
@@ -44,7 +58,7 @@ spring:
                 fallbackUri: forward:/fallback/order
 
         - id: marketplace-app-payment-service
-          uri: lb://marketplace-app-payment-service
+          uri: http://marketplace-app-payment-service:8083
           predicates:
             - Path=/api/payments/**
           filters:
@@ -54,7 +68,7 @@ spring:
                 fallbackUri: forward:/fallback/payment
 
         - id: marketplace-app-product-service-docs
-          uri: lb://marketplace-app-product-service
+          uri: http://marketplace-app-product-service:8082
           predicates:
             - Path=/marketplace-app-product-service/v3/api-docs
           filters:
@@ -63,7 +77,7 @@ spring:
                 parts: 1
 
         - id: marketplace-app-order-service-docs
-          uri: lb:/marketplace-app-/order-service
+          uri: http://marketplace-app-order-service:8084
           predicates:
             - Path=/marketplace-app-order-service/v3/api-docs
           filters:
@@ -72,7 +86,7 @@ spring:
                 parts: 1
 
         - id: marketplace-app-payment-service-docs
-          uri: lb://marketplace-app-payment-service
+          uri: http://marketplace-app-payment-service:8083
           predicates:
             - Path=/marketplace-app-payment-service/v3/api-docs
           filters:
@@ -81,7 +95,7 @@ spring:
                 parts: 1
 
         - id: marketplace-app-auth-service-docs
-          uri: lb://marketplace-app-auth-service
+          uri: http://marketplace-app-auth-service:8081
           predicates:
             - Path=/marketplace-app-auth-service/v3/api-docs
           filters:
@@ -90,8 +104,8 @@ spring:
                 parts: 1
 
 
-    circuitbreaker:
-      resilience4j:
+    resilience4j:
+      circuitbreaker:
         instances:
           authServiceCircuitBreaker:
             failure-rate-threshold: 50
@@ -106,18 +120,13 @@ spring:
           bankAccountCircuitBreaker:
             failure-rate-threshold: 50
             wait-duration-in-open-state: 5000
+          analyticsServiceCircuitBreaker:
+            failure-rate-threshold: 50
+            wait-duration-in-open-state: 5000
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://marketplace-app-eureka-server:8761/eureka
-    healthcheck:
-      enabled: true
-    fetch-registry: true
-    register-with-eureka: true
-  instance:
-    prefer-ip-address: false
-    hostname: api-gateway
+
+
+
 
 management:
   endpoints:
@@ -133,6 +142,15 @@ management:
       tomcat: true
     tags:
       application: ${spring.application.name}
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://zipkin:9411/api/v2/spans
+  observations:
+    jdbc:
+      include-parameter-values: true
 
 springdoc:
   swagger-ui:
@@ -145,6 +163,8 @@ springdoc:
         url: /marketplace-app-product-service/v3/api-docs
       - name: marketplace-app-auth-service
         url: /marketplace-app-auth-service/v3/api-docs
+      - name: marketplace-app-analytics-service
+        url: /marketplace-app-analytics-service/v3/api-docs
 
     path: /swagger-ui.html
 
@@ -154,16 +174,18 @@ security:
     - /marketplace-app-order-service/v3/api-docs
     - /marketplace-app-payment-service/v3/api-docs
     - /marketplace-app-auth-service/v3/api-docs
+    - /marketplace-app-analytics-service/v3/api/docs
     - /swagger-ui.html
     - /swagger-ui/**
     - /v3/api-docs/**
     - /api/auth/login
     - /api/auth/register
+    - /api/analytics/stats
     - /actuator/health
 
 
 
-#logging:
-#  level:
-#    org.springframework.cloud.gateway: DEBUG
-#    io.github.resilience4j: DEBUG
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    io.github.resilience4j: DEBUG

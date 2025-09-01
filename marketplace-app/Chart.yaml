@@ -12,10 +12,6 @@ dependencies:
     version: 0.1.0
     repository: "file://charts/auth-service"
 
-  - name: marketplace-app-eureka-server
-    version: 0.1.0
-    repository: "file://charts/eureka-server"
-
   - name: marketplace-app-kafka
     version: 0.1.0
     repository: "file://charts/kafka"

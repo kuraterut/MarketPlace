@@ -1,0 +1,92 @@
+services:
+  marketplace-app-api-gateway:
+    build:
+      context: ../ApiGateway
+      dockerfile: Dockerfile
+    container_name: marketplace-app-api-gateway
+    hostname: marketplace-app-api-gateway
+    ports:
+      - "8080:8080"
+    networks:
+      - marketplace-net
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+
+  marketplace-app-auth-service:
+    build:
+      context: ../AuthService
+      dockerfile: Dockerfile
+    container_name: marketplace-app-auth-service
+    hostname: marketplace-app-auth-service
+    ports:
+      - "8081:8081"
+    networks:
+      - marketplace-net
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${POSTGRES_NAME_AUTH}:5432/${POSTGRES_DB_AUTH}
+
+  marketplace-app-product-service:
+    build:
+      context: ../ProductService
+      dockerfile: Dockerfile
+    container_name: marketplace-app-product-service
+    hostname: marketplace-app-product-service
+    ports:
+      - "8082:8082"
+    networks:
+      - marketplace-net
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${POSTGRES_NAME_PRODUCT}:5432/${POSTGRES_DB_PRODUCT}
+
+  marketplace-app-payment-service:
+    build:
+      context: ../PaymentService
+      dockerfile: Dockerfile
+    container_name: marketplace-app-payment-service
+    hostname: marketplace-app-payment-service
+    ports:
+      - "8083:8083"
+      - "9090:9090"
+    networks:
+      - marketplace-net
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${POSTGRES_NAME_PAYMENT}:5432/${POSTGRES_DB_PAYMENT}
+
+  marketplace-app-order-service:
+    build:
+      context: ../OrderService
+      dockerfile: Dockerfile
+    container_name: marketplace-app-order-service
+    hostname: marketplace-app-order-service
+    ports:
+      - "8084:8084"
+    networks:
+      - marketplace-net
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${POSTGRES_NAME_ORDER}:5432/${POSTGRES_DB_ORDER}
+
+  marketplace-app-analytics-service:
+    build:
+      context: ../AnalyticsService
+      dockerfile: Dockerfile
+    container_name: marketplace-app-analytics-service
+    hostname: marketplace-app-analytics-service
+    ports:
+      - "8085:8085"
+    networks:
+      - marketplace-net
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:ch://clickhouse-analytics:8123/analytics
+      - SPRING_DATASOURCE_USERNAME=kuraterut
+      - SPRING_DATASOURCE_PASSWORD=kuraterut
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=marketplace-app-kafka:9092
+
+networks:
+  marketplace-net:
+    name: marketplace-net
+    driver: bridge
+    external: true

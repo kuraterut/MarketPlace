@@ -7,6 +7,11 @@ grpc:
 
 
 spring:
+  zipkin:
+    base-url: http://zipkin:9411
+    sleuth:
+      sampler:
+        probability: 1.0
   cache:
     type: redis
     redis:
@@ -73,13 +78,16 @@ management:
       tomcat: true
     tags:
       application: ${spring.application.name}
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://zipkin:9411/api/v2/spans
+  observations:
+    jdbc:
+      include-parameter-values: true
 
-
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://marketplace-app-eureka-server:8761/eureka
 
 kafka-topics:
   payment-request: payment-request
@@ -90,13 +98,8 @@ scheduling:
   process-payment-event-rate: 3000
   process-payment-result-rate: 3000
 
+
 logging:
   level:
     org.springframework.security: DEBUG
     org.springframework.boot.actuate: DEBUG
-
-
-
-#logging:
-#  level:
-#    org.springframework: DEBUG

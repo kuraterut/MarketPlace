@@ -7,6 +7,5 @@ metadata:
 data:
   SERVER_PORT: {{ .Values.service.port | quote}}
   SPRING_PROFILES_ACTIVE: {{ .Values.spring.profiles.active | quote }}
-  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: {{ .Values.global.eureka.serviceUrl | quote }}
   JWT_SECRET: "{{ .Values.global.jwt.secret}}"
   LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_GATEWAY: "DEBUG"

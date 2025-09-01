@@ -36,6 +36,8 @@ public class KafkaConfig {
 
     @Bean
     public KafkaTemplate<String, UserRegistrationEvent> userRegistrationEventKafkaTemplate() {
-        return new KafkaTemplate<>(userRegistrationEventProducerFactory());
+        KafkaTemplate<String, UserRegistrationEvent> template = new KafkaTemplate<>(userRegistrationEventProducerFactory());
+        template.setObservationEnabled(true);
+        return template;
     }
 }
